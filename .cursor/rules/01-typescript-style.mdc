@@ -1,0 +1,97 @@
+---
+description: 编写或改写 TypeScript 时：4 空格缩进、行尾注释优先、签名尽量单行、简单失败早退一行；维护 index.ts / docs/架构 时也引用
+alwaysApply: false
+---
+
+# TypeScript 风格
+
+## 缩进
+
+- 一层缩进 = **4 个空格**
+- **禁止 Tab**；不要用 2 空格
+- 适用范围：`assets/**/*.ts`（及同仓库后续业务 TS）；改写 TS 时保持一致
+- 根目录 `.editorconfig` 的 `[*.ts]` 与上述一致（`indent_style=space`，`indent_size=4`）
+
+## 代码注释（强制优先级）
+
+1. **能写在同一行的，必须用行尾 `//`**，不要用上方的 `/** */`。  
+   适用于：enum 成员、接口方法/字段、简单属性、一行能说清的语句。
+2. **只有**类、导出函数、或需要多行说明的类型，才用紧凑 JSDoc（尽量短）。
+3. 不写废话；中文即可。
+4. 状态机/生命周期：各值用行尾 `//`；整体流转可在文件顶用一小段 `/** */` 或指向 `docs/架构/`。
+
+## 简单失败早退：尽量一行
+
+- 仅做「有错就打日志并 return」时，优先：
+
+```ts
+if (err) return console.error('[ScMain] load DemoHome 失败', err);
+```
+
+- 适用：无后续清理、无其它分支逻辑的早退。
+- 不适用：return 前还要关 UI / 解绑 / 改状态等多步；或成功/失败都有实质逻辑——仍用多行块。
+
+```ts
+// ✅
+if (err) return console.error('[ScMain] load DemoChild 失败', err);
+
+// ❌ 无必要拆开（仅日志 + return）
+if (err) {
+    console.error('[ScMain] load DemoChild 失败', err);
+    return;
+}
+```
+
+## 签名与调用排版
+
+- 函数/方法**签名**、**调用**、**`new` 构造**在能一眼看清时尽量**单行**（参数写在同一行）。
+- 参数过多、单行明显难读时才允许拆行。
+- 回调**函数体**、较大对象字面量本身需要多行时，允许括号跨行；但不要把简单实参无故拆成多行。
+
+```ts
+// ✅
+on(eventNames: string | string[], listener: FFEventListener, priority = 0, once = -1): this {}
+const ctx = new FFBindContext(name, this.events, this.resource, this, parentPath);
+this.resource.loadBundle(name, (err) => { /* ... */ }, onProgress);
+
+// ❌ 无必要拆行（签名 / 简单实参）
+on(
+    eventNames: string | string[],
+    listener: FFEventListener,
+    priority = 0,
+    once = -1,
+): this {}
+```
+
+```ts
+// ✅ enum / 接口成员：同一行 //
+export enum FFBindState {
+    Uncreated = 'uncreated', // 尚未 onLoad
+    Ready = 'ready',         // 进场完成，可使用
+}
+
+interface IFFLifecycle {
+    onLoad?(): void | Promise<void>; // [→Created] 首次准备
+}
+
+loadIfNeeded?: boolean; // 默认 false，由逻辑显式 load
+
+// ✅ 类/函数：短 JSDoc
+/** 显式加载 Bundle；脚本侧应完成自登记 */
+async loadBundle(name: string): Promise<void> {}
+
+// ❌ 一行意思却拆成块注释
+/** 尚未创建 */
+Uncreated = 'uncreated',
+```
+
+## 模块一览（代码内）
+
+- 有多文件的包（如 `assets/fframe/`）：以 **`index.ts` 为唯一文件职责总表**。
+- 每个 `export` 旁行尾 `//` 一句话职责；文件顶用极短说明「先看本文件」。
+- **不要**再维护一份平行的 README/markdown 文件表（易漂移）；`docs/架构/` 只写启动/生命周期等概念，并指向对应 `index.ts`。
+
+## 架构/用法简介（docs）
+
+- 放在 `docs/架构/`，短文、省 token（启动方式、生命周期表、和 index 的链接）。
+- 设计决策放 `docs/框架设计讨论/`。

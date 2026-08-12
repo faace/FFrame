@@ -1,6 +1,7 @@
 ---
-description: 脚本优先用 Node.js；临时脚本统一放在 tools/temp
-alwaysApply: true
+description: 编写临时/工具脚本，或把脚本放到 tools 时引用：优先 Node.js；临时脚本放 tools/temp
+globs: tools/**
+alwaysApply: false
 ---
 
 # 脚本开发约定
@@ -24,4 +25,4 @@ alwaysApply: true
 
 ## 注意
 
-- `tools/temp/` 仅用于临时/探索性脚本；可复用、长期维护的工具脚本另议正式目录。
+- `tools/temp/` 仅用于临时/探索性脚本；可复用、长期维护的工具脚本另议正式目录（如 `tools/*.mjs`）。

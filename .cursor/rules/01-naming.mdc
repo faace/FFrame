@@ -1,0 +1,125 @@
+---
+description: 新建/调整 Bundle、功能目录、绑定名，或新建/改 Sc 场景、Pf 预制体及其关联脚本时引用
+globs: assets/bundles/**,**/*.{scene,prefab}
+alwaysApply: false
+---
+
+# 命名约定：Bundle / 场景 / 预制体
+
+## Bundle 与功能目录
+
+- `assets/bundles/` 下的**功能目录名** = **Bundle 名** = **绑定名**，必须使用 **大驼峰（PascalCase）**。
+- **禁止**使用连字符 `-`、下划线蛇形（如 `demo_home`）作为功能/Bundle 名。
+
+```text
+✅ assets/bundles/DemoHome/
+✅ assets/bundles/Demo/DemoHome/     # Demo 仅为分组（如测试组），不配 Bundle
+✅ assets/bundles/Core/SomeFeature/  # Core 同理，仅为分组
+✅ loadBundle('DemoHome') / bind('DemoHome')   # 绑定名 = 叶子目录名
+
+❌ assets/bundles/demo-home/
+❌ assets/bundles/demo_home/
+❌ assets/bundles/demoHome/          # 小驼峰：不作 Bundle/功能目录名
+❌ 把中间分组目录也配成 Asset Bundle（首版不做 Bundle 套 Bundle）
+❌ 绑定名写成全路径（如 Core/DemoHome）— 默认只用叶子名
+```
+
+## 多层分组（D23）
+
+- `bundles/` 下**允许**中间层分组目录（如 `Core/`、`Activity/`），只做分类。
+- **只有叶子功能目录**配置为 Asset Bundle（一对一）。
+- 绑定名 / Bundle 名 = **叶子目录大驼峰名**；同名叶子避免跨分组冲突。
+
+## 与其它标识符的分工
+
+| 种类 | 风格 | 示例 |
+|------|------|------|
+| 功能目录 / Bundle / 绑定名 | 大驼峰 | `DemoHome` |
+| 类 / 入口类型 | 大驼峰 | `DemoHomeEntry` |
+| 变量、方法、函数 | 小驼峰 | `bindChild`, `loadBundle` |
+| 文件名（脚本） | 与导出类型一致，优先大驼峰 | `DemoHomeEntry.ts` |
+
+## 脚手架 vs 功能（大小写，D24）
+
+| 种类 | 风格 | 示例 |
+|------|------|------|
+| 系统/脚手架目录 | **小写**（对齐 Cocos `resources`） | `fframe/`、`main/`、`bundles/` |
+| 分组目录 | **大驼峰** | `Demo/`、`Core/` |
+| 功能叶子 / Bundle / 绑定名 | **大驼峰** | `DemoHome/` |
+
+- 核心：`assets/fframe/`（固定）
+- 入口：`assets/main/`（固定；启动场景 `ScMain.scene`）
+- 功能根：`assets/bundles/`（固定小写；其下再分组/功能）
+
+## 场景（Scene）
+
+- 文件名：`Sc` + 大驼峰语义名 + `.scene`
+- 示例：`ScMain.scene`、`ScDemoHome.scene`
+- 关联脚本：同名 `.ts`（如 `ScMain.ts`），类名与文件名一致
+- 挂载：在 `Canvas` 下建**空节点**（节点名与脚本同名），脚本挂该节点上；与 `Camera` **同级**，不要直接挂在 `Canvas` / `Camera` 上
+
+```text
+ScMain          # 场景根
+└── Canvas
+    ├── Camera
+    └── ScMain  # 空节点 + ScMain.ts
+```
+
+## 预制体（Prefab）
+
+- 文件名：`Pf` + 大驼峰语义名 + `.prefab`
+- 示例：`PfPlayer.prefab`、`PfRewardPopup.prefab`
+- 关联脚本：同名 `.ts`（如 `PfPlayer.ts`），类名与文件名一致
+- 挂载：脚本挂在预制体 **根节点** 上
+
+## Layer
+
+- 文件名 / 类名：`Ly` + 大驼峰语义名（如 `LyHUD`）
+- 关联脚本与节点约定随具体 Layer 用途；基类见下
+
+## UI 脚本必须继承的框架基类
+
+继承链：`FFScene` → `FFLayer` → `FFComponent`（`Pf*` 旁支直接挂 `FFComponent`）。
+
+| 前缀 | 必须继承 | 禁止 |
+|------|----------|------|
+| `Pf*` | `FFComponent` | 直接 `Component` |
+| `Ly*` | `FFLayer` | 直接 `Component` / `FFComponent` |
+| `Sc*` | `FFScene` | 直接 `Component` / `FFComponent` / `FFLayer` |
+
+```ts
+// ✅
+export class PfDemoPanel extends FFComponent {}
+export class LyHUD extends FFLayer {}
+export class ScMain extends FFScene {}
+
+// ❌
+export class ScMain extends Component {}
+export class ScMain extends FFComponent {}
+export class PfX extends FFScene {}
+```
+
+- Bundle 逻辑入口仍用 `FFClassBase` / `FFBundleEntryBase`，不适用本条。
+- `FFLayer` / `FFScene` 可先与 `FFComponent` 同能，仅作类型分层；差异以后再加。
+
+## 目录
+
+- 场景 / 预制体与其关联脚本放在**同一文件夹**，不要拆成 `scripts/`、`scenes/`、`prefabs/` 等分目录。
+
+## 对照
+
+| 种类 | 前缀 | 示例资产 | 示例脚本 / 类 | 基类 |
+|------|------|----------|----------------|------|
+| 场景 | `Sc` | `ScMain.scene` | `ScMain.ts` / `ScMain` | `FFScene` |
+| Layer | `Ly` | — | `LyHUD.ts` / `LyHUD` | `FFLayer` |
+| 预制体 | `Pf` | `PfPlayer.prefab` | `PfPlayer.ts` / `PfPlayer` | `FFComponent` |
+
+```text
+✅ DemoHome/ScDemoHome.scene + DemoHome/ScDemoHome.ts（同目录；Canvas 下空节点；extends FFScene）
+✅ DemoHome/PfRewardPopup.prefab + DemoHome/PfRewardPopup.ts（同目录，挂根节点；extends FFComponent）
+❌ DemoHome/scenes/… 与 DemoHome/scripts/… 分目录存放
+❌ main.scene / Main.scene / SCMain.scene（缺 Sc 或大小写不对）
+❌ player.prefab / PFPlayer.prefab（缺 Pf 或大小写不对）
+❌ 场景脚本直接挂在 Canvas / Camera 上；预制体脚本挂在子节点
+❌ Sc*/Ly*/Pf* 直接 extends Component
+```

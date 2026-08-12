@@ -1,0 +1,34 @@
+---
+description: 新写或改写公共异步 API / 完成回调 / onProgress 时引用：error-first；完成在前、进度可选
+alwaysApply: false
+---
+
+# 异步回调约定
+
+## 完成回调：error-first
+
+- 所有**完成/结果**回调，**第一个参数必须是 `err`**（`Error | null`）。
+- 成功时：`err === null`，其后才跟实际结果参数（没有结果可不跟）。
+- 失败时：只保证 `err` 有值；**不要依赖**后面的结果参数。
+
+```ts
+// ✅
+onComplete(err: Error | null, data?: T): void
+loadBundle(name, (err) => { if (err) return; /* 成功 */ })
+
+// ❌ 成功/失败拆两个回调、或把结果放在 err 前面
+onSuccess(data) / onFail(err)
+onComplete(data, err)
+```
+
+## 带进度的异步 API 签名尾巴
+
+- 统一：`(..., onComplete, onProgress?)`
+- 不需要进度时只传 `onComplete`。
+- `onProgress` **不是**完成回调，不走 error-first；约定为 `(finished, total, ...)`（具体语义由 API 注明）。
+- 对接 Cocos 等引擎时，在实现层映射字段名（如 `onFileProgress`），对外保持 `onProgress`。
+- 共用类型：`assets/fframe/resource/FFAsyncCallback.ts`（`FFAsyncComplete` / `FFAsyncProgress`）；后续资源加载等沿用。
+
+## 适用范围
+
+- `assets/**/*.ts` 新写/改写的公共异步 API 与回调；对内若对外暴露回调，同样遵守。
