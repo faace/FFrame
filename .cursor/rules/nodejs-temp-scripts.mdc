@@ -1,0 +1,27 @@
+---
+description: 脚本优先用 Node.js；临时脚本统一放在 tools/temp
+alwaysApply: true
+---
+
+# 脚本开发约定
+
+## 运行时
+
+- 编写脚本时**优先使用 Node.js**（`.js` / `.mjs` / `.ts`）。
+- 除非用户明确要求或其他语言更合适，否则不要默认用 Python、Bash、PowerShell 等写新脚本。
+
+## 临时脚本存放位置
+
+- 所有临时脚本、一次性工具脚本统一放在 `tools/temp/` 下。
+- 不要把临时脚本散落在项目根目录、源码目录或其他位置。
+
+```text
+✅ tools/temp/migrate-foo.mjs
+✅ tools/temp/check-bar.ts
+❌ ./tmp-script.js
+❌ scripts/one-off.py
+```
+
+## 注意
+
+- `tools/temp/` 仅用于临时/探索性脚本；可复用、长期维护的工具脚本另议正式目录。
