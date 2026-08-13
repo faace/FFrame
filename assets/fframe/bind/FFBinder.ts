@@ -4,6 +4,7 @@ import { FFBindState } from './FFBindState';
 import type { FFBundleRegistry } from './FFBundleRegistry';
 import type { FFEventManager } from '../event/FFEventManager';
 import type { IFFResource } from '../resource/IFFResource';
+import type { FFUIManager } from '../ui/FFUIManager';
 
 export interface FFBindOptions {
     loadIfNeeded?: boolean; // true=bind 前自动 load；默认 false（逻辑显式 load）
@@ -22,8 +23,13 @@ interface BindNode {
 export class FFBinder {
     private readonly nodes = new Map<string, BindNode>();
     private readonly roots = new Set<string>();
+    private ui: FFUIManager | null = null;
 
     constructor(private readonly registry: FFBundleRegistry, private readonly resource: IFFResource, private readonly events: FFEventManager) {}
+
+    attachUI(ui: FFUIManager): void {
+        this.ui = ui;
+    }
 
     /** 当前绑定树（父 → 子名列表） */
     dumpTree(): Record<string, string[]> {
@@ -94,7 +100,7 @@ export class FFBinder {
                 this.roots.add(name);
             }
 
-            const ctx = new FFBindContext(name, this.events, this.resource, this, parentPath);
+            const ctx = new FFBindContext(name, this.events, this.resource, this, parentPath, this.ui);
 
             console.info('[FFBinder] bind →', ctx.bindPath.join(' / '));
             await entry.bind(ctx);
@@ -117,6 +123,13 @@ export class FFBinder {
             return;
         }
 
+        const blockers = this.ui?.getUnbindBlockers(this.collectFamily(name)) ?? [];
+        if (blockers.length) {
+            const msg = `[FFBinder] 不能 unbind ${name}：仍占用 ${blockers.join('；')}`;
+            console.error(msg);
+            throw new Error(msg);
+        }
+
         // 子随父：逆序级联
         for (const child of [...node.children].reverse()) {
             await this.unbind(child, releaseBundle);
@@ -124,7 +137,7 @@ export class FFBinder {
 
         const entry = this.registry.get(name);
         const parentPath = this.buildPath(node.parent);
-        const ctx = new FFBindContext(name, this.events, this.resource, this, parentPath);
+        const ctx = new FFBindContext(name, this.events, this.resource, this, parentPath, this.ui);
 
         console.info('[FFBinder] unbind →', name);
         if (entry) {
@@ -155,6 +168,14 @@ export class FFBinder {
         } catch (e) {
             console.error('[FFBinder] 回滚时再次失败', name, e);
         }
+    }
+
+    private collectFamily(name: string): string[] {
+        const out = [name];
+        const node = this.nodes.get(name);
+        if (!node) return out;
+        for (const child of node.children) out.push(...this.collectFamily(child));
+        return out;
     }
 
     private buildPath(parentName?: string): string[] {

@@ -9,9 +9,8 @@ const { ccclass } = _decorator;
  */
 @ccclass('PfDemoPanel')
 export class PfDemoPanel extends FFComponent {
-    onLoad(): void {
-        super.onLoad();
-        console.info('[PfDemoPanel] onLoad');
+    onInit(): void {
+        console.info('[PfDemoPanel] onInit');
         this.on('BindReady'); // listener=this → onBindReady
     }
 
@@ -19,8 +18,7 @@ export class PfDemoPanel extends FFComponent {
         console.info('[PfDemoPanel] 事件 BindReady', e.data);
     }
 
-    onDestroy(): void {
-        console.info('[PfDemoPanel] onDestroy（将卸掉本实例事件）');
-        super.onDestroy();
+    onRemove(): void {
+        console.info('[PfDemoPanel] onRemove');
     }
 }

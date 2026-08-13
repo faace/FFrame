@@ -6,24 +6,24 @@ class DemoChildEntry extends FFBundleEntryBase {
         super('DemoChild');
     }
 
-    async onLoad(): Promise<void> {
-        console.log('[DemoChild] onLoad');
+    onInit(): void {
+        console.log('[DemoChild] onInit');
     }
 
     async onBind(ctx: FFBindContext): Promise<void> {
         console.log('[DemoChild] onBind', ctx.bindPath.join('/'));
     }
 
-    async start(): Promise<void> {
-        console.log('[DemoChild] start (Ready)');
+    onStart(): void {
+        console.log('[DemoChild] onStart (Ready)');
     }
 
     async onUnbind(): Promise<void> {
         console.log('[DemoChild] onUnbind');
     }
 
-    async onDestroy(): Promise<void> {
-        console.log('[DemoChild] onDestroy');
+    onRemove(): void {
+        console.log('[DemoChild] onRemove');
     }
 }
 

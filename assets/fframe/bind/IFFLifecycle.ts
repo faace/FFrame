@@ -9,11 +9,11 @@ export interface IFFLifecycle {
     readonly bindId: string;
     getState(): FFBindState;
 
-    onLoad?(): void | Promise<void>; // [→Created] 首次准备
+    onInit?(): void; // [→Created] 首次准备
     onBind?(ctx: FFBindContext): void | Promise<void>; // [Binding] 进场；可 bindChild
-    start?(): void | Promise<void>; // [Binding] 依赖就绪
+    onStart?(): void; // [Binding] 依赖就绪
     onEnable?(): void | Promise<void>; // [→Ready] 启用（预留）
     onDisable?(): void | Promise<void>; // [Unbinding] 停用（预留）
     onUnbind?(ctx: FFBindContext): void | Promise<void>; // [Unbinding] 解绑清理
-    onDestroy?(): void | Promise<void>; // [→Destroyed] 销毁
+    onRemove?(): void; // [→Destroyed] 销毁；此时本入口监听已卸
 }

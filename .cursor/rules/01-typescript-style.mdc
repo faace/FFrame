@@ -66,12 +66,12 @@ on(
 ```ts
 // ✅ enum / 接口成员：同一行 //
 export enum FFBindState {
-    Uncreated = 'uncreated', // 尚未 onLoad
+    Uncreated = 'uncreated', // 尚未 onInit
     Ready = 'ready',         // 进场完成，可使用
 }
 
 interface IFFLifecycle {
-    onLoad?(): void | Promise<void>; // [→Created] 首次准备
+    onInit?(): void; // [→Created] 首次准备
 }
 
 loadIfNeeded?: boolean; // 默认 false，由逻辑显式 load

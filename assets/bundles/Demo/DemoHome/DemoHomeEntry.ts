@@ -1,60 +1,42 @@
-import { find, Node } from 'cc';
 import { FFBindContext, FFBundleEntryBase, registerBundleEntry } from '../../../fframe';
-import { PfDemoPanel } from './PfDemoPanel';
 
-/** 示范功能：嵌套绑定 DemoChild + 挂一个 FFComponent UI */
+/** 示范功能：嵌套绑定 DemoChild，再切真场景并开一个 layer */
 class DemoHomeEntry extends FFBundleEntryBase {
-    private panelNode: Node | null = null;
-
     constructor() {
         super('DemoHome');
     }
 
-    async onLoad(): Promise<void> {
-        console.log('[DemoHome] onLoad');
+    onInit(): void {
+        console.log('[DemoHome] onInit');
     }
 
     async onBind(ctx: FFBindContext): Promise<void> {
         console.log('[DemoHome] onBind', ctx.bindPath.join('/'));
         this.on('BindReady');
-        this.mountDemoPanel(); // 先挂 UI，才能收到后续 BindReady
         await ctx.bindChild('DemoChild');
+        ctx.openScene('ScDemoHome', (err) => {
+            if (err) return console.error('[DemoHome] openScene 失败', err);
+            ctx.showLayer('LyDemoPopup', (err2) => {
+                if (err2) return console.error('[DemoHome] showLayer 失败', err2);
+                console.info('[DemoHome] 场景与弹窗已打开');
+            });
+        });
     }
 
     onBindReady(e: { data?: unknown }): void {
         console.info('[DemoHome] 事件 BindReady', e.data);
     }
 
-    async start(): Promise<void> {
-        console.log('[DemoHome] start (Ready)');
+    onStart(): void {
+        console.log('[DemoHome] onStart (Ready)');
     }
 
     async onUnbind(): Promise<void> {
         console.log('[DemoHome] onUnbind');
-        this.unmountDemoPanel();
     }
 
-    async onDestroy(): Promise<void> {
-        console.log('[DemoHome] onDestroy');
-    }
-
-    private mountDemoPanel(): void {
-        const canvas = find('Canvas');
-        if (!canvas) return console.warn('[DemoHome] 未找到 Canvas，跳过 PfDemoPanel');
-        const node = new Node('PfDemoPanel');
-        node.addComponent(PfDemoPanel);
-        canvas.addChild(node);
-        this.panelNode = node;
-        console.info('[DemoHome] 已挂 PfDemoPanel（FFComponent）');
-    }
-
-    private unmountDemoPanel(): void {
-        if (!this.panelNode?.isValid) {
-            this.panelNode = null;
-            return;
-        }
-        this.panelNode.destroy();
-        this.panelNode = null;
+    onRemove(): void {
+        console.log('[DemoHome] onRemove');
     }
 }
 

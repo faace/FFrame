@@ -13,7 +13,7 @@ export interface IFFBundleEntry {
 
 /**
  * 标准入口基类：编排侧调 bind/unbind；内部按序触发生命周期钩子并推进 FFBindState。
- * 状态流转见 FFBindState.ts；业务重写 onLoad/onBind/start/… 即可。
+ * 状态流转见 FFBindState.ts；业务重写 onInit/onBind/onStart/… 即可。
  */
 export abstract class FFBundleEntryBase extends FFClassBase implements IFFBundleEntry {
     constructor(public readonly bundleName: string) {
@@ -32,11 +32,11 @@ export abstract class FFBundleEntryBase extends FFClassBase implements IFFBundle
 
         try {
             if (needCreate) {
-                await this.invoke('onLoad');
+                await this.invoke('onInit');
                 this.setState(FFBindState.Created);
             }
             await this.invoke('onBind', ctx);
-            await this.invoke('start');
+            await this.invoke('onStart');
             await this.invoke('onEnable');
             this.setState(FFBindState.Ready);
         } catch (err) {
@@ -55,7 +55,8 @@ export abstract class FFBundleEntryBase extends FFClassBase implements IFFBundle
         try {
             await this.invoke('onDisable');
             await this.invoke('onUnbind', ctx);
-            await this.invoke('onDestroy');
+            this.removeAllEvents();
+            await this.invoke('onRemove');
         } finally {
             this.removeAllEvents();
             this.setState(FFBindState.Destroyed);

@@ -1,5 +1,6 @@
 import { assetManager, AssetManager } from 'cc';
-import type { FFAsyncComplete, FFAsyncProgress } from './FFAsyncCallback';
+import type { Asset } from 'cc';
+import type { FFAsyncComplete, FFAsyncCompleteWith, FFAsyncProgress } from './FFAsyncCallback';
 import type { IFFResource } from './IFFResource';
 
 /** 基于 assetManager 的 Bundle 加载/释放 */
@@ -8,6 +9,10 @@ export class FFCocosResource implements IFFResource {
 
     hasBundle(name: string): boolean {
         return !!assetManager.getBundle(name) || this.cache.has(name);
+    }
+
+    getBundle(name: string): AssetManager.Bundle | null {
+        return assetManager.getBundle(name) ?? this.cache.get(name) ?? null;
     }
 
     loadBundle(name: string, onComplete: FFAsyncComplete, onProgress?: FFAsyncProgress): void {
@@ -28,6 +33,17 @@ export class FFCocosResource implements IFFResource {
             this.cache.set(name, bundle);
             onComplete(null);
         });
+    }
+
+    load<T extends Asset>(bundleName: string, path: string, type: new (...args: any[]) => T, onComplete: FFAsyncCompleteWith<T>, onProgress?: FFAsyncProgress): void {
+        const bundle = this.getBundle(bundleName);
+        if (!bundle) return onComplete(new Error(`[FFCocosResource] Bundle 未加载: ${bundleName}`));
+        const done = (err: Error | null, asset?: T) => {
+            if (err || !asset) return onComplete(err ?? new Error(`[FFCocosResource] load 失败: ${bundleName}/${path}`));
+            onComplete(null, asset);
+        };
+        if (onProgress) bundle.load(path, type, onProgress, done);
+        else bundle.load(path, type, done);
     }
 
     async releaseBundle(name: string): Promise<void> {

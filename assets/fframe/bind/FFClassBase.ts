@@ -5,13 +5,13 @@ import type { FFEvent } from '../event/FFEventManager';
 import type { IFFLifecycle } from './IFFLifecycle';
 
 type HookName =
-    | 'onLoad'
+    | 'onInit'
     | 'onBind'
-    | 'start'
+    | 'onStart'
     | 'onEnable'
     | 'onDisable'
     | 'onUnbind'
-    | 'onDestroy';
+    | 'onRemove';
 
 /** 逻辑侧通用基类（不挂 Component）；自带实例事件 on/off/emit */
 export abstract class FFClassBase implements IFFLifecycle {
