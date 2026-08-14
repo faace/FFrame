@@ -89,7 +89,7 @@ ScMain          # 场景根
 
 ```ts
 // ✅
-export class PfDemoPanel extends FFComponent {}
+export class PfRewardPopup extends FFComponent {}
 export class LyHUD extends FFLayer {}
 export class ScMain extends FFScene {}
 

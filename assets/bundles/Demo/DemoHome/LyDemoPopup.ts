@@ -24,4 +24,8 @@ export class LyDemoPopup extends FFLayer {
         label.verticalAlign = Label.VerticalAlign.CENTER;
         console.info('[LyDemoPopup] onInit');
     }
+
+    onRemove(): void {
+        console.info('[LyDemoPopup] onRemove');
+    }
 }
