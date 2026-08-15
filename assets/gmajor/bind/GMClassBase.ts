@@ -1,8 +1,8 @@
-import type { FFBindContext } from './FFBindContext';
-import { FFBindState } from './FFBindState';
-import { FFEventHost } from '../event/FFEventHost';
-import type { FFEvent } from '../event/FFEventManager';
-import type { IFFLifecycle } from './IFFLifecycle';
+import type { GMBindContext } from './GMBindContext';
+import { GMBindState } from './GMBindState';
+import { GMEventHost } from '../event/GMEventHost';
+import type { GMEvent } from '../event/GMEventManager';
+import type { IGMLifecycle } from './IGMLifecycle';
 
 type HookName =
     | 'onInit'
@@ -14,21 +14,21 @@ type HookName =
     | 'onRemove';
 
 /** 逻辑侧通用基类（不挂 Component）；自带实例事件 on/off/emit */
-export abstract class FFClassBase implements IFFLifecycle {
-    private _state: FFBindState = FFBindState.Uncreated;
-    private readonly _events = new FFEventHost(this);
+export abstract class GMClassBase implements IGMLifecycle {
+    private _state: GMBindState = GMBindState.Uncreated;
+    private readonly _events = new GMEventHost(this);
 
     constructor(public readonly bindId: string) {}
 
-    getState(): FFBindState {
+    getState(): GMBindState {
         return this._state;
     }
 
-    protected get state(): FFBindState {
+    protected get state(): GMBindState {
         return this._state;
     }
 
-    protected setState(state: FFBindState): void {
+    protected setState(state: GMBindState): void {
         this._state = state;
     }
 
@@ -53,7 +53,7 @@ export abstract class FFClassBase implements IFFLifecycle {
         return this;
     }
 
-    emit(event: FFEvent | string, data?: any): this {
+    emit(event: GMEvent | string, data?: any): this {
         this._events.emit(event, data);
         return this;
     }
@@ -64,11 +64,11 @@ export abstract class FFClassBase implements IFFLifecycle {
     }
 
     /** 若子类实现了对应钩子则 await 调用 */
-    protected async invoke(hook: HookName, ctx?: FFBindContext): Promise<void> {
-        const fn = (this as IFFLifecycle)[hook];
+    protected async invoke(hook: HookName, ctx?: GMBindContext): Promise<void> {
+        const fn = (this as IGMLifecycle)[hook];
         if (typeof fn !== 'function') return;
         if (hook === 'onBind' || hook === 'onUnbind') {
-            await (fn as (c: FFBindContext) => void | Promise<void>).call(this, ctx as FFBindContext);
+            await (fn as (c: GMBindContext) => void | Promise<void>).call(this, ctx as GMBindContext);
         } else {
             await (fn as () => void | Promise<void>).call(this);
         }

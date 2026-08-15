@@ -1,6 +1,6 @@
 import { _decorator, Component } from 'cc';
-import { FFEventHost } from '../event/FFEventHost';
-import type { FFEvent } from '../event/FFEventManager';
+import { GMEventHost } from '../event/GMEventHost';
+import type { GMEvent } from '../event/GMEventManager';
 
 const { ccclass } = _decorator;
 
@@ -8,16 +8,16 @@ const { ccclass } = _decorator;
  * UI 通用基类（挂 Component）。
  * 业务写 onInit/onStart/onRemove；不要重写 onLoad/start/onDestroy。
  */
-@ccclass('FFComponent')
-export class FFComponent extends Component {
-    private _events!: FFEventHost; // onLoad 里创建
+@ccclass('GMComponent')
+export class GMComponent extends Component {
+    private _events!: GMEventHost; // onLoad 里创建
 
     onInit?(): void; // 与 onLoad 同时机；可 this.on(...)
     onStart?(): void; // 与 start 同时机
     onRemove?(): void; // 与 onDestroy 同时机；此时监听已卸
 
     onLoad(): void { // 引擎回调；业务用 onInit，不要重写
-        this._events = new FFEventHost(this);
+        this._events = new GMEventHost(this);
         this.onInit?.();
     }
 
@@ -51,7 +51,7 @@ export class FFComponent extends Component {
         return this;
     }
 
-    emit(event: FFEvent | string, data?: any): this {
+    emit(event: GMEvent | string, data?: any): this {
         this._events.emit(event, data);
         return this;
     }

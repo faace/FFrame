@@ -1,11 +1,11 @@
 import { _decorator, Color, Graphics, Label, Node, UITransform } from 'cc';
-import { FFLayer } from '../../../fframe';
+import { GMLayer } from '../../../gmajor';
 
 const { ccclass } = _decorator;
 
 /** Demo 弹窗：根节点 scale 入场；panel 自己画，不依赖贴图 */
 @ccclass('LyDemoPopup')
-export class LyDemoPopup extends FFLayer {
+export class LyDemoPopup extends GMLayer {
     onInit(): void {
         const uit = this.node.getComponent(UITransform) ?? this.node.addComponent(UITransform);
         uit.setContentSize(520, 360);

@@ -3,7 +3,7 @@ description: 规则索引与 #rule 写入流程（Always）
 alwaysApply: true
 ---
 
-# FFrame 规则元信息
+# GMajor 规则元信息
 
 ## 常见场景 → 规则（手写，保持极短）
 

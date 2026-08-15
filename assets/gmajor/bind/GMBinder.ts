@@ -1,12 +1,12 @@
-import type { FFAsyncComplete, FFAsyncProgress } from '../resource/FFAsyncCallback';
-import { FFBindContext } from './FFBindContext';
-import { FFBindState } from './FFBindState';
-import type { FFBundleRegistry } from './FFBundleRegistry';
-import type { FFEventManager } from '../event/FFEventManager';
-import type { IFFResource } from '../resource/IFFResource';
-import type { FFUIManager } from '../ui/FFUIManager';
+import type { GMAsyncComplete, GMAsyncProgress } from '../resource/GMAsyncCallback';
+import { GMBindContext } from './GMBindContext';
+import { GMBindState } from './GMBindState';
+import type { GMBundleRegistry } from './GMBundleRegistry';
+import type { GMEventManager } from '../event/GMEventManager';
+import type { IGMResource } from '../resource/IGMResource';
+import type { GMUIManager } from '../ui/GMUIManager';
 
-export interface FFBindOptions {
+export interface GMBindOptions {
     loadIfNeeded?: boolean; // true=bind 前自动 load；默认 false（逻辑显式 load）
     parentPath?: readonly string[];
     parentName?: string;
@@ -20,14 +20,14 @@ interface BindNode {
 }
 
 /** 调用者编排：load/bind/unbind、嵌套树、失败回滚 */
-export class FFBinder {
+export class GMBinder {
     private readonly nodes = new Map<string, BindNode>();
     private readonly roots = new Set<string>();
-    private ui: FFUIManager | null = null;
+    private ui: GMUIManager | null = null;
 
-    constructor(private readonly registry: FFBundleRegistry, private readonly resource: IFFResource, private readonly events: FFEventManager) {}
+    constructor(private readonly registry: GMBundleRegistry, private readonly resource: IGMResource, private readonly events: GMEventManager) {}
 
-    attachUI(ui: FFUIManager): void {
+    attachUI(ui: GMUIManager): void {
         this.ui = ui;
     }
 
@@ -45,11 +45,11 @@ export class FFBinder {
     }
 
     /** 显式加载 Bundle；成功后注册表中必须已有入口。onProgress 可选 */
-    loadBundle(name: string, onComplete: FFAsyncComplete, onProgress?: FFAsyncProgress): void {
+    loadBundle(name: string, onComplete: GMAsyncComplete, onProgress?: GMAsyncProgress): void {
         this.resource.loadBundle(name, (err) => {
             if (err) return onComplete(err);
             if (!this.registry.has(name)) {
-                return onComplete(new Error(`[FFBinder] Bundle 已加载但未登记入口: ${name}`));
+                return onComplete(new Error(`[GMBinder] Bundle 已加载但未登记入口: ${name}`));
             }
             onComplete(null);
         }, onProgress);
@@ -65,11 +65,11 @@ export class FFBinder {
     /**
      * 绑定至就绪。默认要求已 load；失败则对称回滚。
      */
-    async bind(name: string, options: FFBindOptions = {}): Promise<void> {
+    async bind(name: string, options: GMBindOptions = {}): Promise<void> {
         if (this.nodes.has(name)) {
             const entry = this.registry.get(name);
-            if (entry?.getState() === FFBindState.Ready) {
-                console.debug('[FFBinder] 已就绪，跳过绑定', name);
+            if (entry?.getState() === GMBindState.Ready) {
+                console.debug('[GMBinder] 已就绪，跳过绑定', name);
                 return;
             }
         }
@@ -81,12 +81,12 @@ export class FFBinder {
             if (options.loadIfNeeded) {
                 await this.loadBundleAsync(name);
             } else if (!this.resource.hasBundle(name)) {
-                throw new Error(`[FFBinder] Bundle 未加载: ${name}。请先由逻辑调用 loadBundle 后再 bind`);
+                throw new Error(`[GMBinder] Bundle 未加载: ${name}。请先由逻辑调用 loadBundle 后再 bind`);
             }
 
             const entry = this.registry.get(name);
             if (!entry) {
-                throw new Error(`[FFBinder] 未找到标准入口: ${name}`);
+                throw new Error(`[GMBinder] 未找到标准入口: ${name}`);
             }
 
             const node: BindNode = { name, children: [], parent: options.parentName };
@@ -100,14 +100,14 @@ export class FFBinder {
                 this.roots.add(name);
             }
 
-            const ctx = new FFBindContext(name, this.events, this.resource, this, parentPath, this.ui);
+            const ctx = new GMBindContext(name, this.events, this.resource, this, parentPath, this.ui);
 
-            console.info('[FFBinder] bind →', ctx.bindPath.join(' / '));
+            console.info('[GMBinder] bind →', ctx.bindPath.join(' / '));
             await entry.bind(ctx);
             this.events.emit({ name: 'BindReady', data: { name, bindPath: ctx.bindPath } });
-            console.info('[FFBinder] ready', name);
+            console.info('[GMBinder] ready', name);
         } catch (err) {
-            console.error('[FFBinder] bind 失败，开始回滚', name, err);
+            console.error('[GMBinder] bind 失败，开始回滚', name, err);
             await this.rollback(name, releaseOnRollback);
             throw err;
         }
@@ -119,13 +119,13 @@ export class FFBinder {
     async unbind(name: string, releaseBundle = true): Promise<void> {
         const node = this.nodes.get(name);
         if (!node) {
-            console.debug('[FFBinder] 未绑定，跳过解绑', name);
+            console.debug('[GMBinder] 未绑定，跳过解绑', name);
             return;
         }
 
         const blockers = this.ui?.getUnbindBlockers(this.collectFamily(name)) ?? [];
         if (blockers.length) {
-            const msg = `[FFBinder] 不能 unbind ${name}：仍占用 ${blockers.join('；')}`;
+            const msg = `[GMBinder] 不能 unbind ${name}：仍占用 ${blockers.join('；')}`;
             console.error(msg);
             throw new Error(msg);
         }
@@ -137,9 +137,9 @@ export class FFBinder {
 
         const entry = this.registry.get(name);
         const parentPath = this.buildPath(node.parent);
-        const ctx = new FFBindContext(name, this.events, this.resource, this, parentPath, this.ui);
+        const ctx = new GMBindContext(name, this.events, this.resource, this, parentPath, this.ui);
 
-        console.info('[FFBinder] unbind →', name);
+        console.info('[GMBinder] unbind →', name);
         if (entry) {
             await entry.unbind(ctx);
         }
@@ -166,7 +166,7 @@ export class FFBinder {
         try {
             await this.unbind(name, releaseBundle);
         } catch (e) {
-            console.error('[FFBinder] 回滚时再次失败', name, e);
+            console.error('[GMBinder] 回滚时再次失败', name, e);
         }
     }
 

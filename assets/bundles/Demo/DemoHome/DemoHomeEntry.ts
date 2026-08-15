@@ -1,7 +1,7 @@
-import { FFBindContext, FFBundleEntryBase, ff, registerBundleEntry } from '../../../fframe';
+import { GMBindContext, GMBundleEntryBase, gm, registerBundleEntry } from '../../../gmajor';
 
 /** 示范功能：嵌套绑定 DemoChild，再切真场景并开一个 layer */
-class DemoHomeEntry extends FFBundleEntryBase {
+class DemoHomeEntry extends GMBundleEntryBase {
     constructor() {
         super('DemoHome');
     }
@@ -10,7 +10,7 @@ class DemoHomeEntry extends FFBundleEntryBase {
         console.log('[DemoHome] onInit');
     }
 
-    async onBind(ctx: FFBindContext): Promise<void> {
+    async onBind(ctx: GMBindContext): Promise<void> {
         console.log('[DemoHome] onBind', ctx.bindPath.join('/'));
         this.on('BindReady');
         await ctx.bindChild('DemoChild');
@@ -25,15 +25,15 @@ class DemoHomeEntry extends FFBundleEntryBase {
     }
 
     /** 故意 unbind（应拒绝）→ closeLayer → 再 unbind（场景仍占，仍拒绝） */
-    private demoOccupyAndClose(ctx: FFBindContext): void {
-        void ff.binder.unbind('DemoHome').then(
+    private demoOccupyAndClose(ctx: GMBindContext): void {
+        void gm.binder.unbind('DemoHome').then(
             () => console.error('[DemoHome] 占用中 unbind 却成功了'),
             (e) => {
                 console.info('[DemoHome] 占用中 unbind 已拒绝（预期）', e);
                 ctx.closeLayer('LyDemoPopup', (err) => {
                     if (err) return console.error('[DemoHome] closeLayer 失败', err);
                     console.info('[DemoHome] closeLayer 完成');
-                    void ff.binder.unbind('DemoHome').then(
+                    void gm.binder.unbind('DemoHome').then(
                         () => console.error('[DemoHome] 关弹窗后 unbind 却成功了'),
                         (e2) => console.info('[DemoHome] 关弹窗后仍占场景，unbind 已拒绝（预期）', e2),
                     );

@@ -43,11 +43,11 @@ alwaysApply: false
 
 | 种类 | 风格 | 示例 |
 |------|------|------|
-| 系统/脚手架目录 | **小写**（对齐 Cocos `resources`） | `fframe/`、`main/`、`bundles/` |
+| 系统/脚手架目录 | **小写**（对齐 Cocos `resources`） | `gmajor/`、`main/`、`bundles/` |
 | 分组目录 | **大驼峰** | `Demo/`、`Core/` |
 | 功能叶子 / Bundle / 绑定名 | **大驼峰** | `DemoHome/` |
 
-- 核心：`assets/fframe/`（固定）
+- 核心：`assets/gmajor/`（固定）
 - 入口：`assets/main/`（固定；启动场景 `ScMain.scene`）
 - 功能根：`assets/bundles/`（固定小写；其下再分组/功能）
 
@@ -79,28 +79,28 @@ ScMain          # 场景根
 
 ## UI 脚本必须继承的框架基类
 
-继承链：`FFScene` → `FFLayer` → `FFComponent`（`Pf*` 旁支直接挂 `FFComponent`）。
+继承链：`GMScene` → `GMLayer` → `GMComponent`（`Pf*` 旁支直接挂 `GMComponent`）。
 
 | 前缀 | 必须继承 | 禁止 |
 |------|----------|------|
-| `Pf*` | `FFComponent` | 直接 `Component` |
-| `Ly*` | `FFLayer` | 直接 `Component` / `FFComponent` |
-| `Sc*` | `FFScene` | 直接 `Component` / `FFComponent` / `FFLayer` |
+| `Pf*` | `GMComponent` | 直接 `Component` |
+| `Ly*` | `GMLayer` | 直接 `Component` / `GMComponent` |
+| `Sc*` | `GMScene` | 直接 `Component` / `GMComponent` / `GMLayer` |
 
 ```ts
 // ✅
-export class PfRewardPopup extends FFComponent {}
-export class LyHUD extends FFLayer {}
-export class ScMain extends FFScene {}
+export class PfRewardPopup extends GMComponent {}
+export class LyHUD extends GMLayer {}
+export class ScMain extends GMScene {}
 
 // ❌
 export class ScMain extends Component {}
-export class ScMain extends FFComponent {}
-export class PfX extends FFScene {}
+export class ScMain extends GMComponent {}
+export class PfX extends GMScene {}
 ```
 
-- Bundle 逻辑入口仍用 `FFClassBase` / `FFBundleEntryBase`，不适用本条。
-- `FFLayer` / `FFScene` 可先与 `FFComponent` 同能，仅作类型分层；差异以后再加。
+- Bundle 逻辑入口仍用 `GMClassBase` / `GMBundleEntryBase`，不适用本条。
+- `GMLayer` / `GMScene` 可先与 `GMComponent` 同能，仅作类型分层；差异以后再加。
 
 ## 目录
 
@@ -110,13 +110,13 @@ export class PfX extends FFScene {}
 
 | 种类 | 前缀 | 示例资产 | 示例脚本 / 类 | 基类 |
 |------|------|----------|----------------|------|
-| 场景 | `Sc` | `ScMain.scene` | `ScMain.ts` / `ScMain` | `FFScene` |
-| Layer | `Ly` | — | `LyHUD.ts` / `LyHUD` | `FFLayer` |
-| 预制体 | `Pf` | `PfPlayer.prefab` | `PfPlayer.ts` / `PfPlayer` | `FFComponent` |
+| 场景 | `Sc` | `ScMain.scene` | `ScMain.ts` / `ScMain` | `GMScene` |
+| Layer | `Ly` | — | `LyHUD.ts` / `LyHUD` | `GMLayer` |
+| 预制体 | `Pf` | `PfPlayer.prefab` | `PfPlayer.ts` / `PfPlayer` | `GMComponent` |
 
 ```text
-✅ DemoHome/ScDemoHome.scene + DemoHome/ScDemoHome.ts（同目录；Canvas 下空节点；extends FFScene）
-✅ DemoHome/PfRewardPopup.prefab + DemoHome/PfRewardPopup.ts（同目录，挂根节点；extends FFComponent）
+✅ DemoHome/ScDemoHome.scene + DemoHome/ScDemoHome.ts（同目录；Canvas 下空节点；extends GMScene）
+✅ DemoHome/PfRewardPopup.prefab + DemoHome/PfRewardPopup.ts（同目录，挂根节点；extends GMComponent）
 ❌ DemoHome/scenes/… 与 DemoHome/scripts/… 分目录存放
 ❌ main.scene / Main.scene / SCMain.scene（缺 Sc 或大小写不对）
 ❌ player.prefab / PFPlayer.prefab（缺 Pf 或大小写不对）

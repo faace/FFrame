@@ -3,8 +3,8 @@ import { _decorator, Component } from 'cc';
 const { ccclass } = _decorator;
 
 /** persist Overlay 上的调度器：具名 delay，可取消（loading 显形/超时） */
-@ccclass('FFOverlayHost')
-export class FFOverlayHost extends Component {
+@ccclass('GMOverlayHost')
+export class GMOverlayHost extends Component {
     private readonly named = new Map<string, () => void>();
 
     scheduleNamed(name: string, delay: number, cb: () => void): void {

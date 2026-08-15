@@ -1,7 +1,7 @@
-import { FFBindContext, FFBundleEntryBase, registerBundleEntry } from '../../../fframe';
+import { GMBindContext, GMBundleEntryBase, registerBundleEntry } from '../../../gmajor';
 
 /** 示范子功能：被 DemoHome 嵌套绑定 */
-class DemoChildEntry extends FFBundleEntryBase {
+class DemoChildEntry extends GMBundleEntryBase {
     constructor() {
         super('DemoChild');
     }
@@ -10,7 +10,7 @@ class DemoChildEntry extends FFBundleEntryBase {
         console.log('[DemoChild] onInit');
     }
 
-    async onBind(ctx: FFBindContext): Promise<void> {
+    async onBind(ctx: GMBindContext): Promise<void> {
         console.log('[DemoChild] onBind', ctx.bindPath.join('/'));
     }
 

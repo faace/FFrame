@@ -1,5 +1,5 @@
 import { _decorator, tween, Tween, UIOpacity } from 'cc';
-import { FFLayer } from './FFLayer';
+import { GMLayer } from './GMLayer';
 
 const { ccclass } = _decorator;
 
@@ -7,8 +7,8 @@ const { ccclass } = _decorator;
  * 场景关联脚本基类。`Sc*` 脚本继承本类。
  * 入场/退场默认改 Canvas 整体 opacity（不是 layer 的 scale）。
  */
-@ccclass('FFScene')
-export class FFScene extends FFLayer {
+@ccclass('GMScene')
+export class GMScene extends GMLayer {
     onEnter(done: () => void): void { // 默认 opacity 0 → 255
         const op = this.ensureCanvasOpacity();
         Tween.stopAllByTarget(op);

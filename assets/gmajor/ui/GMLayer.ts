@@ -1,14 +1,14 @@
 import { _decorator, tween, Tween, Vec3 } from 'cc';
-import { FFComponent } from './FFComponent';
+import { GMComponent } from './GMComponent';
 
 const { ccclass } = _decorator;
 
 /**
- * Layer 脚本基类。`Ly*` 关联脚本继承本类（不要直接 extends Component / FFComponent）。
- * `onEnter`/`onLeave` 由 ff.ui 在带进/带出画面时调用；默认 scale 动效，子类可整段覆盖。
+ * Layer 脚本基类。`Ly*` 关联脚本继承本类（不要直接 extends Component / GMComponent）。
+ * `onEnter`/`onLeave` 由 gm.ui 在带进/带出画面时调用；默认 scale 动效，子类可整段覆盖。
  */
-@ccclass('FFLayer')
-export class FFLayer extends FFComponent {
+@ccclass('GMLayer')
+export class GMLayer extends GMComponent {
     onEnter(done: () => void): void { // 默认 0 → 1.1 → 1
         Tween.stopAllByTarget(this.node);
         this.node.setScale(0, 0, 1);

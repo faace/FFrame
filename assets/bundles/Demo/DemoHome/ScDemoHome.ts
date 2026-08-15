@@ -1,11 +1,11 @@
 import { _decorator, Color, Graphics, UITransform } from 'cc';
-import { FFScene } from '../../../fframe';
+import { GMScene } from '../../../gmajor';
 
 const { ccclass } = _decorator;
 
 /** DemoHome 真场景；Canvas 涂色方便看见 opacity 入场 */
 @ccclass('ScDemoHome')
-export class ScDemoHome extends FFScene {
+export class ScDemoHome extends GMScene {
     onInit(): void {
         const canvas = this.node.scene?.getChildByName('Canvas');
         const uit = canvas?.getComponent(UITransform);

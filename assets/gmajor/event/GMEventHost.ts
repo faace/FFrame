@@ -1,27 +1,27 @@
 /**
  * 实例级事件能力（内部复用，不从 index 导出）。
- * 由 FFLauncher 注入全局 FFEventManager，避免与 ff 循环依赖。
+ * 由 GMLauncher 注入全局 GMEventManager，避免与 gm 循环依赖。
  */
-import type { FFEvent, FFEventListener, FFEventManager } from './FFEventManager';
+import type { GMEvent, GMEventListener, GMEventManager } from './GMEventManager';
 
-let eventsRef: FFEventManager | null = null;
+let eventsRef: GMEventManager | null = null;
 
 /** 启动时注入；仅 Launcher 调用 */
-export function bindFFEvents(em: FFEventManager): void {
+export function bindGMEvents(em: GMEventManager): void {
     eventsRef = em;
 }
 
-function em(): FFEventManager {
-    if (!eventsRef) throw new Error('[fframe] 事件总线尚未就绪');
+function em(): GMEventManager {
+    if (!eventsRef) throw new Error('[gmajor] 事件总线尚未就绪');
     return eventsRef;
 }
 
-/** 挂在 FFClassBase / FFComponent 上：记本实例监听，销毁时卸干净 */
-export class FFEventHost {
+/** 挂在 GMClassBase / GMComponent 上：记本实例监听，销毁时卸干净 */
+export class GMEventHost {
     private readonly names: string[] = [];
     private any = false;
 
-    constructor(private readonly target: FFEventListener) {}
+    constructor(private readonly target: GMEventListener) {}
 
     on(eventNames: string | string[], priority = 0, once = -1): this {
         const list = typeof eventNames === 'string' ? [eventNames] : eventNames;
@@ -54,7 +54,7 @@ export class FFEventHost {
         return this;
     }
 
-    emit(event: FFEvent | string, data?: any): this {
+    emit(event: GMEvent | string, data?: any): this {
         em().emit(event, data);
         return this;
     }

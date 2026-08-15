@@ -2,26 +2,26 @@ import {
     BlockInputEvents, Camera, Canvas, Color, director, instantiate, Label, Layers, Node,
     Prefab, SceneAsset, UIOpacity, UITransform, Widget, view,
 } from 'cc';
-import type { FFAsyncComplete, FFAsyncProgress } from '../resource/FFAsyncCallback';
-import type { IFFResource } from '../resource/IFFResource';
-import { FFLayer } from './FFLayer';
-import { FFOverlayHost } from './FFOverlayHost';
-import { FFScene } from './FFScene';
+import type { GMAsyncComplete, GMAsyncProgress } from '../resource/GMAsyncCallback';
+import type { IGMResource } from '../resource/IGMResource';
+import { GMLayer } from './GMLayer';
+import { GMOverlayHost } from './GMOverlayHost';
+import { GMScene } from './GMScene';
 
 const OVERLAY_LAYER = 1 << 19; // 独立层，避免被场景 UI 相机画两次
 const LOADING_DELAY = 1.5; // 秒；之后才出转圈
 const LOADING_TIMEOUT = 20; // 秒；到期自动 hide
 const ENTER_LEAVE_FALLBACK = 5; // 秒；子类忘调 done 时兜底
 
-export interface FFOpenSceneOptions {
+export interface GMOpenSceneOptions {
     bundle: string; // 必填：加载来源 = unbind 占用者
 }
 
-export interface FFShowLayerOptions {
+export interface GMShowLayerOptions {
     bundle: string; // 必填：加载来源 = unbind 占用者
 }
 
-export interface FFLoadingShowOptions {
+export interface GMLoadingShowOptions {
     delay?: number; // 默认 1.5；Infinity = 一直透明
     timeout?: number; // 默认 20；到期自动 hide 该 key
 }
@@ -33,9 +33,9 @@ interface LayerItem {
 }
 
 /** 视图门面：真场景切换、layer 栈、loading 令牌；persist Overlay */
-export class FFUIManager {
+export class GMUIManager {
     private overlay: Node | null = null;
-    private host: FFOverlayHost | null = null;
+    private host: GMOverlayHost | null = null;
     private layersRoot: Node | null = null;
     private loadingRoot: Node | null = null;
     private loadingVisual: Node | null = null;
@@ -46,7 +46,7 @@ export class FFUIManager {
     private readonly preparingLayers = new Set<string>();
     private openingScene = false;
 
-    constructor(private readonly resource: IFFResource) {}
+    constructor(private readonly resource: IGMResource) {}
 
     /** 当前场景或 layer 仍占用这些 Bundle 时，返回中文原因（空数组 = 可 unbind） */
     getUnbindBlockers(bundleNames: string[]): string[] {
@@ -67,9 +67,9 @@ export class FFUIManager {
     ensureOverlay(): void {
         if (this.overlay?.isValid) return;
         const scene = director.getScene();
-        if (!scene) return console.error('[ff.ui] 无当前场景，无法创建 Overlay');
+        if (!scene) return console.error('[gm.ui] 无当前场景，无法创建 Overlay');
 
-        const root = new Node('FFOverlay');
+        const root = new Node('GMOverlay');
         this.setLayer(root);
         const size = view.getVisibleSize();
         root.addComponent(UITransform).setContentSize(size.width, size.height);
@@ -111,22 +111,22 @@ export class FFUIManager {
         label.horizontalAlign = Label.HorizontalAlign.CENTER;
         label.verticalAlign = Label.VerticalAlign.CENTER;
 
-        this.host = root.addComponent(FFOverlayHost);
+        this.host = root.addComponent(GMOverlayHost);
         scene.addChild(root);
         director.addPersistRootNode(root);
         this.overlay = root;
-        console.info('[ff.ui] Overlay 已创建');
+        console.info('[gm.ui] Overlay 已创建');
     }
 
-    openScene(sceneName: string, options: FFOpenSceneOptions, onComplete?: FFAsyncComplete, onProgress?: FFAsyncProgress): void {
-        if (!sceneName) return this.fail(onComplete, '[ff.ui] openScene 场景名为空');
-        if (!options?.bundle) return this.fail(onComplete, '[ff.ui] openScene 必须带 bundle');
-        if (this.openingScene) return this.fail(onComplete, '[ff.ui] 正在切场景，忽略 ' + sceneName);
+    openScene(sceneName: string, options: GMOpenSceneOptions, onComplete?: GMAsyncComplete, onProgress?: GMAsyncProgress): void {
+        if (!sceneName) return this.fail(onComplete, '[gm.ui] openScene 场景名为空');
+        if (!options?.bundle) return this.fail(onComplete, '[gm.ui] openScene 必须带 bundle');
+        if (this.openingScene) return this.fail(onComplete, '[gm.ui] 正在切场景，忽略 ' + sceneName);
         this.ensureOverlay();
-        if (!this.overlay) return this.fail(onComplete, '[ff.ui] Overlay 未就绪');
+        if (!this.overlay) return this.fail(onComplete, '[gm.ui] Overlay 未就绪');
 
         if (this.running?.name === sceneName && this.running.bundle === options.bundle) {
-            console.info('[ff.ui] 已是当前场景', sceneName);
+            console.info('[gm.ui] 已是当前场景', sceneName);
             onComplete?.(null);
             return;
         }
@@ -166,18 +166,18 @@ export class FFUIManager {
         });
     }
 
-    showLayer(layerName: string, options: FFShowLayerOptions, onComplete?: FFAsyncComplete): void {
-        if (!layerName) return this.fail(onComplete, '[ff.ui] showLayer 名为空');
-        if (!options?.bundle) return this.fail(onComplete, '[ff.ui] showLayer 必须带 bundle');
+    showLayer(layerName: string, options: GMShowLayerOptions, onComplete?: GMAsyncComplete): void {
+        if (!layerName) return this.fail(onComplete, '[gm.ui] showLayer 名为空');
+        if (!options?.bundle) return this.fail(onComplete, '[gm.ui] showLayer 必须带 bundle');
         this.ensureOverlay();
-        if (!this.layersRoot) return this.fail(onComplete, '[ff.ui] Overlay 未就绪');
+        if (!this.layersRoot) return this.fail(onComplete, '[gm.ui] Overlay 未就绪');
 
         const old = this.findLayer(layerName);
         if (old) {
-            console.warn('[ff.ui] layer 已存在，拆旧开新', layerName);
+            console.warn('[gm.ui] layer 已存在，拆旧开新', layerName);
             this.destroyLayer(old, true);
         }
-        if (this.preparingLayers.has(layerName)) return this.fail(onComplete, `[ff.ui] layer 正在打开: ${layerName}`);
+        if (this.preparingLayers.has(layerName)) return this.fail(onComplete, `[gm.ui] layer 正在打开: ${layerName}`);
 
         const bundleName = options.bundle;
         const loadingKey = `layer:${bundleName}:${layerName}`;
@@ -190,7 +190,7 @@ export class FFUIManager {
                 this.preparingLayers.delete(layerName);
                 this.pendingBundles.delete(bundleName);
                 this.loadingHide(loadingKey);
-                return this.fail(onComplete, err?.message ?? `[ff.ui] 加载 layer 失败: ${layerName}`);
+                return this.fail(onComplete, err?.message ?? `[gm.ui] 加载 layer 失败: ${layerName}`);
             }
             const node = instantiate(prefab);
             node.parent = this.layersRoot;
@@ -199,7 +199,7 @@ export class FFUIManager {
             this.layers.push(item);
             this.preparingLayers.delete(layerName);
 
-            this.runHook(node.getComponent(FFLayer), 'onEnter', () => {
+            this.runHook(node.getComponent(GMLayer), 'onEnter', () => {
                 this.pendingBundles.delete(bundleName);
                 this.loadingHide(loadingKey);
                 onComplete?.(null);
@@ -207,14 +207,14 @@ export class FFUIManager {
         });
     }
 
-    closeLayer(layerName: string, onComplete?: FFAsyncComplete): void {
+    closeLayer(layerName: string, onComplete?: GMAsyncComplete): void {
         const item = this.findLayer(layerName);
         if (!item) {
-            console.info('[ff.ui] closeLayer 未找到', layerName);
+            console.info('[gm.ui] closeLayer 未找到', layerName);
             onComplete?.(null);
             return;
         }
-        this.runHook(item.node.getComponent(FFLayer), 'onLeave', () => {
+        this.runHook(item.node.getComponent(GMLayer), 'onLeave', () => {
             this.destroyLayer(item, true);
             onComplete?.(null);
         });
@@ -227,12 +227,12 @@ export class FFUIManager {
         }
     }
 
-    loadingShow(actionName: string, params: FFLoadingShowOptions = {}): void {
-        if (typeof actionName !== 'string' || !actionName) return console.error('[ff.ui] loadingShow 名不合法', actionName);
+    loadingShow(actionName: string, params: GMLoadingShowOptions = {}): void {
+        if (typeof actionName !== 'string' || !actionName) return console.error('[gm.ui] loadingShow 名不合法', actionName);
         this.ensureOverlay();
         if (!this.host || !this.loadingRoot || !this.loadingVisual) return;
         if (this.loadingNames.indexOf(actionName) !== -1) {
-            return console.error('[ff.ui] loading 同名', actionName, this.loadingNames);
+            return console.error('[gm.ui] loading 同名', actionName, this.loadingNames);
         }
 
         const delay = params.delay === undefined ? LOADING_DELAY : params.delay;
@@ -248,7 +248,7 @@ export class FFUIManager {
             });
         }
         this.host.scheduleNamed(actionName + ':hide', timeout, () => {
-            console.warn('[ff.ui] loading 超时自动 hide', actionName, timeout);
+            console.warn('[gm.ui] loading 超时自动 hide', actionName, timeout);
             this.loadingHide(actionName);
         });
     }
@@ -265,14 +265,14 @@ export class FFUIManager {
         }
     }
 
-    private runBundleScene(bundleName: string, sceneName: string, onProgress: FFAsyncProgress | undefined, finish: (err: Error | null) => void): void {
+    private runBundleScene(bundleName: string, sceneName: string, onProgress: GMAsyncProgress | undefined, finish: (err: Error | null) => void): void {
         const bundle = this.resource.getBundle(bundleName);
-        if (!bundle) return finish(new Error(`[ff.ui] Bundle 未加载: ${bundleName}`));
+        if (!bundle) return finish(new Error(`[gm.ui] Bundle 未加载: ${bundleName}`));
         const done = (err: Error | null, sceneAsset?: SceneAsset): void => {
-            if (err || !sceneAsset) return finish(err ?? new Error(`[ff.ui] loadScene 失败: ${bundleName}/${sceneName}`));
+            if (err || !sceneAsset) return finish(err ?? new Error(`[gm.ui] loadScene 失败: ${bundleName}/${sceneName}`));
             director.runScene(sceneAsset, () => {}, () => {
                 this.running = { name: sceneName, bundle: bundleName };
-                const script = director.getScene()?.getComponentInChildren(FFScene);
+                const script = director.getScene()?.getComponentInChildren(GMScene);
                 this.runHook(script, 'onEnter', () => finish(null));
             });
         };
@@ -280,20 +280,20 @@ export class FFUIManager {
         else bundle.loadScene(sceneName, done);
     }
 
-    private preloadBundleScene(bundleName: string, sceneName: string, onProgress: FFAsyncProgress | undefined, onComplete: FFAsyncComplete): void {
+    private preloadBundleScene(bundleName: string, sceneName: string, onProgress: GMAsyncProgress | undefined, onComplete: GMAsyncComplete): void {
         const bundle = this.resource.getBundle(bundleName);
-        if (!bundle) return onComplete(new Error(`[ff.ui] Bundle 未加载: ${bundleName}`));
+        if (!bundle) return onComplete(new Error(`[gm.ui] Bundle 未加载: ${bundleName}`));
         const done = (err: Error | null): void => onComplete(err);
         if (onProgress) bundle.preloadScene(sceneName, onProgress, done);
         else bundle.preloadScene(sceneName, done);
     }
 
     private runSceneLeave(done: () => void): void {
-        const script = director.getScene()?.getComponentInChildren(FFScene);
+        const script = director.getScene()?.getComponentInChildren(GMScene);
         this.runHook(script, 'onLeave', done);
     }
 
-    private runHook(script: FFLayer | FFScene | null | undefined, hook: 'onEnter' | 'onLeave', done: () => void): void {
+    private runHook(script: GMLayer | GMScene | null | undefined, hook: 'onEnter' | 'onLeave', done: () => void): void {
         let called = false;
         const once = (): void => {
             if (called) return;
@@ -303,7 +303,7 @@ export class FFUIManager {
         };
         if (!script) return once();
         this.host?.scheduleNamed('hook:' + hook, ENTER_LEAVE_FALLBACK, () => {
-            console.warn('[ff.ui] ' + hook + ' 未调用 done，已兜底');
+            console.warn('[gm.ui] ' + hook + ' 未调用 done，已兜底');
             once();
         });
         script[hook](once);
@@ -346,7 +346,7 @@ export class FFUIManager {
         if (op) op.opacity = opacity;
     }
 
-    private fail(onComplete: FFAsyncComplete | undefined, message: string): void {
+    private fail(onComplete: GMAsyncComplete | undefined, message: string): void {
         console.error(message);
         onComplete?.(new Error(message));
     }

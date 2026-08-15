@@ -1,12 +1,12 @@
-import type { IFFBundleEntry } from './FFBundleEntryBase';
+import type { IGMBundleEntry } from './GMBundleEntryBase';
 
 /** Bundle 标准入口注册表；由 Bundle 脚本 load 时自登记 */
-export class FFBundleRegistry {
-    private readonly entries = new Map<string, IFFBundleEntry>();
+export class GMBundleRegistry {
+    private readonly entries = new Map<string, IGMBundleEntry>();
 
-    register(name: string, entry: IFFBundleEntry): void {
+    register(name: string, entry: IGMBundleEntry): void {
         if (this.entries.has(name)) {
-            throw new Error(`[FFBundleRegistry] 重复登记: ${name}`);
+            throw new Error(`[GMBundleRegistry] 重复登记: ${name}`);
         }
         this.entries.set(name, entry);
     }
@@ -15,7 +15,7 @@ export class FFBundleRegistry {
         this.entries.delete(name);
     }
 
-    get(name: string): IFFBundleEntry | undefined {
+    get(name: string): IGMBundleEntry | undefined {
         return this.entries.get(name);
     }
 

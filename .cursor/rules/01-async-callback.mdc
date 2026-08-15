@@ -27,7 +27,7 @@ onComplete(data, err)
 - 不需要进度时只传 `onComplete`。
 - `onProgress` **不是**完成回调，不走 error-first；约定为 `(finished, total, ...)`（具体语义由 API 注明）。
 - 对接 Cocos 等引擎时，在实现层映射字段名（如 `onFileProgress`），对外保持 `onProgress`。
-- 共用类型：`assets/fframe/resource/FFAsyncCallback.ts`（`FFAsyncComplete` / `FFAsyncProgress`）；后续资源加载等沿用。
+- 共用类型：`assets/gmajor/resource/GMAsyncCallback.ts`（`GMAsyncComplete` / `GMAsyncProgress`）；后续资源加载等沿用。
 
 ## 适用范围
 

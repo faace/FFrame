@@ -1,10 +1,10 @@
 import { assetManager, AssetManager } from 'cc';
 import type { Asset } from 'cc';
-import type { FFAsyncComplete, FFAsyncCompleteWith, FFAsyncProgress } from './FFAsyncCallback';
-import type { IFFResource } from './IFFResource';
+import type { GMAsyncComplete, GMAsyncCompleteWith, GMAsyncProgress } from './GMAsyncCallback';
+import type { IGMResource } from './IGMResource';
 
 /** 基于 assetManager 的 Bundle 加载/释放 */
-export class FFCocosResource implements IFFResource {
+export class GMCocosResource implements IGMResource {
     private readonly cache = new Map<string, AssetManager.Bundle>();
 
     hasBundle(name: string): boolean {
@@ -15,7 +15,7 @@ export class FFCocosResource implements IFFResource {
         return assetManager.getBundle(name) ?? this.cache.get(name) ?? null;
     }
 
-    loadBundle(name: string, onComplete: FFAsyncComplete, onProgress?: FFAsyncProgress): void {
+    loadBundle(name: string, onComplete: GMAsyncComplete, onProgress?: GMAsyncProgress): void {
         const existing = assetManager.getBundle(name);
         if (existing) {
             this.cache.set(name, existing);
@@ -23,11 +23,11 @@ export class FFCocosResource implements IFFResource {
             return;
         }
 
-        console.info('[fframe] loadBundle', name);
+        console.info('[gmajor] loadBundle', name);
         // 对外 onProgress；对接引擎时映射为 onFileProgress
         assetManager.loadBundle(name, { onFileProgress: onProgress } as never, (err, bundle) => {
             if (err || !bundle) {
-                onComplete(err ?? new Error(`[FFCocosResource] loadBundle 失败: ${name}`));
+                onComplete(err ?? new Error(`[GMCocosResource] loadBundle 失败: ${name}`));
                 return;
             }
             this.cache.set(name, bundle);
@@ -35,11 +35,11 @@ export class FFCocosResource implements IFFResource {
         });
     }
 
-    load<T extends Asset>(bundleName: string, path: string, type: new (...args: any[]) => T, onComplete: FFAsyncCompleteWith<T>, onProgress?: FFAsyncProgress): void {
+    load<T extends Asset>(bundleName: string, path: string, type: new (...args: any[]) => T, onComplete: GMAsyncCompleteWith<T>, onProgress?: GMAsyncProgress): void {
         const bundle = this.getBundle(bundleName);
-        if (!bundle) return onComplete(new Error(`[FFCocosResource] Bundle 未加载: ${bundleName}`));
+        if (!bundle) return onComplete(new Error(`[GMCocosResource] Bundle 未加载: ${bundleName}`));
         const done = (err: Error | null, asset?: T) => {
-            if (err || !asset) return onComplete(err ?? new Error(`[FFCocosResource] load 失败: ${bundleName}/${path}`));
+            if (err || !asset) return onComplete(err ?? new Error(`[GMCocosResource] load 失败: ${bundleName}/${path}`));
             onComplete(null, asset);
         };
         if (onProgress) bundle.load(path, type, onProgress, done);
@@ -49,7 +49,7 @@ export class FFCocosResource implements IFFResource {
     async releaseBundle(name: string): Promise<void> {
         const bundle = assetManager.getBundle(name) ?? this.cache.get(name);
         if (!bundle) return;
-        console.info('[fframe] releaseBundle', name);
+        console.info('[gmajor] releaseBundle', name);
         assetManager.removeBundle(bundle);
         this.cache.delete(name);
     }

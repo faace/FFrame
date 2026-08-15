@@ -50,14 +50,14 @@ if (err) {
 
 ```ts
 // ✅
-on(eventNames: string | string[], listener: FFEventListener, priority = 0, once = -1): this {}
-const ctx = new FFBindContext(name, this.events, this.resource, this, parentPath);
+on(eventNames: string | string[], listener: GMEventListener, priority = 0, once = -1): this {}
+const ctx = new GMBindContext(name, this.events, this.resource, this, parentPath);
 this.resource.loadBundle(name, (err) => { /* ... */ }, onProgress);
 
 // ❌ 无必要拆行（签名 / 简单实参）
 on(
     eventNames: string | string[],
-    listener: FFEventListener,
+    listener: GMEventListener,
     priority = 0,
     once = -1,
 ): this {}
@@ -65,12 +65,12 @@ on(
 
 ```ts
 // ✅ enum / 接口成员：同一行 //
-export enum FFBindState {
+export enum GMBindState {
     Uncreated = 'uncreated', // 尚未 onInit
     Ready = 'ready',         // 进场完成，可使用
 }
 
-interface IFFLifecycle {
+interface IGMLifecycle {
     onInit?(): void; // [→Created] 首次准备
 }
 
@@ -87,7 +87,7 @@ Uncreated = 'uncreated',
 
 ## 模块一览（代码内）
 
-- 有多文件的包（如 `assets/fframe/`）：以 **`index.ts` 为唯一文件职责总表**。
+- 有多文件的包（如 `assets/gmajor/`）：以 **`index.ts` 为唯一文件职责总表**。
 - 每个 `export` 旁行尾 `//` 一句话职责；文件顶用极短说明「先看本文件」。
 - **不要**再维护一份平行的 README/markdown 文件表（易漂移）；`docs/架构/` 只写启动/生命周期等概念，并指向对应 `index.ts`。
 
