@@ -4,6 +4,7 @@ import { GMBindState } from './GMBindState';
 import type { GMBundleRegistry } from './GMBundleRegistry';
 import type { GMEventManager } from '../event/GMEventManager';
 import type { IGMResource } from '../resource/IGMResource';
+import type { GMStoreHub } from '../data/GMStoreHub';
 import type { GMUIManager } from '../ui/GMUIManager';
 
 export interface GMBindOptions {
@@ -24,11 +25,16 @@ export class GMBinder {
     private readonly nodes = new Map<string, BindNode>();
     private readonly roots = new Set<string>();
     private ui: GMUIManager | null = null;
+    private store: GMStoreHub | null = null;
 
     constructor(private readonly registry: GMBundleRegistry, private readonly resource: IGMResource, private readonly events: GMEventManager) {}
 
     attachUI(ui: GMUIManager): void {
         this.ui = ui;
+    }
+
+    attachStore(store: GMStoreHub): void {
+        this.store = store;
     }
 
     /** 当前绑定树（父 → 子名列表） */
@@ -101,6 +107,7 @@ export class GMBinder {
             }
 
             const ctx = new GMBindContext(name, this.events, this.resource, this, parentPath, this.ui);
+            this.store?.onBind(name); // 建 gd.<包> + gl.<包> 空树
 
             console.info('[GMBinder] bind →', ctx.bindPath.join(' / '));
             await entry.bind(ctx);
@@ -143,6 +150,7 @@ export class GMBinder {
         if (entry) {
             await entry.unbind(ctx);
         }
+        this.store?.onUnbind(name); // 卸本包 gd/gl（假服数据保留）
 
         if (node.parent) {
             const parent = this.nodes.get(node.parent);

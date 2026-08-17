@@ -1,4 +1,4 @@
-import { GMBindContext, GMBundleEntryBase, gm, registerBundleEntry } from '../../../gmajor';
+import { GMBindContext, GMBundleEntryBase, gd, gl, gm, registerBundleEntry } from '../../../gmajor';
 
 /** 示范功能：嵌套绑定 DemoChild，再切真场景并开一个 layer */
 class DemoHomeEntry extends GMBundleEntryBase {
@@ -12,6 +12,7 @@ class DemoHomeEntry extends GMBundleEntryBase {
 
     async onBind(ctx: GMBindContext): Promise<void> {
         console.log('[DemoHome] onBind', ctx.bindPath.join('/'));
+        this.demoData();
         this.on('BindReady');
         await ctx.bindChild('DemoChild');
         ctx.openScene('ScDemoHome', (err) => {
@@ -21,6 +22,19 @@ class DemoHomeEntry extends GMBundleEntryBase {
                 console.info('[DemoHome] 场景与弹窗已打开');
                 this.demoOccupyAndClose(ctx);
             });
+        });
+    }
+
+    /** 第一刀：本地立刻落盘；server 只许 sync/apply */
+    private demoData(): void {
+        const home = gl.DemoHome;
+        if (!home) return console.error('[DemoHome] gl.DemoHome 未建树');
+        gl.setting.volume = 0.8;
+        home.lastTab = 'play';
+        console.info('[DemoHome] gl.setting.volume', gl.setting.volume, 'gl.DemoHome.lastTab', home.lastTab);
+        gd.sync('user', (err) => {
+            if (err) return console.error('[DemoHome] gd.sync user 失败', err);
+            console.info('[DemoHome] gd.user.gold', gd.user.gold);
         });
     }
 

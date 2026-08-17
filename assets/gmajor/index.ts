@@ -1,6 +1,6 @@
 /**
  * GMajor 核心出口 = 模块一览（先看本文件再下钻）。
- * 目录：launch/ event/ resource/ bind/ ui/；用法表：docs/架构/核心简介.md
+ * 目录：launch/ event/ resource/ bind/ ui/ data/；用法表：docs/架构/核心简介.md
  */
 
 // —— event/ ——
@@ -30,6 +30,12 @@ export { GMScene } from './ui/GMScene'; // 场景基类；Sc* 继承（→Layer�
 export { GMUIManager } from './ui/GMUIManager'; // 视图门面：openScene / showLayer / loading
 export type { GMOpenSceneOptions, GMShowLayerOptions, GMLoadingShowOptions } from './ui/GMUIManager';
 
+// —— data/ ——
+export { GMKvStore } from './data/GMKvStore'; // LocalStore / web 假服信封读写
+export { GMRemoteAdapter } from './data/GMRemoteAdapter'; // 拉树；web 用 localStorage 当假服
+export { GMStoreHub } from './data/GMStoreHub'; // gd / gl 枢纽：建拆树、apply / sync
+export type { GMDataRoot, GMLocalRoot } from './data/GMStoreHub';
+
 // —— launch/ ——
-export { gm, registerBundleEntry } from './launch/GMLauncher'; // gm 全局单例（含 gm.ui）；Bundle 入口自登记
+export { gm, gd, gl, registerBundleEntry } from './launch/GMLauncher'; // gm 全局单例；gd===gm.data；gl===gm.local
 export type { GMCore } from './launch/GMLauncher';
