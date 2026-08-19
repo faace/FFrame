@@ -1,0 +1,4 @@
+interface:
+  display_name: "VberAI 图片分层"
+  short_description: "分析图片素材并在 VberAI 中自动框选、排序与导出"
+  default_prompt: "使用 $vber-ai-layer-split 将项目图片或本地图片按我的素材需求完成分层，并在提交前让我确认。"

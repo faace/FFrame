@@ -26,8 +26,6 @@ export class GMStoreHub {
     constructor() {
         this.gd = this.makeDataRoot();
         this.gl = this.makeLocalRoot();
-        this.ensureTree(this.dataTrees, 'user', false, false);
-        this.ensureTree(this.localTrees, 'setting', true, true);
     }
 
     onBind(name: string): void {
@@ -36,7 +34,6 @@ export class GMStoreHub {
     }
 
     onUnbind(name: string): void {
-        if (name === 'user' || name === 'setting') return; // 核心预置不随 Bundle 卸
         this.dropTree(this.dataTrees, name, false);
         this.dropTree(this.localTrees, name, true);
     }
@@ -142,11 +139,9 @@ export class GMStoreHub {
 export type GMDataRoot = {
     apply(name: string, patch: Record<string, unknown>): void;
     sync(name: string, onComplete: GMAsyncComplete): void;
-    user: Record<string, unknown>;
     [name: string]: unknown;
 };
 
 export type GMLocalRoot = {
-    setting: Record<string, unknown>;
     [name: string]: Record<string, unknown> | undefined;
 };

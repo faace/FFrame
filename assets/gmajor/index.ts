@@ -37,5 +37,6 @@ export { GMStoreHub } from './data/GMStoreHub'; // gd / gl 枢纽：建拆树、
 export type { GMDataRoot, GMLocalRoot } from './data/GMStoreHub';
 
 // —— launch/ ——
+export { config } from './config'; // 框架配置（版本）；跟 gmajor/ 走
 export { gm, gd, gl, registerBundleEntry } from './launch/GMLauncher'; // gm 全局单例；gd===gm.data；gl===gm.local
 export type { GMCore } from './launch/GMLauncher';

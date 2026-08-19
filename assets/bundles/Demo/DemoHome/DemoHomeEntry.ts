@@ -28,14 +28,14 @@ class DemoHomeEntry extends GMBundleEntryBase {
     /** 第一刀：本地立刻落盘；server 只许 sync/apply */
     private demoData(): void {
         const home = gl.DemoHome;
+        const setting = gl.Setting;
         if (!home) return console.error('[DemoHome] gl.DemoHome 未建树');
-        gl.setting.volume = 0.8;
+        if (!setting) return console.error('[DemoHome] gl.Setting 未建树（基础包未开？）');
+        setting.bgmVolume = 0.8;
         home.lastTab = 'play';
-        console.info('[DemoHome] gl.setting.volume', gl.setting.volume, 'gl.DemoHome.lastTab', home.lastTab);
-        gd.sync('user', (err) => {
-            if (err) return console.error('[DemoHome] gd.sync user 失败', err);
-            console.info('[DemoHome] gd.user.gold', gd.user.gold);
-        });
+        console.info('[DemoHome] gl.Setting.bgmVolume', setting.bgmVolume, 'gl.DemoHome.lastTab', home.lastTab);
+        const user = gd.User as Record<string, unknown> | undefined;
+        console.info('[DemoHome] gd.User.gold', user?.gold);
     }
 
     /** 故意 unbind（应拒绝）→ closeLayer → 再 unbind（场景仍占，仍拒绝） */

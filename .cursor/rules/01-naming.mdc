@@ -14,6 +14,7 @@ alwaysApply: false
 ```text
 ✅ assets/bundles/DemoHome/
 ✅ assets/bundles/Demo/DemoHome/     # Demo 仅为分组（如测试组），不配 Bundle
+✅ assets/bundles/Base/User/         # Base 为基础包分组，不配 Bundle
 ✅ assets/bundles/Core/SomeFeature/  # Core 同理，仅为分组
 ✅ loadBundle('DemoHome') / bind('DemoHome')   # 绑定名 = 叶子目录名
 
@@ -44,7 +45,7 @@ alwaysApply: false
 | 种类 | 风格 | 示例 |
 |------|------|------|
 | 系统/脚手架目录 | **小写**（对齐 Cocos `resources`） | `gmajor/`、`main/`、`bundles/` |
-| 分组目录 | **大驼峰** | `Demo/`、`Core/` |
+| 分组目录 | **大驼峰** | `Demo/`、`Base/`、`Core/` |
 | 功能叶子 / Bundle / 绑定名 | **大驼峰** | `DemoHome/` |
 
 - 核心：`assets/gmajor/`（固定）

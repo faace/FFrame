@@ -1,5 +1,6 @@
 import { _decorator } from 'cc';
 import { GMScene, gm } from '../gmajor';
+import { config } from './config';
 
 const { ccclass } = _decorator;
 
@@ -15,8 +16,16 @@ export class ScMain extends GMScene {
         console.info('[ScMain] 事件 BindReady', e.data);
     }
 
-    /** load/bind Demo；切场景由 DemoHome.onBind 调 gm.ui */
+    /** 先按项目 boot 打开基础包，再开 Demo */
     private boot(): void {
+        console.info('[ScMain] 版本', 'gmajor', gm.config.version, 'app', config.version.app);
+        gm.binder.bindInOrder(config.boot, (err) => {
+            if (err) return console.error('[ScMain] 基础包失败', err);
+            this.bindDemo();
+        });
+    }
+
+    private bindDemo(): void {
         gm.binder.loadBundle('DemoChild', (err) => {
             if (err) return console.error('[ScMain] load DemoChild 失败', err);
             gm.binder.loadBundle('DemoHome', (err2) => {

@@ -5,6 +5,7 @@ import { GMCocosResource } from '../resource/GMCocosResource';
 import { bindGMEvents } from '../event/GMEventHost';
 import { GMEventManager } from '../event/GMEventManager';
 import type { IGMResource } from '../resource/IGMResource';
+import { config } from '../config';
 import { GMStoreHub, type GMDataRoot, type GMLocalRoot } from '../data/GMStoreHub';
 import { GMUIManager } from '../ui/GMUIManager';
 
@@ -17,6 +18,7 @@ export interface GMCore {
     readonly ui: GMUIManager;
     readonly data: GMDataRoot; // === gd
     readonly local: GMLocalRoot; // === gl
+    readonly config: typeof config; // 框架配置（版本等）
 }
 
 const events = new GMEventManager();
@@ -34,7 +36,7 @@ export const gd = store.gd; // === gm.data；全是 server
 export const gl = store.gl; // === gm.local；全是本地
 
 /** GMajor 全局单例 */
-export const gm: GMCore = { events, resource, registry, binder, ui, data: gd, local: gl };
+export const gm: GMCore = { events, resource, registry, binder, ui, data: gd, local: gl, config };
 
 declare global {
     interface Window {
@@ -54,4 +56,4 @@ export function registerBundleEntry(name: string, entry: IGMBundleEntry): void {
     gm.registry.register(name, entry);
 }
 
-console.info('[gmajor] 核心已就绪');
+console.info('[gmajor] 核心已就绪', config.version);
