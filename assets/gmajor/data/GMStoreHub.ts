@@ -4,6 +4,13 @@ import { GMRemoteAdapter } from './GMRemoteAdapter';
 
 const SCHEMA = 1; // 第一刀各树默认 version
 
+export type GMWatchCb = (newVal: unknown, oldVal: unknown) => void; // 当场调；新旧 === 不喊
+
+export type GMWatchRoot = {
+    watch(name: string, key: string, cb: GMWatchCb): void;
+    unwatch(name: string, key: string, cb: GMWatchCb): void;
+};
+
 interface TreeRec {
     name: string;
     schema: number;
@@ -13,13 +20,17 @@ interface TreeRec {
     proxy: Record<string, unknown>;
 }
 
-/** 数据枢纽：gd / gl 两根 + bind 建树 / unbind 拆树 */
+type WatchMap = Map<string, Map<string, Set<GMWatchCb>>>; // 树名 → 字段 → 回调
+
+/** 数据枢纽：gd / gl 两根 + bind 建树 / unbind 拆树 + 字段 watch */
 export class GMStoreHub {
     readonly gd: GMDataRoot;
     readonly gl: GMLocalRoot;
 
     private readonly dataTrees = new Map<string, TreeRec>();
     private readonly localTrees = new Map<string, TreeRec>();
+    private readonly dataWatch: WatchMap = new Map();
+    private readonly localWatch: WatchMap = new Map();
     private readonly localKv = new GMKvStore('gm.gl');
     private readonly remote = new GMRemoteAdapter(new GMKvStore('gm.remote'));
 
@@ -34,6 +45,8 @@ export class GMStoreHub {
     }
 
     onUnbind(name: string): void {
+        this.clearWatch(this.dataWatch, name);
+        this.clearWatch(this.localWatch, name);
         this.dropTree(this.dataTrees, name, false);
         this.dropTree(this.localTrees, name, true);
     }
@@ -41,7 +54,15 @@ export class GMStoreHub {
     apply(name: string, patch: Record<string, unknown>): void {
         const rec = this.dataTrees.get(name);
         if (!rec) return console.error('[gd] apply 无此树', name);
-        Object.assign(rec.data, patch);
+        const fires: { key: string; neu: unknown; old: unknown }[] = [];
+        for (const key of Object.keys(patch)) {
+            const old = rec.data[key];
+            const neu = patch[key];
+            if (old === neu) continue;
+            rec.data[key] = neu;
+            fires.push({ key, neu, old });
+        }
+        for (const f of fires) this.fire(this.dataWatch, name, f.key, f.neu, f.old);
     }
 
     sync(name: string, onComplete: GMAsyncComplete): void {
@@ -58,6 +79,54 @@ export class GMStoreHub {
             this.apply(name, pack.data);
             onComplete(null);
         });
+    }
+
+    watchData(name: string, key: string, cb: GMWatchCb): void {
+        this.addWatch(this.dataTrees, this.dataWatch, name, key, cb);
+    }
+
+    unwatchData(name: string, key: string, cb: GMWatchCb): void {
+        this.removeWatch(this.dataWatch, name, key, cb);
+    }
+
+    watchLocal(name: string, key: string, cb: GMWatchCb): void {
+        this.addWatch(this.localTrees, this.localWatch, name, key, cb);
+    }
+
+    unwatchLocal(name: string, key: string, cb: GMWatchCb): void {
+        this.removeWatch(this.localWatch, name, key, cb);
+    }
+
+    private addWatch(trees: Map<string, TreeRec>, watches: WatchMap, name: string, key: string, cb: GMWatchCb): void {
+        if (!trees.has(name)) throw new Error(`[watch] 无此树: ${name}`);
+        let keys = watches.get(name);
+        if (!keys) {
+            keys = new Map();
+            watches.set(name, keys);
+        }
+        let set = keys.get(key);
+        if (!set) {
+            set = new Set();
+            keys.set(key, set);
+        }
+        set.add(cb);
+    }
+
+    private removeWatch(watches: WatchMap, name: string, key: string, cb: GMWatchCb): void {
+        const set = watches.get(name)?.get(key);
+        if (!set) return;
+        set.delete(cb);
+        if (!set.size) watches.get(name)!.delete(key);
+    }
+
+    private clearWatch(watches: WatchMap, name: string): void {
+        watches.delete(name);
+    }
+
+    private fire(watches: WatchMap, name: string, key: string, neu: unknown, old: unknown): void {
+        const set = watches.get(name)?.get(key);
+        if (!set || !set.size) return;
+        for (const cb of [...set]) cb(neu, old);
     }
 
     private ensureTree(map: Map<string, TreeRec>, name: string, writable: boolean, persist: boolean): TreeRec {
@@ -99,14 +168,19 @@ export class GMStoreHub {
 
     private makeTreeProxy(rec: TreeRec): Record<string, unknown> {
         const self = this;
+        const watches = rec.writable ? this.localWatch : this.dataWatch;
         return new Proxy(rec.data, {
             get(t, key) {
                 return t[key as string];
             },
             set(t, key, value) {
                 if (!rec.writable) throw new Error(`[gd] 不能直接写 ${rec.name}.${String(key)}，请用 apply/sync`);
-                t[key as string] = value;
+                const field = key as string;
+                const old = t[field];
+                if (old === value) return true;
+                t[field] = value;
                 self.persistLocal(rec);
+                self.fire(watches, rec.name, field, value, old);
                 return true;
             },
         });
@@ -117,6 +191,8 @@ export class GMStoreHub {
         const api = {
             apply: (name: string, patch: Record<string, unknown>) => self.apply(name, patch),
             sync: (name: string, onComplete: GMAsyncComplete) => self.sync(name, onComplete),
+            watch: (name: string, key: string, cb: GMWatchCb) => self.watchData(name, key, cb),
+            unwatch: (name: string, key: string, cb: GMWatchCb) => self.unwatchData(name, key, cb),
         };
         return new Proxy(api, {
             get(t, key) {
@@ -128,20 +204,25 @@ export class GMStoreHub {
 
     private makeLocalRoot(): GMLocalRoot {
         const self = this;
-        return new Proxy({} as GMLocalRoot, {
-            get(_, key) {
+        const api = {
+            watch: (name: string, key: string, cb: GMWatchCb) => self.watchLocal(name, key, cb),
+            unwatch: (name: string, key: string, cb: GMWatchCb) => self.unwatchLocal(name, key, cb),
+        };
+        return new Proxy(api, {
+            get(t, key) {
+                if (key in t) return t[key as keyof typeof t];
                 return self.localTrees.get(key as string)?.proxy;
             },
-        });
+        }) as GMLocalRoot;
     }
 }
 
-export type GMDataRoot = {
+export type GMDataRoot = GMWatchRoot & {
     apply(name: string, patch: Record<string, unknown>): void;
     sync(name: string, onComplete: GMAsyncComplete): void;
     [name: string]: unknown;
 };
 
-export type GMLocalRoot = {
-    [name: string]: Record<string, unknown> | undefined;
+export type GMLocalRoot = GMWatchRoot & {
+    [name: string]: unknown;
 };

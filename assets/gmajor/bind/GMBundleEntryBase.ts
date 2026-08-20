@@ -55,9 +55,12 @@ export abstract class GMBundleEntryBase extends GMClassBase implements IGMBundle
         try {
             await this.invoke('onDisable');
             await this.invoke('onUnbind', ctx);
+            this.disposeSpawned();
+            this.removeAllWatches();
             this.removeAllEvents();
             await this.invoke('onRemove');
         } finally {
+            this.removeAllWatches();
             this.removeAllEvents();
             this.setState(GMBindState.Destroyed);
         }

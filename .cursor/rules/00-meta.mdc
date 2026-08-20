@@ -10,10 +10,12 @@ alwaysApply: true
 | 场景 | 引用 |
 |------|------|
 | 编写/改写普通 TS（风格、注释、排版） | `01-typescript-style` |
-| 新建功能 / Bundle / 绑定名，或 Sc、Pf | `01-naming` |
+| 新建功能 / Bundle / 绑定名 / 基类，或 Sc、Pf、Ly | `01-naming` |
+| 数据变了刷新 UI、金币/字段变化、watch | `01-naming` |
+| 监听业务事件（on / off / emit） | `01-naming` |
 | 新写/改公共异步 API、完成回调、进度回调 | `01-async-callback` |
 | 写临时/工具脚本（`tools/`） | `01-nodejs-temp-scripts` |
-| 消息含 `#rule`、要沉淀/改规则 | 本文件（下方流程） |
+| 消息含 `#rule`、grilling 收尾要沉淀规范 | 本文件（下方流程） |
 
 前缀：`00-` Always 元规则；`01-` 通用工程约定；`02-` 功能域（暂无）。
 
@@ -25,7 +27,7 @@ alwaysApply: true
 |------|------|-------------|
 | `00-meta.mdc` | Always | 规则索引与 #rule 写入流程（Always） |
 | `01-async-callback.mdc` | Agent/按需 | 新写或改写公共异步 API / 完成回调 / onProgress 时引用：error-first；完成在前、进度可选 |
-| `01-naming.mdc` | globs: `assets/bundles/**,**/*.{scene,prefab}`；Agent/按需 | 新建/调整 Bundle、功能目录、绑定名，或新建/改 Sc 场景、Pf 预制体及其关联脚本时引用 |
+| `01-naming.mdc` | globs: `assets/bundles/**,assets/gmajor/**,**/*.{scene,prefab}`；Agent/按需 | Bundle/功能目录/绑定名、Sc/Ly/Pf、双基类、数据 watch、业务事件 on。新建或改 Bundle、场景、预制体、gmajor/bundles 脚本时引用。用户说数据变了刷新 UI、金币/字段变化、监听事件、新建功能包时也引用。 |
 | `01-nodejs-temp-scripts.mdc` | globs: `tools/**`；Agent/按需 | 编写临时/工具脚本，或把脚本放到 tools 时引用：优先 Node.js；临时脚本放 tools/temp |
 | `01-typescript-style.mdc` | Agent/按需 | 编写或改写 TypeScript 时：4 空格缩进、行尾注释优先、签名尽量单行、简单失败早退一行；维护 index.ts / docs/架构 时也引用 |
 
@@ -33,20 +35,24 @@ alwaysApply: true
 
 ## `#rule` 写入流程
 
-用户消息中出现 **`#rule`**，表示要把当前讨论点沉淀为 Cursor rule。
+用户消息中出现 **`#rule`**，或 **grilling 收尾确认要进 Rule**，表示要把当前讨论点沉淀为 Cursor rule。
+
+### grilling 收尾（必做）
+
+grilling 达成共识后，**必须问**要不要把可执行短条并进 Rule（默认并入现有 `01-*` / `02-*`）。用户说确认 / 可以加 / `#rule` 才写入。不要等用户自己想起「更新规则」。
 
 ### 必须流程
 
 1. **先整理**：收敛成简短、可执行的条文草案（拟写入哪个 `.mdc`）。
 2. **合并门禁（默认合并）**：能并进现有 `01-*` / `02-*` 就并；只有明确新主题（尤其新功能域）才允许新建文件。草案须写明「并入 xxx」或「新建 xxx 及理由」。
-3. **等人确认**：展示草案，等待明确确认（如「确认」「可以加」）。
+3. **等人确认**：展示草案，等待明确确认（如「确认」「可以加」）。grilling 收尾问过且用户确认的，视同本步完成。
 4. **再写入**：确认后才创建或修改 `.cursor/rules/` 下的文件。
 5. **同步索引**：写入后必须运行 `node tools/sync-cursor-rules-index.mjs`，更新上方自动清单；若场景表需增删，一并改本文件手写区。
 
 ### 禁止
 
 - **未确认不得写入**任何 rule。
-- 用户只是「提到规则 / 加到规则」但**没有 `#rule`** 时：可整理草案并询问，**默认不落盘**；仅当用户再次明确确认写入时才落盘。
+- 用户只是「提到规则 / 加到规则」但**没有 `#rule`**、也**未经 grilling 收尾确认**时：可整理草案并询问，**默认不落盘**。
 - 不要把未整理的聊天原文整段塞进 rule；要压缩成约定条目。
 - 不要把业务规则设为 `alwaysApply: true`（仅本 `00-meta` 为 Always）。
-- 不要给「凡编辑 TS 就引用」写过宽的 `description` / `globs: **/*.ts`（会抵消按需加载）。
+- 不要给「凡编辑 TS 就引用」写过宽的 `description` / `globs: **/*.ts`（会抵消按需加载）。`assets/bundles/**` 与 `assets/gmajor/**` 可以（写这些文件时需要规范）。

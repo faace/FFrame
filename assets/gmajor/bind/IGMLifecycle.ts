@@ -15,5 +15,5 @@ export interface IGMLifecycle {
     onEnable?(): void | Promise<void>; // [→Ready] 启用（预留）
     onDisable?(): void | Promise<void>; // [Unbinding] 停用（预留）
     onUnbind?(ctx: GMBindContext): void | Promise<void>; // [Unbinding] 解绑清理
-    onRemove?(): void; // [→Destroyed] 销毁；此时本入口监听已卸
+    onRemove?(): void; // [→Destroyed] 销毁；此时本入口事件与 watch 已卸
 }

@@ -1,6 +1,6 @@
 ---
-description: 新建/调整 Bundle、功能目录、绑定名，或新建/改 Sc 场景、Pf 预制体及其关联脚本时引用
-globs: assets/bundles/**,**/*.{scene,prefab}
+description: Bundle/功能目录/绑定名、Sc/Ly/Pf、双基类、数据 watch、业务事件 on。新建或改 Bundle、场景、预制体、gmajor/bundles 脚本时引用。用户说数据变了刷新 UI、金币/字段变化、监听事件、新建功能包时也引用。
+globs: assets/bundles/**,assets/gmajor/**,**/*.{scene,prefab}
 alwaysApply: false
 ---
 
@@ -78,6 +78,14 @@ ScMain          # 场景根
 - 文件名 / 类名：`Ly` + 大驼峰语义名（如 `LyHUD`）
 - 关联脚本与节点约定随具体 Layer 用途；基类见下
 
+## 双基类（写脚本必守）
+
+- 挂 Creator 组件的脚本：**必须**走 `GMComponent` 链（`Pf`/`Ly`/`Sc` 见下表）。禁止直接 `extends Component`。
+- 不挂组件的业务逻辑：**必须** `GMClassBase`；Bundle 入口 **必须** `GMBundleEntryBase`。
+- `config.ts` 是普通对象，不套基类。
+- 入口钩子：`onInit` / `onBind` / `onStart` / `onUnbind` / `onRemove`（逻辑侧由 Binder 调）。包内其它逻辑对象用入口 `spawn`，随包 `unbind` 拆；不要散 `new` 又不登记。
+- 用法细节见 `docs/架构/核心简介.md`。
+
 ## UI 脚本必须继承的框架基类
 
 继承链：`GMScene` → `GMLayer` → `GMComponent`（`Pf*` 旁支直接挂 `GMComponent`）。
@@ -100,8 +108,15 @@ export class ScMain extends GMComponent {}
 export class PfX extends GMScene {}
 ```
 
-- Bundle 逻辑入口仍用 `GMClassBase` / `GMBundleEntryBase`，不适用本条。
 - `GMLayer` / `GMScene` 可先与 `GMComponent` 同能，仅作类型分层；差异以后再加。
+
+## 数据与事件（写逻辑/UI 时）
+
+- 服务器树 `gd`：**只许** `apply` / `sync`，禁止 `gd.User.gold = 1`。
+- 本地树 `gl`：赋值即落盘。
+- 数据变了要刷新界面（含「金币变了改数字」这种说法）：用 `watch` / `this.watch(gd 或 gl, 树名, 字段, 回调)`，不要每帧扫、不要用事件冒充字段监听。
+- `watch` 只盯一层字段；`===` 没变不喊。对象/数组只有整份换才喊；里面改了请 `this.emit`。
+- 业务事件用 `this.on` / `off` / `emit`（基类已带；组件销毁、包 unbind 会自动摘）。数据用 `watch`，事件用 `on`，别混。
 
 ## 目录
 
@@ -114,6 +129,7 @@ export class PfX extends GMScene {}
 | 场景 | `Sc` | `ScMain.scene` | `ScMain.ts` / `ScMain` | `GMScene` |
 | Layer | `Ly` | — | `LyHUD.ts` / `LyHUD` | `GMLayer` |
 | 预制体 | `Pf` | `PfPlayer.prefab` | `PfPlayer.ts` / `PfPlayer` | `GMComponent` |
+| 逻辑入口 | — | — | `DemoHomeEntry.ts` | `GMBundleEntryBase` |
 
 ```text
 ✅ DemoHome/ScDemoHome.scene + DemoHome/ScDemoHome.ts（同目录；Canvas 下空节点；extends GMScene）

@@ -1,4 +1,15 @@
-import { GMBindContext, GMBundleEntryBase, gd, gl, gm, registerBundleEntry } from '../../../gmajor';
+import { GMBindContext, GMBundleEntryBase, GMClassBase, gd, gl, gm, registerBundleEntry } from '../../../gmajor';
+
+/** 示范 spawn：包拆时走 onRemove */
+class DemoHomeWatchProbe extends GMClassBase {
+    constructor() {
+        super('DemoHome');
+    }
+
+    onRemove(): void {
+        console.log('[DemoHomeWatchProbe] onRemove');
+    }
+}
 
 /** 示范功能：嵌套绑定 DemoChild，再切真场景并开一个 layer */
 class DemoHomeEntry extends GMBundleEntryBase {
@@ -25,13 +36,16 @@ class DemoHomeEntry extends GMBundleEntryBase {
         });
     }
 
-    /** 第一刀：本地立刻落盘；server 只许 sync/apply */
+    /** 本地立刻落盘；watch 当场喊；server 只许 sync/apply */
     private demoData(): void {
         const home = gl.DemoHome;
         const setting = gl.Setting;
         if (!home) return console.error('[DemoHome] gl.DemoHome 未建树');
         if (!setting) return console.error('[DemoHome] gl.Setting 未建树（基础包未开？）');
-        setting.bgmVolume = 0.8;
+        this.spawn(new DemoHomeWatchProbe());
+        this.watch(gl, 'Setting', 'bgmVolume', (n, o) => console.info('[DemoHome] watch bgmVolume', o, '→', n));
+        const next = setting.bgmVolume === 0.8 ? 0.7 : 0.8;
+        setting.bgmVolume = next;
         home.lastTab = 'play';
         console.info('[DemoHome] gl.Setting.bgmVolume', setting.bgmVolume, 'gl.DemoHome.lastTab', home.lastTab);
         const user = gd.User as Record<string, unknown> | undefined;

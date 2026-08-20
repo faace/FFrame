@@ -1,4 +1,4 @@
-import { GMBundleEntryBase, gl, registerBundleEntry } from '../../../../gmajor';
+import { GMBundleEntryBase, gl, registerBundleEntry } from '../../../gmajor';
 
 /** 基础包：本地设置 gl.Setting */
 class SettingEntry extends GMBundleEntryBase {

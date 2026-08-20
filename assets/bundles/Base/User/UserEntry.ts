@@ -1,4 +1,4 @@
-import { GMBundleEntryBase, gd, registerBundleEntry } from '../../../../gmajor';
+import { GMBundleEntryBase, gd, registerBundleEntry } from '../../../gmajor';
 
 /** 基础包：账号树 gd.User */
 class UserEntry extends GMBundleEntryBase {
