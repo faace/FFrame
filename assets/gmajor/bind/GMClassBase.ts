@@ -82,9 +82,13 @@ export abstract class GMClassBase implements IGMLifecycle {
         this._watches.removeAll();
     }
 
-    /** 登记包内逻辑对象；本对象退场时先拆孩子 */
-    protected spawn<T extends GMClassBase>(child: T): T {
+    /** 带参初始化；与 onInit 独立。spawn(child, parm) 会调 */
+    init?(parm?: unknown): void;
+
+    /** 登记包内逻辑对象；本对象退场时先拆孩子。parm 有值则当场 init */
+    protected spawn<T extends GMClassBase>(child: T, parm?: unknown): T {
         this._spawned.push(child);
+        if (parm !== undefined) child.init?.(parm);
         return child;
     }
 

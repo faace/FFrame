@@ -1,5 +1,5 @@
 ---
-description: Bundle/功能目录/绑定名、Sc/Ly/Pf、双基类、数据 watch、业务事件 on、loading、addClick、动态 UI 挂 Canvas。新建或改 Bundle、场景、预制体、gmajor/bundles 脚本时引用。用户说数据变了刷新 UI、金币/字段变化、监听事件、新建功能包、异步等待、挡住操作、loading、注册点击、addClick、按钮看不见、动态创建节点时也引用。
+description: Bundle/功能目录/绑定名、Sc/Ly/Pf、双基类、数据 watch、业务事件 on、loading、addClick、createTs、动态 UI 挂 Canvas。新建或改 Bundle、场景、预制体、gmajor/bundles 脚本时引用。用户说数据变了刷新 UI、金币/字段变化、监听事件、新建功能包、异步等待、挡住操作、loading、注册点击、addClick、列表项、createTs、按钮看不见、动态创建节点时也引用。
 globs: assets/bundles/**,assets/gmajor/**,**/*.{scene,prefab}
 alwaysApply: false
 ---
@@ -139,6 +139,14 @@ export class PfX extends GMScene {}
 - loading 开着时回调不进（按下时还没菊花、松开时已经有，也要丢掉）。挡操作靠 loading，不做总开关。
 - 默认不锁。要防连点才传 `{ lockTime: 秒 }`。锁住时由 `gu` 打 `[gm.ui] addClick 已锁，忽略`，不进回调。变色/缩放后做。
 - 同一节点再 `addClick` 会换掉旧回调。
+
+## createTs（实例化拿脚本）
+
+- 列表项等：先自己 `load` Prefab，再 `gu.createTs(prefab, nodeParm?, initParm?)`，返回根上 `GMComponent`（含子类）。**握脚本改状态，不要只握 node。**
+- 第二参可选：`parent` / `active` / `x` / `y` / `scale` / `anchor`；`zIndex` → `siblingIndex`。有就改、没有不管。
+- `init(parm)` 和 `onInit` 独立。激活入树则先 `onInit` 再 `init`。
+- 逻辑对象：`spawn(child, parm?)` 有 parm 就当场 `init`。
+- `showLayer` / `openScene` 不走 `createTs`。
 
 ## 目录
 

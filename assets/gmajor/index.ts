@@ -27,8 +27,8 @@ export type { IGMBundleEntry } from './bind/GMBundleEntryBase';
 export { GMComponent } from './ui/GMComponent'; // UI 通用基类；业务 onInit/onStart/onRemove；watch 随节点卸
 export { GMLayer } from './ui/GMLayer'; // Layer 基类；Ly* 继承；默认 scale 入场
 export { GMScene } from './ui/GMScene'; // 场景基类；Sc* 继承（→Layer→Component）；默认 opacity
-export { GMUIManager } from './ui/GMUIManager'; // 视图门面：openScene / showLayer 已内嵌 loading；addClick；窗=设计分辨率
-export type { GMOpenSceneOptions, GMShowLayerOptions, GMLoadingShowOptions, GMAddClickOpts } from './ui/GMUIManager';
+export { GMUIManager } from './ui/GMUIManager'; // 视图门面：openScene / showLayer / addClick / createTs；窗=设计分辨率
+export type { GMOpenSceneOptions, GMShowLayerOptions, GMLoadingShowOptions, GMAddClickOpts, GMCreateTsNodeParm } from './ui/GMUIManager';
 
 // —— data/ ——
 export { GMKvStore } from './data/GMKvStore'; // LocalStore / web 假服信封读写

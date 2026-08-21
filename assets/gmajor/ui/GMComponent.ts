@@ -18,6 +18,7 @@ export class GMComponent extends Component {
     onInit?(): void; // 与 onLoad 同时机；可 this.on / this.watch
     onStart?(): void; // 与 start 同时机
     onRemove?(): void; // 与 onDestroy 同时机；此时事件与 watch 已卸
+    init?(parm?: unknown): void; // 入树后由 createTs 带参调用；与 onInit 独立
 
     onLoad(): void { // 引擎回调；业务用 onInit，不要重写
         this._events = new GMEventHost(this);

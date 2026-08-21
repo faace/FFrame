@@ -6,6 +6,10 @@ class DemoHomeWatchProbe extends GMClassBase {
         super('DemoHome');
     }
 
+    init(parm?: { tag?: string }): void {
+        console.info('[DemoHomeWatchProbe] init', parm?.tag);
+    }
+
     onRemove(): void {
         console.log('[DemoHomeWatchProbe] onRemove');
     }
@@ -42,7 +46,7 @@ class DemoHomeEntry extends GMBundleEntryBase {
         const setting = gl.Setting;
         if (!home) return console.error('[DemoHome] gl.DemoHome 未建树');
         if (!setting) return console.error('[DemoHome] gl.Setting 未建树（基础包未开？）');
-        this.spawn(new DemoHomeWatchProbe());
+        this.spawn(new DemoHomeWatchProbe(), { tag: 'demoData' });
         this.watch(gl, 'Setting', 'bgmVolume', (n, o) => console.info('[DemoHome] watch bgmVolume', o, '→', n));
         const next = setting.bgmVolume === 0.8 ? 0.7 : 0.8;
         setting.bgmVolume = next;

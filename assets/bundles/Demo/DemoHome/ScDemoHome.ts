@@ -1,5 +1,6 @@
-import { _decorator, Color, Graphics, Label, Node, UITransform } from 'cc';
-import { GMScene, gu } from '../../../gmajor';
+import { _decorator, Color, Graphics, Label, Node, Prefab, UITransform } from 'cc';
+import { GMScene, gm, gu } from '../../../gmajor';
+import { PfDemoItem } from './PfDemoItem';
 
 const { ccclass } = _decorator;
 
@@ -14,6 +15,7 @@ export class ScDemoHome extends GMScene {
 
     onStart(): void {
         console.info('[ScDemoHome] onStart');
+        this.demoCreateTs();
     }
 
     private paintBg(): void {
@@ -59,5 +61,18 @@ export class ScDemoHome extends GMScene {
         label.horizontalAlign = Label.HorizontalAlign.CENTER;
         label.verticalAlign = Label.VerticalAlign.CENTER;
         return node;
+    }
+
+    /** load 一次 Prefab，createTs 拿脚本句柄，再 setCount 不碰 node */
+    private demoCreateTs(): void {
+        const canvas = this.node.scene?.getChildByName('Canvas');
+        if (!canvas) return console.error('[ScDemoHome] 无 Canvas，无法 createTs');
+        gm.resource.load('DemoHome', 'PfDemoItem', Prefab, (err, prefab) => {
+            if (err || !prefab) return console.error('[ScDemoHome] load PfDemoItem 失败', err);
+            const item = gu.createTs(prefab, { parent: canvas, x: 0, y: 80 }, { count: 3 }) as PfDemoItem | null;
+            if (!item) return;
+            item.setCount(7);
+            gu.addClick(item.node, () => item.setCount(item.getCount() + 1));
+        });
     }
 }

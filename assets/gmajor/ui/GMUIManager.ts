@@ -4,6 +4,7 @@ import {
 } from 'cc';
 import type { GMAsyncComplete, GMAsyncProgress } from '../resource/GMAsyncCallback';
 import type { IGMResource } from '../resource/IGMResource';
+import { GMComponent } from './GMComponent';
 import { GMLayer } from './GMLayer';
 import { GMOverlayHost } from './GMOverlayHost';
 import { GMScene } from './GMScene';
@@ -28,6 +29,16 @@ export interface GMLoadingShowOptions {
 
 export interface GMAddClickOpts {
     lockTime?: number; // 秒；有值才锁。默认不锁
+}
+
+export interface GMCreateTsNodeParm {
+    parent?: Node; // 有则入树（激活时当场 onInit）
+    active?: boolean;
+    x?: number;
+    y?: number;
+    scale?: number; // 等比
+    anchor?: number | { x: number; y: number };
+    zIndex?: number; // 落到 siblingIndex；须已有 parent
 }
 
 interface LayerItem {
@@ -303,6 +314,39 @@ export class GMUIManager {
         target.removeComponent(Button);
     }
 
+    /**
+     * instantiate prefab，按常用字段改节点，返回根上 GMComponent（含子类）。
+     * 先入树（激活则 onInit），再 init(initParm)。调用方自己 load Prefab。
+     */
+    createTs(prefab: Prefab, nodeParm?: GMCreateTsNodeParm, initParm?: unknown): GMComponent | null {
+        if (!prefab) return this.failTs('[gm.ui] createTs 无 prefab');
+        const node = instantiate(prefab);
+        const p = nodeParm ?? {};
+        if (p.x !== undefined || p.y !== undefined) {
+            const pos = node.position;
+            node.setPosition(p.x ?? pos.x, p.y ?? pos.y, pos.z);
+        }
+        if (p.scale !== undefined) node.setScale(p.scale, p.scale, 1);
+        if (p.anchor !== undefined) {
+            const uit = node.getComponent(UITransform) ?? node.addComponent(UITransform);
+            if (typeof p.anchor === 'number') uit.setAnchorPoint(p.anchor, p.anchor);
+            else uit.setAnchorPoint(p.anchor.x, p.anchor.y);
+        }
+        if (p.active !== undefined) node.active = p.active;
+        if (p.parent) {
+            node.parent = p.parent;
+            this.applyLayer(node, p.parent.layer); // 跟父节点同层，否则 UI 相机看不见
+        }
+        if (p.zIndex !== undefined) {
+            if (!node.parent) console.warn('[gm.ui] createTs zIndex 需要 parent');
+            else node.setSiblingIndex(p.zIndex);
+        }
+        const ts = node.getComponent(GMComponent);
+        if (!ts) return this.failTs('[gm.ui] createTs 根节点没有 GMComponent', node.name);
+        if (initParm !== undefined) ts.init?.(initParm);
+        return ts;
+    }
+
     loadingHide(actionName: string): void {
         if (!this.host || !this.loadingRoot) return;
         const index = this.loadingNames.indexOf(actionName);
@@ -387,8 +431,18 @@ export class GMUIManager {
     }
 
     private setLayer(node: Node): void {
-        node.layer = OVERLAY_LAYER;
-        for (const child of node.children) this.setLayer(child);
+        this.applyLayer(node, OVERLAY_LAYER);
+    }
+
+    private applyLayer(node: Node, layer: number): void {
+        node.layer = layer;
+        for (const child of node.children) this.applyLayer(child, layer);
+    }
+
+    private failTs(message: string, extra?: unknown): null {
+        if (extra !== undefined) console.error(message, extra);
+        else console.error(message);
+        return null;
     }
 
     private setVisualOpacity(opacity: number): void {
