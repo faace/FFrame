@@ -1,5 +1,5 @@
 ---
-description: Bundle/功能目录/绑定名、Sc/Ly/Pf、双基类、layer 结构（根+panel、mask 克隆）、数据 watch、业务事件 on、loading、addClick、createTs、动态 UI 挂 Canvas。新建或改 Bundle、场景、预制体、gmajor/bundles 脚本时引用。用户说数据变了刷新 UI、金币/字段变化、监听事件、新建功能包、异步等待、挡住操作、loading、注册点击、addClick、列表项、createTs、按钮看不见、动态创建节点、新建 Ly、layer 结构、mask、panel、生成 Ly 预制体时也引用。
+description: Bundle/功能目录/绑定名、Sc/Ly/Pf、双基类、layer 结构（根+panel、mask 克隆）、数据 watch、业务事件 on、loading、addClick、createTs、动态 UI 挂 Canvas、双窗数据权。新建或改 Bundle、场景、预制体、gmajor/bundles 脚本时引用。用户说数据变了刷新 UI、金币/字段变化、监听事件、新建功能包、异步等待、挡住操作、loading、注册点击、addClick、列表项、createTs、按钮看不见、动态创建节点、新建 Ly、layer 结构、mask、panel、生成 Ly 预制体、双窗、第二窗、指令回矿、UI 不落盘时也引用。
 globs: assets/bundles/**,assets/gmajor/**,**/*.{scene,prefab}
 alwaysApply: false
 ---
@@ -141,10 +141,12 @@ export class PfX extends GMScene {}
 - 数据变了要刷新界面（含「金币变了改数字」这种说法）：用 `watch` / `this.watch(gd 或 gl, 树名, 字段, 回调)`，不要每帧扫、不要用事件冒充字段监听。
 - `watch` 只盯一层字段；`===` 没变不喊。对象/数组只有整份换才喊；里面改了请 `this.emit`。
 - 业务事件用 `this.on` / `off` / `emit`（基类已带；组件销毁、包 unbind 会自动摘）。数据用 `watch`，事件用 `on`，别混。
+- 两扇操作系统窗口 = 两套 JS 堆，不能靠内存共享。只有权威窗（矿窗）写 `gl` / 落盘；另一窗只发指令、只吃快照，禁止自己改 `gl` 或 LocalStore，禁止双写对打。
 
 ## loading（挡操作）
 
 - 异步等待、或需要挡住用户操作一段时间：用 `gm.ui.loadingShow(key)` / `loadingHide(key)`。立刻挡点击；默认 1.5s 后才出字，快结束看不见字。只挡不显形、且不自动关：`{ delay: Infinity, timeout: Infinity }`（不要传 `-1`）。
+- 第二窗打开、矿窗还要跑但不能点：矿窗用上一档 Infinity loading，关掉再 `loadingHide`。不要另做全局 click 开关。
 - `openScene` / `showLayer` **已经内嵌** loading，调用方不要再包一层。
 - 其它自己的异步（请求、下载、等一段时间）必须自己配对 show/hide；**key 不要撞名**。
 - `closeLayer` / 切走场景不自动 loading。
