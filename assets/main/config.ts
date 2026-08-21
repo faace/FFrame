@@ -2,5 +2,5 @@
 export const config = {
     v: 1, // 本文件格式
     version: { app: '0.1.0' }, // 游戏版本
-    boot: ['User', 'Setting'], // 基础包有序开机
+    boot: ['Widget', 'User', 'Setting'], // Widget 最先常驻；User 登录后再从开机拿掉
 };

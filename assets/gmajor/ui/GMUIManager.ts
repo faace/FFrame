@@ -41,10 +41,25 @@ export interface GMCreateTsNodeParm {
     zIndex?: number; // 落到 siblingIndex；须已有 parent
 }
 
+export type GMAlertBtn = (() => void) | { text?: string; cb?: () => void };
+
+export interface GMAlertParams {
+    content: string;
+    ok?: GMAlertBtn; // 缺省「确定」
+    cancel?: GMAlertBtn; // 有则双按钮，缺省「取消」
+}
+
 interface LayerItem {
     name: string;
     bundle: string;
     node: Node;
+}
+
+interface AlertItem {
+    id: string;
+    key: string; // content + 按钮文案
+    node: Node;
+    closing: boolean;
 }
 
 /** 视图门面：真场景切换、layer 栈、loading 令牌；persist Overlay；窗=设计分辨率 */
@@ -54,8 +69,13 @@ export class GMUIManager {
     private host: GMOverlayHost | null = null;
     private layersRoot: Node | null = null;
     private loadingRoot: Node | null = null;
+    private alertsRoot: Node | null = null;
     private loadingVisual: Node | null = null;
     private readonly layers: LayerItem[] = [];
+    private readonly alerts: AlertItem[] = [];
+    private alertPrefab: Prefab | null = null;
+    private alertSeq = 0;
+    private readonly alertPending = new Set<string>(); // load 完成前也占去重 key
     readonly loadingNames: string[] = []; // console 一眼能看全
     private running: { name: string; bundle: string } | null = null;
     private readonly pendingBundles = new Set<string>(); // 正在打开、尚未入场结束
@@ -127,6 +147,7 @@ export class GMUIManager {
 
         this.layersRoot = this.makeFullNode('layers', root);
         this.loadingRoot = this.makeFullNode('loading', root);
+        this.alertsRoot = this.makeFullNode('alerts', root); // 最上：等待中也能点确认
         this.loadingRoot.addComponent(BlockInputEvents);
         this.loadingRoot.active = false;
         this.loadingVisual = new Node('visual');
@@ -293,7 +314,8 @@ export class GMUIManager {
         }
         target.off(Button.EventType.CLICK);
         target.on(Button.EventType.CLICK, (ev?: unknown) => {
-            if (this.loadingNames.length > 0) return; // 按下时还没菊花、松开时已经有
+            const underAlert = this.isUnder(target, this.alertsRoot);
+            if (!underAlert && this.loadingNames.length > 0) return; // Alert 在 loading 之上，仍可点
             const lock = opts?.lockTime;
             if (lock && lock > 0) {
                 const now = Date.now();
@@ -347,6 +369,52 @@ export class GMUIManager {
         return ts;
     }
 
+    /** 系统确认框。字符串 = 仅确定。content+按钮文案相同则不新建 */
+    alert(param: string | GMAlertParams): void {
+        const p: GMAlertParams = typeof param === 'string' ? { content: param } : param;
+        if (!p?.content) return console.error('[gm.ui] alert 无 content');
+        const okText = this.btnText(p.ok, '确定');
+        const showCancel = p.cancel !== undefined;
+        const cancelText = showCancel ? this.btnText(p.cancel, '取消') : '';
+        const key = JSON.stringify([p.content, okText, cancelText]);
+        for (const one of this.alerts) {
+            if (one.key === key && !one.closing && one.node.isValid) {
+                return console.info('[gm.ui] alert 重复，忽略', p.content);
+            }
+        }
+        if (this.alertPending.has(key)) return console.info('[gm.ui] alert 重复，忽略', p.content);
+        this.ensureOverlay();
+        if (!this.alertsRoot) return console.error('[gm.ui] Overlay 未就绪');
+        this.alertPending.add(key);
+        const open = (prefab: Prefab): void => {
+            const id = String(++this.alertSeq);
+            const item: AlertItem = { id, key, node: null as unknown as Node, closing: false };
+            const ts = this.createTs(prefab, { parent: this.alertsRoot }, {
+                content: p.content,
+                okText,
+                cancelText,
+                showCancel,
+                onOk: this.btnCb(p.ok),
+                onCancel: this.btnCb(p.cancel),
+                close: () => this.closeAlertItem(item),
+            });
+            this.alertPending.delete(key);
+            if (!ts) return;
+            item.node = ts.node;
+            this.alerts.push(item);
+            this.runHook(ts as GMLayer, 'onEnter', () => {}, id);
+        };
+        if (this.alertPrefab) return open(this.alertPrefab);
+        this.resource.load('Widget', 'LyAlert', Prefab, (err, prefab) => {
+            if (err || !prefab) {
+                this.alertPending.delete(key);
+                return console.error('[gm.ui] load LyAlert 失败', err);
+            }
+            this.alertPrefab = prefab;
+            open(prefab);
+        });
+    }
+
     loadingHide(actionName: string): void {
         if (!this.host || !this.loadingRoot) return;
         const index = this.loadingNames.indexOf(actionName);
@@ -387,20 +455,53 @@ export class GMUIManager {
         this.runHook(script, 'onLeave', done);
     }
 
-    private runHook(script: GMLayer | GMScene | null | undefined, hook: 'onEnter' | 'onLeave', done: () => void): void {
+    private runHook(script: GMLayer | GMScene | null | undefined, hook: 'onEnter' | 'onLeave', done: () => void, tag = ''): void {
         let called = false;
+        const name = 'hook:' + hook + (tag ? ':' + tag : '');
         const once = (): void => {
             if (called) return;
             called = true;
-            this.host?.unscheduleNamed('hook:' + hook);
+            this.host?.unscheduleNamed(name);
             done();
         };
         if (!script) return once();
-        this.host?.scheduleNamed('hook:' + hook, ENTER_LEAVE_FALLBACK, () => {
+        this.host?.scheduleNamed(name, ENTER_LEAVE_FALLBACK, () => {
             console.warn('[gm.ui] ' + hook + ' 未调用 done，已兜底');
             once();
         });
         script[hook](once);
+    }
+
+    private closeAlertItem(item: AlertItem): void {
+        if (item.closing) return;
+        item.closing = true;
+        const ts = item.node?.isValid ? item.node.getComponent(GMLayer) : null;
+        this.runHook(ts, 'onLeave', () => {
+            const i = this.alerts.indexOf(item);
+            if (i !== -1) this.alerts.splice(i, 1);
+            if (item.node?.isValid) item.node.destroy();
+        }, item.id);
+    }
+
+    private btnText(btn: GMAlertBtn | undefined, fallback: string): string {
+        if (btn && typeof btn === 'object' && btn.text) return btn.text;
+        return fallback;
+    }
+
+    private btnCb(btn: GMAlertBtn | undefined): (() => void) | undefined {
+        if (!btn) return undefined;
+        if (typeof btn === 'function') return btn;
+        return btn.cb;
+    }
+
+    private isUnder(node: Node, root: Node | null): boolean {
+        if (!root?.isValid) return false;
+        let cur: Node | null = node;
+        while (cur) {
+            if (cur === root) return true;
+            cur = cur.parent;
+        }
+        return false;
     }
 
     private findLayer(layerName: string): LayerItem | null {

@@ -1,4 +1,4 @@
-import { GMBindContext, GMBundleEntryBase, GMClassBase, gd, gl, gm, registerBundleEntry } from '../../../gmajor';
+import { GMBindContext, GMBundleEntryBase, GMClassBase, gd, gl, gm, gu, registerBundleEntry } from '../../../gmajor';
 
 /** 示范 spawn：包拆时走 onRemove */
 class DemoHomeWatchProbe extends GMClassBase {
@@ -35,6 +35,7 @@ class DemoHomeEntry extends GMBundleEntryBase {
             ctx.showLayer('LyDemoPopup', (err2) => {
                 if (err2) return console.error('[DemoHome] showLayer 失败', err2);
                 console.info('[DemoHome] 场景与弹窗已打开');
+                this.demoAlert();
                 this.demoLoading(() => this.demoOccupyAndClose(ctx));
             });
         });
@@ -54,6 +55,18 @@ class DemoHomeEntry extends GMBundleEntryBase {
         console.info('[DemoHome] gl.Setting.bgmVolume', setting.bgmVolume, 'gl.DemoHome.lastTab', home.lastTab);
         const user = gd.User as Record<string, unknown> | undefined;
         console.info('[DemoHome] gd.User.gold', user?.gold);
+    }
+
+    /** 单按钮 + 同参去重日志 + 带取消叠在上面 */
+    private demoAlert(): void {
+        const one = { content: 'Demo 单按钮 Alert', ok: () => console.info('[DemoHome] alert 确定') };
+        gu.alert(one);
+        gu.alert(one); // 应打重复忽略
+        gu.alert({
+            content: 'Demo 带取消 Alert',
+            ok: () => console.info('[DemoHome] alert2 确定'),
+            cancel: () => console.info('[DemoHome] alert2 取消'),
+        });
     }
 
     /** 验收 loading 显形：快关看不见字；慢关 1.5s 后看见。openScene/showLayer 已内嵌，这里只测手调 */
