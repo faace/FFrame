@@ -1,5 +1,5 @@
 ---
-description: Bundle/功能目录/绑定名、Sc/Ly/Pf、双基类、数据 watch、业务事件 on。新建或改 Bundle、场景、预制体、gmajor/bundles 脚本时引用。用户说数据变了刷新 UI、金币/字段变化、监听事件、新建功能包时也引用。
+description: Bundle/功能目录/绑定名、Sc/Ly/Pf、双基类、数据 watch、业务事件 on、loading、addClick、动态 UI 挂 Canvas。新建或改 Bundle、场景、预制体、gmajor/bundles 脚本时引用。用户说数据变了刷新 UI、金币/字段变化、监听事件、新建功能包、异步等待、挡住操作、loading、注册点击、addClick、按钮看不见、动态创建节点时也引用。
 globs: assets/bundles/**,assets/gmajor/**,**/*.{scene,prefab}
 alwaysApply: false
 ---
@@ -66,6 +66,13 @@ ScMain          # 场景根
     └── ScMain  # 空节点 + ScMain.ts
 ```
 
+## 动态 UI 节点（必守）
+
+- `new Node()` 默认 layer 是 **DEFAULT**；场景 UI 相机只画 Canvas 的 **UI_2D**。挂错层 = 看不见、点不到。
+- 代码里创建的按钮 / Label / Graphics：**必须挂到 Canvas（或 Canvas 下已是 UI_2D 的节点）**，并 `node.layer = parent.layer`（子节点也要跟）。
+- **禁止**把可见 UI 挂到场景根上的 `Sc*` 空节点（若该节点不在 Canvas 下、或层是 DEFAULT）。
+- Overlay 上的节点走 `gm.ui` 的 Overlay 层，不要跟场景 UI_2D 混。
+
 ## 预制体（Prefab）
 
 - 文件名：`Pf` + 大驼峰语义名 + `.prefab`
@@ -118,6 +125,21 @@ export class PfX extends GMScene {}
 - `watch` 只盯一层字段；`===` 没变不喊。对象/数组只有整份换才喊；里面改了请 `this.emit`。
 - 业务事件用 `this.on` / `off` / `emit`（基类已带；组件销毁、包 unbind 会自动摘）。数据用 `watch`，事件用 `on`，别混。
 
+## loading（挡操作）
+
+- 异步等待、或需要挡住用户操作一段时间：用 `gm.ui.loadingShow(key)` / `loadingHide(key)`。立刻挡点击；默认 1.5s 后才出字，快结束看不见字。
+- `openScene` / `showLayer` **已经内嵌** loading，调用方不要再包一层。
+- 其它自己的异步（请求、下载、等一段时间）必须自己配对 show/hide；**key 不要撞名**。
+- `closeLayer` / 切走场景不自动 loading。
+
+## 点击（addClick）
+
+- 给节点注册点击用 `gu.addClick(node, cb, opts?)`（`gu === gm.ui`）。**不要**在编辑器里拖 Button；代码里会加。
+- 基类不加 `this.addClick`。节点销毁会自己卸。主动摘用 `gu.removeClick(node)`。
+- loading 开着时回调不进（按下时还没菊花、松开时已经有，也要丢掉）。挡操作靠 loading，不做总开关。
+- 默认不锁。要防连点才传 `{ lockTime: 秒 }`。锁住时由 `gu` 打 `[gm.ui] addClick 已锁，忽略`，不进回调。变色/缩放后做。
+- 同一节点再 `addClick` 会换掉旧回调。
+
 ## 目录
 
 - 场景 / 预制体与其关联脚本放在**同一文件夹**，不要拆成 `scripts/`、`scenes/`、`prefabs/` 等分目录。
@@ -139,4 +161,5 @@ export class PfX extends GMScene {}
 ❌ player.prefab / PFPlayer.prefab（缺 Pf 或大小写不对）
 ❌ 场景脚本直接挂在 Canvas / Camera 上；预制体脚本挂在子节点
 ❌ Sc*/Ly*/Pf* 直接 extends Component
+❌ 代码 new 出来的按钮挂在场景根 Sc* 上、layer 仍是 DEFAULT（UI 相机看不见）
 ```

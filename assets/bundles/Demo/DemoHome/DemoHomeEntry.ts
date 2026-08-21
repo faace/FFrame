@@ -31,7 +31,7 @@ class DemoHomeEntry extends GMBundleEntryBase {
             ctx.showLayer('LyDemoPopup', (err2) => {
                 if (err2) return console.error('[DemoHome] showLayer 失败', err2);
                 console.info('[DemoHome] 场景与弹窗已打开');
-                this.demoOccupyAndClose(ctx);
+                this.demoLoading(() => this.demoOccupyAndClose(ctx));
             });
         });
     }
@@ -50,6 +50,20 @@ class DemoHomeEntry extends GMBundleEntryBase {
         console.info('[DemoHome] gl.Setting.bgmVolume', setting.bgmVolume, 'gl.DemoHome.lastTab', home.lastTab);
         const user = gd.User as Record<string, unknown> | undefined;
         console.info('[DemoHome] gd.User.gold', user?.gold);
+    }
+
+    /** 验收 loading 显形：快关看不见字；慢关 1.5s 后看见。openScene/showLayer 已内嵌，这里只测手调 */
+    private demoLoading(then: () => void): void {
+        console.info('[DemoHome] loading 快关（应看不见字）');
+        gm.ui.loadingShow('demo-fast');
+        gm.ui.loadingHide('demo-fast');
+        console.info('[DemoHome] loading 慢关（约 1.5s 后应看见字）');
+        gm.ui.loadingShow('demo-slow');
+        setTimeout(() => {
+            gm.ui.loadingHide('demo-slow');
+            console.info('[DemoHome] loading 慢关结束');
+            then();
+        }, 2500);
     }
 
     /** 故意 unbind（应拒绝）→ closeLayer → 再 unbind（场景仍占，仍拒绝） */

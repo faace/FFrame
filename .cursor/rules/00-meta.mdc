@@ -13,6 +13,9 @@ alwaysApply: true
 | 新建功能 / Bundle / 绑定名 / 基类，或 Sc、Pf、Ly | `01-naming` |
 | 数据变了刷新 UI、金币/字段变化、watch | `01-naming` |
 | 监听业务事件（on / off / emit） | `01-naming` |
+| 异步等待、挡住操作、loading | `01-naming` |
+| 注册点击、addClick、不要拖 Button | `01-naming` |
+| 动态创建 UI、按钮看不见 | `01-naming` |
 | 新写/改公共异步 API、完成回调、进度回调 | `01-async-callback` |
 | 写临时/工具脚本（`tools/`） | `01-nodejs-temp-scripts` |
 | 消息含 `#rule`、grilling 收尾要沉淀规范 | 本文件（下方流程） |
@@ -27,7 +30,7 @@ alwaysApply: true
 |------|------|-------------|
 | `00-meta.mdc` | Always | 规则索引与 #rule 写入流程（Always） |
 | `01-async-callback.mdc` | Agent/按需 | 新写或改写公共异步 API / 完成回调 / onProgress 时引用：error-first；完成在前、进度可选 |
-| `01-naming.mdc` | globs: `assets/bundles/**,assets/gmajor/**,**/*.{scene,prefab}`；Agent/按需 | Bundle/功能目录/绑定名、Sc/Ly/Pf、双基类、数据 watch、业务事件 on。新建或改 Bundle、场景、预制体、gmajor/bundles 脚本时引用。用户说数据变了刷新 UI、金币/字段变化、监听事件、新建功能包时也引用。 |
+| `01-naming.mdc` | globs: `assets/bundles/**,assets/gmajor/**,**/*.{scene,prefab}`；Agent/按需 | Bundle/功能目录/绑定名、Sc/Ly/Pf、双基类、数据 watch、业务事件 on、loading、addClick、动态 UI 挂 Canvas。新建或改 Bundle、场景、预制体、gmajor/bundles 脚本时引用。用户说数据变了刷新 UI、金币/字段变化、监听事件、新建功能包、异步等待、挡住操作、loading、注册点击、addClick、按钮看不见、动态创建节点时也引用。 |
 | `01-nodejs-temp-scripts.mdc` | globs: `tools/**`；Agent/按需 | 编写临时/工具脚本，或把脚本放到 tools 时引用：优先 Node.js；临时脚本放 tools/temp |
 | `01-typescript-style.mdc` | Agent/按需 | 编写或改写 TypeScript 时：4 空格缩进、行尾注释优先、签名尽量单行、简单失败早退一行；维护 index.ts / docs/架构 时也引用 |
 

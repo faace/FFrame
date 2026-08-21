@@ -27,8 +27,8 @@ export type { IGMBundleEntry } from './bind/GMBundleEntryBase';
 export { GMComponent } from './ui/GMComponent'; // UI 通用基类；业务 onInit/onStart/onRemove；watch 随节点卸
 export { GMLayer } from './ui/GMLayer'; // Layer 基类；Ly* 继承；默认 scale 入场
 export { GMScene } from './ui/GMScene'; // 场景基类；Sc* 继承（→Layer→Component）；默认 opacity
-export { GMUIManager } from './ui/GMUIManager'; // 视图门面：openScene / showLayer / loading
-export type { GMOpenSceneOptions, GMShowLayerOptions, GMLoadingShowOptions } from './ui/GMUIManager';
+export { GMUIManager } from './ui/GMUIManager'; // 视图门面：openScene / showLayer 已内嵌 loading；addClick；窗=设计分辨率
+export type { GMOpenSceneOptions, GMShowLayerOptions, GMLoadingShowOptions, GMAddClickOpts } from './ui/GMUIManager';
 
 // —— data/ ——
 export { GMKvStore } from './data/GMKvStore'; // LocalStore / web 假服信封读写
@@ -38,5 +38,5 @@ export type { GMDataRoot, GMLocalRoot, GMWatchCb, GMWatchRoot } from './data/GMS
 
 // —— launch/ ——
 export { config } from './config'; // 框架配置（版本）；跟 gmajor/ 走
-export { gm, gd, gl, registerBundleEntry } from './launch/GMLauncher'; // gm 全局单例；gd===gm.data；gl===gm.local
+export { gm, gd, gl, gu, registerBundleEntry } from './launch/GMLauncher'; // gm 全局单例；gd===gm.data；gl===gm.local；gu===gm.ui
 export type { GMCore } from './launch/GMLauncher';

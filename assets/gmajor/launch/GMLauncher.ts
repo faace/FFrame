@@ -9,7 +9,7 @@ import { config } from '../config';
 import { GMStoreHub, type GMDataRoot, type GMLocalRoot } from '../data/GMStoreHub';
 import { GMUIManager } from '../ui/GMUIManager';
 
-/** 全局核心句柄（模块加载时创建；用法 gm.binder / gm.events / gm.ui / gd / gl …） */
+/** 全局核心句柄（模块加载时创建；用法 gm.binder / gm.events / gm.ui / gd / gl / gu …） */
 export interface GMCore {
     readonly events: GMEventManager;
     readonly resource: IGMResource;
@@ -28,12 +28,14 @@ const resource = new GMCocosResource();
 const registry = new GMBundleRegistry();
 const binder = new GMBinder(registry, resource, events);
 const ui = new GMUIManager(resource);
+ui.bindPixelFit(); // 窗多大，逻辑分辨率就多大
 const store = new GMStoreHub();
 binder.attachUI(ui);
 binder.attachStore(store);
 
 export const gd = store.gd; // === gm.data；全是 server
 export const gl = store.gl; // === gm.local；全是本地
+export const gu = ui; // === gm.ui
 
 /** GMajor 全局单例 */
 export const gm: GMCore = { events, resource, registry, binder, ui, data: gd, local: gl, config };
@@ -43,6 +45,7 @@ declare global {
         gm: GMCore;
         gd: GMDataRoot;
         gl: GMLocalRoot;
+        gu: GMUIManager;
     }
 }
 
@@ -50,6 +53,7 @@ const w = globalThis as unknown as Window;
 w.gm = gm; // 预览控制台可直接敲
 w.gd = gd;
 w.gl = gl;
+w.gu = gu;
 
 /** Bundle 入口自登记（写到 gm.registry） */
 export function registerBundleEntry(name: string, entry: IGMBundleEntry): void {

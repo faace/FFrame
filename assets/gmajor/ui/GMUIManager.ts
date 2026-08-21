@@ -1,6 +1,6 @@
 import {
-    BlockInputEvents, Camera, Canvas, Color, director, instantiate, Label, Layers, Node,
-    Prefab, SceneAsset, UIOpacity, UITransform, Widget, view,
+    BlockInputEvents, Button, Camera, Canvas, Color, director, Game, game, instantiate, Label, Layers, Node,
+    Prefab, ResolutionPolicy, SceneAsset, UIOpacity, UITransform, Widget, screen, view,
 } from 'cc';
 import type { GMAsyncComplete, GMAsyncProgress } from '../resource/GMAsyncCallback';
 import type { IGMResource } from '../resource/IGMResource';
@@ -26,15 +26,20 @@ export interface GMLoadingShowOptions {
     timeout?: number; // 默认 20；到期自动 hide 该 key
 }
 
+export interface GMAddClickOpts {
+    lockTime?: number; // 秒；有值才锁。默认不锁
+}
+
 interface LayerItem {
     name: string;
     bundle: string;
     node: Node;
 }
 
-/** 视图门面：真场景切换、layer 栈、loading 令牌；persist Overlay */
+/** 视图门面：真场景切换、layer 栈、loading 令牌；persist Overlay；窗=设计分辨率 */
 export class GMUIManager {
     private overlay: Node | null = null;
+    private overlayCamera: Camera | null = null;
     private host: GMOverlayHost | null = null;
     private layersRoot: Node | null = null;
     private loadingRoot: Node | null = null;
@@ -45,8 +50,21 @@ export class GMUIManager {
     private readonly pendingBundles = new Set<string>(); // 正在打开、尚未入场结束
     private readonly preparingLayers = new Set<string>();
     private openingScene = false;
+    private fitBound = false;
+    private lastFitW = 0;
+    private lastFitH = 0;
+    private clickUnlockAt = 0; // 有 lockTime 的点击共用；无 lockTime 的不查
 
     constructor(private readonly resource: IGMResource) {}
+
+    /** 核心启动：设计分辨率跟窗口逻辑像素走（1 单位 = 1 像素）；resize 再同步 */
+    bindPixelFit(): void {
+        if (this.fitBound) return;
+        this.fitBound = true;
+        this.applyPixelFit();
+        screen.on('window-resize', this.applyPixelFit, this);
+        game.once(Game.EVENT_GAME_INITED, this.applyPixelFit, this);
+    }
 
     /** 当前场景或 layer 仍占用这些 Bundle 时，返回中文原因（空数组 = 可 unbind） */
     getUnbindBlockers(bundleNames: string[]): string[] {
@@ -79,6 +97,7 @@ export class GMUIManager {
         root.addChild(camNode);
         camNode.setPosition(0, 0, 1000);
         const camera = camNode.addComponent(Camera);
+        this.overlayCamera = camera;
         camera.projection = Camera.ProjectionType.ORTHO;
         camera.priority = 1024;
         camera.near = 0;
@@ -115,6 +134,7 @@ export class GMUIManager {
         scene.addChild(root);
         director.addPersistRootNode(root);
         this.overlay = root;
+        this.syncOverlayToView();
         console.info('[gm.ui] Overlay 已创建');
     }
 
@@ -135,7 +155,7 @@ export class GMUIManager {
         const loadingKey = `scene:${bundleName}:${sceneName}`;
         this.openingScene = true;
         this.pendingBundles.add(bundleName);
-        this.loadingShow(loadingKey);
+        this.loadingShow(loadingKey); // 内嵌；调用方不必再调
 
         const finish = (err: Error | null): void => {
             this.openingScene = false;
@@ -183,7 +203,7 @@ export class GMUIManager {
         const loadingKey = `layer:${bundleName}:${layerName}`;
         this.preparingLayers.add(layerName);
         this.pendingBundles.add(bundleName);
-        this.loadingShow(loadingKey);
+        this.loadingShow(loadingKey); // 内嵌；调用方不必再调
 
         this.resource.load(bundleName, layerName, Prefab, (err, prefab) => {
             if (err || !prefab) {
@@ -251,6 +271,36 @@ export class GMUIManager {
             console.warn('[gm.ui] loading 超时自动 hide', actionName, timeout);
             this.loadingHide(actionName);
         });
+    }
+
+    /** 代码里加 Button 并听 click；同一节点再绑会换掉旧回调。编辑器不用拖 Button */
+    addClick(target: Node, cb: (ev?: unknown) => void, opts?: GMAddClickOpts): void {
+        if (!target?.isValid) return;
+        if (!target.getComponent(Button)) {
+            const btn = target.addComponent(Button);
+            btn.transition = Button.Transition.NONE;
+        }
+        target.off(Button.EventType.CLICK);
+        target.on(Button.EventType.CLICK, (ev?: unknown) => {
+            if (this.loadingNames.length > 0) return; // 按下时还没菊花、松开时已经有
+            const lock = opts?.lockTime;
+            if (lock && lock > 0) {
+                const now = Date.now();
+                if (now < this.clickUnlockAt) {
+                    console.info('[gm.ui] addClick 已锁，忽略', target.name);
+                    return;
+                }
+                this.clickUnlockAt = now + lock * 1000;
+            }
+            cb(ev);
+        });
+    }
+
+    /** 卸 click 并拆掉 Button；节点销毁也会自己卸，这是主动摘 */
+    removeClick(target: Node): void {
+        if (!target?.isValid) return;
+        target.off(Button.EventType.CLICK);
+        target.removeComponent(Button);
     }
 
     loadingHide(actionName: string): void {
@@ -349,5 +399,25 @@ export class GMUIManager {
     private fail(onComplete: GMAsyncComplete | undefined, message: string): void {
         console.error(message);
         onComplete?.(new Error(message));
+    }
+
+    /** 逻辑像素 = 物理窗口 / DPR；DPI 缩放以后再grilling */
+    private applyPixelFit(): void {
+        const dpr = screen.devicePixelRatio || 1;
+        const w = Math.max(1, Math.round(screen.windowSize.width / dpr));
+        const h = Math.max(1, Math.round(screen.windowSize.height / dpr));
+        if (w === this.lastFitW && h === this.lastFitH) return this.syncOverlayToView();
+        this.lastFitW = w;
+        this.lastFitH = h;
+        view.setDesignResolutionSize(w, h, ResolutionPolicy.SHOW_ALL);
+        this.syncOverlayToView();
+        console.info('[gm.ui] 设计分辨率', w, h);
+    }
+
+    private syncOverlayToView(): void {
+        if (!this.overlay?.isValid) return;
+        const size = view.getVisibleSize();
+        this.overlay.getComponent(UITransform)?.setContentSize(size.width, size.height);
+        if (this.overlayCamera?.isValid) this.overlayCamera.orthoHeight = size.height / 2;
     }
 }
