@@ -3,18 +3,22 @@ import { GMLayer } from '../../../gmajor';
 
 const { ccclass } = _decorator;
 
-/** Demo 弹窗：根节点 scale 入场；panel 自己画，不依赖贴图 */
+/** Demo 弹窗：内容画在 panel 上；mask 由 GMLayer 克隆 */
 @ccclass('LyDemoPopup')
 export class LyDemoPopup extends GMLayer {
     onInit(): void {
-        const uit = this.node.getComponent(UITransform) ?? this.node.addComponent(UITransform);
+        const panel = this.panel;
+        if (!panel) return;
+        const uit = panel.getComponent(UITransform) ?? panel.addComponent(UITransform);
         uit.setContentSize(520, 360);
-        const g = this.node.addComponent(Graphics);
+        const g = panel.getComponent(Graphics) ?? panel.addComponent(Graphics);
+        g.clear();
         g.fillColor = new Color(20, 20, 20, 230);
         g.roundRect(-260, -180, 520, 360, 16);
         g.fill();
         const title = new Node('title');
-        this.node.addChild(title);
+        panel.addChild(title);
+        title.layer = panel.layer;
         title.addComponent(UITransform).setContentSize(400, 60);
         const label = title.addComponent(Label);
         label.string = 'LyDemoPopup';

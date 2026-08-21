@@ -1,11 +1,11 @@
 import {
     BlockInputEvents, Button, Camera, Canvas, Color, director, Game, game, instantiate, Label, Layers, Node,
-    Prefab, ResolutionPolicy, SceneAsset, UIOpacity, UITransform, Widget, screen, view,
+    Prefab, ResolutionPolicy, SceneAsset, Sprite, SpriteFrame, Texture2D, UIOpacity, UITransform, Widget, screen, view,
 } from 'cc';
 import type { GMAsyncComplete, GMAsyncProgress } from '../resource/GMAsyncCallback';
 import type { IGMResource } from '../resource/IGMResource';
 import { GMComponent } from './GMComponent';
-import { GMLayer } from './GMLayer';
+import { GMLayer, bindLayerMaskTpl } from './GMLayer';
 import { GMOverlayHost } from './GMOverlayHost';
 import { GMScene } from './GMScene';
 
@@ -85,6 +85,8 @@ export class GMUIManager {
     private lastFitW = 0;
     private lastFitH = 0;
     private clickUnlockAt = 0; // 有 lockTime 的点击共用；无 lockTime 的不查
+    private maskTpl: Node | null = null;
+    private _whiteFrame: SpriteFrame | null = null;
 
     constructor(private readonly resource: IGMResource) {}
 
@@ -148,6 +150,7 @@ export class GMUIManager {
         this.layersRoot = this.makeFullNode('layers', root);
         this.loadingRoot = this.makeFullNode('loading', root);
         this.alertsRoot = this.makeFullNode('alerts', root); // 最上：等待中也能点确认
+        this.makeLayerMaskTpl(root);
         this.loadingRoot.addComponent(BlockInputEvents);
         this.loadingRoot.active = false;
         this.loadingVisual = new Node('visual');
@@ -531,6 +534,34 @@ export class GMUIManager {
         return node;
     }
 
+    private makeLayerMaskTpl(parent: Node): void {
+        const node = new Node('layerMaskTpl');
+        this.setLayer(node);
+        parent.addChild(node);
+        node.active = false;
+        const size = view.getVisibleSize();
+        node.addComponent(UITransform).setContentSize(size.width, size.height);
+        node.addComponent(BlockInputEvents);
+        node.addComponent(UIOpacity).opacity = 255;
+        const sp = node.addComponent(Sprite);
+        sp.spriteFrame = this.whiteFrame();
+        sp.sizeMode = Sprite.SizeMode.CUSTOM;
+        sp.color = new Color(0, 0, 0, 160);
+        bindLayerMaskTpl(node);
+        this.maskTpl = node;
+    }
+
+    private whiteFrame(): SpriteFrame {
+        if (this._whiteFrame?.isValid) return this._whiteFrame;
+        const tex = new Texture2D();
+        tex.reset({ width: 2, height: 2, format: Texture2D.PixelFormat.RGBA8888 });
+        tex.uploadData(new Uint8Array(16).fill(255));
+        const frame = new SpriteFrame();
+        frame.texture = tex;
+        this._whiteFrame = frame;
+        return frame;
+    }
+
     private setLayer(node: Node): void {
         this.applyLayer(node, OVERLAY_LAYER);
     }
@@ -572,7 +603,18 @@ export class GMUIManager {
     private syncOverlayToView(): void {
         if (!this.overlay?.isValid) return;
         const size = view.getVisibleSize();
-        this.overlay.getComponent(UITransform)?.setContentSize(size.width, size.height);
-        if (this.overlayCamera?.isValid) this.overlayCamera.orthoHeight = size.height / 2;
+        const w = size.width;
+        const h = size.height;
+        this.overlay.getComponent(UITransform)?.setContentSize(w, h);
+        if (this.overlayCamera?.isValid) this.overlayCamera.orthoHeight = h / 2;
+        this.maskTpl?.getComponent(UITransform)?.setContentSize(w, h);
+        for (const one of this.layers) this.fitLayerChrome(one.node, w, h);
+        for (const one of this.alerts) this.fitLayerChrome(one.node, w, h);
+    }
+
+    private fitLayerChrome(root: Node, w: number, h: number): void {
+        if (!root?.isValid) return;
+        root.getComponent(UITransform)?.setContentSize(w, h);
+        root.getChildByName('mask')?.getComponent(UITransform)?.setContentSize(w, h);
     }
 }

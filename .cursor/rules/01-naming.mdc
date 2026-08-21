@@ -1,5 +1,5 @@
 ---
-description: Bundle/功能目录/绑定名、Sc/Ly/Pf、双基类、数据 watch、业务事件 on、loading、addClick、createTs、动态 UI 挂 Canvas。新建或改 Bundle、场景、预制体、gmajor/bundles 脚本时引用。用户说数据变了刷新 UI、金币/字段变化、监听事件、新建功能包、异步等待、挡住操作、loading、注册点击、addClick、列表项、createTs、按钮看不见、动态创建节点时也引用。
+description: Bundle/功能目录/绑定名、Sc/Ly/Pf、双基类、layer 结构（根+panel、mask 克隆）、数据 watch、业务事件 on、loading、addClick、createTs、动态 UI 挂 Canvas。新建或改 Bundle、场景、预制体、gmajor/bundles 脚本时引用。用户说数据变了刷新 UI、金币/字段变化、监听事件、新建功能包、异步等待、挡住操作、loading、注册点击、addClick、列表项、createTs、按钮看不见、动态创建节点、新建 Ly、layer 结构、mask、panel、生成 Ly 预制体时也引用。
 globs: assets/bundles/**,assets/gmajor/**,**/*.{scene,prefab}
 alwaysApply: false
 ---
@@ -85,6 +85,23 @@ ScMain          # 场景根
 - 文件名 / 类名：`Ly` + 大驼峰语义名（如 `LyHUD`）
 - 关联脚本与节点约定随具体 Layer 用途；基类见下
 
+## Layer 结构（`Ly*` / Alert 必守；场景不算）
+
+`GMScene` 不套这套。只要继承 `GMLayer` 的弹层（含 Alert）必须：
+
+- **根节点**：只挂脚本 + `UITransform`。禁止 Graphics / Button / Label / Widget。mask 用屏幕宽高直接设 `contentSize`，不用 Widget。
+- **子节点**：新建 Ly 预制体时，默认结构就必须是根 + 空 `panel`（生成时带上，不是事后补）。mask **不进 prefab**。用 `node tools/create-ly-prefab.mjs <目录> Ly名字`。不要从空节点另存成 prefab。运行时没有 `panel` 仍报错——那是预制体没按规范生成。
+- **mask**：Overlay 上有隐藏模板；入树时基类克隆到根下、sibling 最低。半透黑、挡穿透。
+- **内容**：只往 `this.panel` 上长，禁止挂根上。
+- **动效**：不动根。进场 mask 透明→半透，同时 panel `0→1.1→1`，时长对齐；退场反过来。
+
+```text
+LyXxx          # 根：脚本 + UITransform
+├── mask       # 运行时克隆，最底
+└── panel      # prefab 里预放；业务节点都在这
+    └── …
+```
+
 ## 双基类（写脚本必守）
 
 - 挂 Creator 组件的脚本：**必须**走 `GMComponent` 链（`Pf`/`Ly`/`Sc` 见下表）。禁止直接 `extends Component`。
@@ -115,7 +132,7 @@ export class ScMain extends GMComponent {}
 export class PfX extends GMScene {}
 ```
 
-- `GMLayer` / `GMScene` 可先与 `GMComponent` 同能，仅作类型分层；差异以后再加。
+- `GMLayer` 弹层有统一 mask + panel；`GMScene` 仍只做 Canvas opacity，不套 mask。
 
 ## 数据与事件（写逻辑/UI 时）
 
@@ -169,5 +186,6 @@ export class PfX extends GMScene {}
 ❌ player.prefab / PFPlayer.prefab（缺 Pf 或大小写不对）
 ❌ 场景脚本直接挂在 Canvas / Camera 上；预制体脚本挂在子节点
 ❌ Sc*/Ly*/Pf* 直接 extends Component
-❌ 代码 new 出来的按钮挂在场景根 Sc* 上、layer 仍是 DEFAULT（UI 相机看不见）
+✅ node tools/create-ly-prefab.mjs assets/bundles/Demo/DemoHome LyShop（默认带 panel）
+❌ 空节点另存成 Ly prefab 再补 panel；根上挂 Graphics
 ```

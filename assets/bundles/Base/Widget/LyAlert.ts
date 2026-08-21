@@ -1,12 +1,11 @@
-import { _decorator, BlockInputEvents, Color, Graphics, Label, Node, UITransform, view, Widget } from 'cc';
+import { _decorator, Color, Graphics, Label, Node, UITransform } from 'cc';
 import { GMLayer, gu } from '../../../gmajor';
 
 const { ccclass } = _decorator;
 
-/** 系统确认框：全屏挡点击，动效只打在 panel 上（与 layer 同一套 scale） */
+/** 系统确认框：内容画在 panel 上；mask 由 GMLayer 克隆 */
 @ccclass('LyAlert')
 export class LyAlert extends GMLayer {
-    private panel: Node | null = null;
     private body: Label | null = null;
     private okLabel: Label | null = null;
     private cancelLabel: Label | null = null;
@@ -17,37 +16,18 @@ export class LyAlert extends GMLayer {
     private close: (() => void) | undefined;
 
     onInit(): void {
-        const size = view.getVisibleSize();
-        const uit = this.node.getComponent(UITransform) ?? this.node.addComponent(UITransform);
-        uit.setContentSize(size.width, size.height);
-        const widget = this.node.getComponent(Widget) ?? this.node.addComponent(Widget);
-        widget.isAlignTop = widget.isAlignBottom = widget.isAlignLeft = widget.isAlignRight = true;
-        widget.top = widget.bottom = widget.left = widget.right = 0;
-        widget.alignMode = Widget.AlignMode.ALWAYS;
-        if (!this.node.getComponent(BlockInputEvents)) this.node.addComponent(BlockInputEvents);
-
-        const dim = new Node('dim');
-        this.node.addChild(dim);
-        dim.layer = this.node.layer;
-        dim.addComponent(UITransform).setContentSize(size.width, size.height);
-        const dg = dim.addComponent(Graphics);
-        dg.fillColor = new Color(0, 0, 0, 160);
-        dg.rect(-size.width / 2, -size.height / 2, size.width, size.height);
-        dg.fill();
-
-        this.panel = new Node('panel');
-        this.node.addChild(this.panel);
-        this.panel.layer = this.node.layer;
-        this.panel.addComponent(UITransform).setContentSize(480, 280);
-        this.panel.setScale(0, 0, 1);
-        const pg = this.panel.addComponent(Graphics);
+        const panel = this.panel;
+        if (!panel) return;
+        const uit = panel.getComponent(UITransform) ?? panel.addComponent(UITransform);
+        uit.setContentSize(480, 280);
+        const pg = panel.getComponent(Graphics) ?? panel.addComponent(Graphics);
+        pg.clear();
         pg.fillColor = new Color(20, 20, 20, 240);
         pg.roundRect(-240, -140, 480, 280, 16);
         pg.fill();
-
-        this.body = this.makeLabel(this.panel, 'body', 32, 0, 40, 400, 120);
-        this.btnCancel = this.makeBtn(this.panel, 'btnCancel', -110, -80);
-        this.btnOk = this.makeBtn(this.panel, 'btnOk', 110, -80);
+        this.body = this.makeLabel(panel, 'body', 32, 0, 40, 400, 120);
+        this.btnCancel = this.makeBtn(panel, 'btnCancel', -110, -80);
+        this.btnOk = this.makeBtn(panel, 'btnOk', 110, -80);
         this.cancelLabel = this.btnCancel.getChildByName('label')?.getComponent(Label) ?? null;
         this.okLabel = this.btnOk.getChildByName('label')?.getComponent(Label) ?? null;
         console.info('[LyAlert] onInit');
@@ -77,16 +57,6 @@ export class LyAlert extends GMLayer {
         if (parm.showCancel && this.btnCancel) {
             gu.addClick(this.btnCancel, () => { this.onCancel?.(); this.close?.(); });
         }
-    }
-
-    onEnter(done: () => void): void {
-        if (!this.panel) return done();
-        this.animateEnter(this.panel, done);
-    }
-
-    onLeave(done: () => void): void {
-        if (!this.panel) return done();
-        this.animateLeave(this.panel, done);
     }
 
     onRemove(): void {

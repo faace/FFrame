@@ -9,6 +9,7 @@ const { ccclass } = _decorator;
  */
 @ccclass('GMScene')
 export class GMScene extends GMLayer {
+    protected useLayerChrome = false; // 场景不套 mask/panel
     onEnter(done: () => void): void { // 默认 opacity 0 → 255
         const op = this.ensureCanvasOpacity();
         Tween.stopAllByTarget(op);

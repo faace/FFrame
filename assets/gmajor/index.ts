@@ -25,7 +25,7 @@ export type { IGMBundleEntry } from './bind/GMBundleEntryBase';
 
 // —— ui/ ——
 export { GMComponent } from './ui/GMComponent'; // UI 通用基类；业务 onInit/onStart/onRemove；watch 随节点卸
-export { GMLayer } from './ui/GMLayer'; // Layer 基类；Ly* 继承；默认 scale 入场
+export { GMLayer } from './ui/GMLayer'; // Layer 基类；Ly* 继承；mask+panel 入场；场景不套
 export { GMScene } from './ui/GMScene'; // 场景基类；Sc* 继承（→Layer→Component）；默认 opacity
 export { GMUIManager } from './ui/GMUIManager'; // 视图门面：openScene / showLayer / addClick / createTs / alert；窗=设计分辨率
 export type { GMOpenSceneOptions, GMShowLayerOptions, GMLoadingShowOptions, GMAddClickOpts, GMCreateTsNodeParm, GMAlertParams, GMAlertBtn } from './ui/GMUIManager';
