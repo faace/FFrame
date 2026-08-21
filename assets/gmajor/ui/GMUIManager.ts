@@ -24,7 +24,7 @@ export interface GMShowLayerOptions {
 
 export interface GMLoadingShowOptions {
     delay?: number; // 默认 1.5；Infinity = 一直透明
-    timeout?: number; // 默认 20；到期自动 hide 该 key
+    timeout?: number; // 默认 20；到期自动 hide 该 key；Infinity = 不自动关
 }
 
 export interface GMAddClickOpts {
@@ -302,10 +302,12 @@ export class GMUIManager {
                 this.setVisualOpacity(255);
             });
         }
-        this.host.scheduleNamed(actionName + ':hide', timeout, () => {
-            console.warn('[gm.ui] loading 超时自动 hide', actionName, timeout);
-            this.loadingHide(actionName);
-        });
+        if (timeout !== Infinity) {
+            this.host.scheduleNamed(actionName + ':hide', timeout, () => {
+                console.warn('[gm.ui] loading 超时自动 hide', actionName, timeout);
+                this.loadingHide(actionName);
+            });
+        }
     }
 
     /** 代码里加 Button 并听 click；同一节点再绑会换掉旧回调。编辑器不用拖 Button */

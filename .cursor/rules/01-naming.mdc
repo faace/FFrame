@@ -144,7 +144,7 @@ export class PfX extends GMScene {}
 
 ## loading（挡操作）
 
-- 异步等待、或需要挡住用户操作一段时间：用 `gm.ui.loadingShow(key)` / `loadingHide(key)`。立刻挡点击；默认 1.5s 后才出字，快结束看不见字。
+- 异步等待、或需要挡住用户操作一段时间：用 `gm.ui.loadingShow(key)` / `loadingHide(key)`。立刻挡点击；默认 1.5s 后才出字，快结束看不见字。只挡不显形、且不自动关：`{ delay: Infinity, timeout: Infinity }`（不要传 `-1`）。
 - `openScene` / `showLayer` **已经内嵌** loading，调用方不要再包一层。
 - 其它自己的异步（请求、下载、等一段时间）必须自己配对 show/hide；**key 不要撞名**。
 - `closeLayer` / 切走场景不自动 loading。
