@@ -43,7 +43,7 @@ binder.attachStore(store);
 export const gd = store.gd; // === gm.data；全是 server
 export const gl = store.gl; // === gm.local；全是本地
 export const gu = ui; // === gm.ui
-export const gp = createPlatform(); // === gm.platform；import 时认环境
+export const gp = createPlatform(events); // === gm.platform；import 时认环境；推送进 events
 
 function boot(game: GMGameConfig, onComplete: GMAsyncComplete, onProgress?: GMAsyncProgress): void;
 function boot(game: GMGameConfig, opts: GMBootOpts, onComplete: GMAsyncComplete, onProgress?: GMAsyncProgress): void;

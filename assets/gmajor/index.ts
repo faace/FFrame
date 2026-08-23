@@ -44,5 +44,5 @@ export type { GMCore } from './launch/GMLauncher';
 export type { GMGameConfig, GMBootOpts } from './launch/GMBoot'; // 项目开机配置；gm.boot 吃这个
 
 // —— platform/ ——
-export { GMPlatform } from './platform/GMPlatform'; // 平台基类；游戏只喊 gp
-export type { GMPlatformId, GMPlatformParams } from './platform/GMPlatform';
+export { GMPlatform, toGpEventName } from './platform/GMPlatform'; // 平台基类；游戏只喊 gp；推送事件名 Gp*
+export type { GMPlatformId, GMPlatformParams, GMPlatformMsg } from './platform/GMPlatform';

@@ -1,5 +1,5 @@
 ---
-description: Bundle/功能目录/绑定名、Sc/Ly/Pf、双基类、layer 结构（根+panel、mask 克隆）、数据 watch、业务事件 on、loading、addClick、createTs、动态 UI 挂 Canvas、双窗数据权。新建或改 Bundle、场景、预制体、gmajor/game 脚本时引用。用户说数据变了刷新 UI、金币/字段变化、监听事件、新建功能包、异步等待、挡住操作、loading、注册点击、addClick、列表项、createTs、按钮看不见、动态创建节点、新建 Ly、layer 结构、mask、panel、生成 Ly 预制体、双窗、第二窗、指令回矿、UI 不落盘时也引用。
+description: Bundle/功能目录/绑定名、Sc/Ly/Pf、双基类、layer 结构（根+panel、mask 克隆）、数据 watch、业务事件 on、事件大类前缀（Gp/Bind）、平台 gp.call/send、loading、addClick、createTs、动态 UI 挂 Canvas、双窗数据权。新建或改 Bundle、场景、预制体、gmajor/game 脚本时引用。用户说数据变了刷新 UI、金币/字段变化、监听事件、事件前缀、Gp、gp.call、平台通道、原生回包、新建功能包、异步等待、挡住操作、loading、注册点击、addClick、列表项、createTs、按钮看不见、动态创建节点、新建 Ly、layer 结构、mask、panel、生成 Ly 预制体、双窗、第二窗、指令回矿、UI 不落盘时也引用。
 globs: assets/game/**,assets/gmajor/**,**/*.{scene,prefab}
 alwaysApply: false
 ---
@@ -141,7 +141,15 @@ export class PfX extends GMScene {}
 - 数据变了要刷新界面（含「金币变了改数字」这种说法）：用 `watch` / `this.watch(gd 或 gl, 树名, 字段, 回调)`，不要每帧扫、不要用事件冒充字段监听。
 - `watch` 只盯一层字段；`===` 没变不喊。对象/数组只有整份换才喊；里面改了请 `this.emit`。
 - 业务事件用 `this.on` / `off` / `emit`（基类已带；组件销毁、包 unbind 会自动摘）。数据用 `watch`，事件用 `on`，别混。
+- **事件名按大类加前缀**，且首字母大写（事件总线强制）：平台推送 `Gp`（壳 `ui-closed` → `GpUiClosed`，听 `this.on('GpUiClosed')`）；绑定 `Bind`（已有 `BindReady`）。不要无前缀的 `UiClosed`。已是 `GpXxx` 不要再叠。
 - 两扇操作系统窗口 = 两套 JS 堆，不能靠内存共享。只有权威窗（矿窗）写 `gl` / 落盘；另一窗只发指令、只吃快照，禁止自己改 `gl` 或 LocalStore，禁止双写对打。
+
+## 平台（`gp === gm.platform`）
+
+- 游戏包和 gmajor 其它模块只喊 `gp`。禁止读 `window.desktop` / `wx` / `jsb`。壳探测只留在 Electron 子类。
+- 问外面并等回：`gp.call(name, data, onComplete)`（error-first；`msgid` 只在通道内）。只发不等：`gp.send(name, data?)`。`ScMain` 不解析 URL；`role` 来自 `gp.params`。
+- 外面主动推**不**走 `gp.on`，进 `gm.events`（见上条 `Gp*`）。
+- **游戏禁止调 `gp.recv`**（`recv` 是 `protected`）。壳/原生回包由**平台子类**在 ipc / 反射回调里 `this.recv(原文)`；JSON 在基类里转对象。具名封装以后再二次处理。
 
 ## loading（挡操作）
 
