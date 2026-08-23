@@ -1,6 +1,6 @@
 /**
  * GMajor 核心出口 = 模块一览（先看本文件再下钻）。
- * 目录：launch/ event/ resource/ bind/ ui/ data/；用法表：docs/架构/核心简介.md
+ * 目录：launch/ event/ resource/ bind/ ui/ data/ platform/；用法表：docs/架构/核心简介.md
  */
 
 // —— event/ ——
@@ -26,6 +26,7 @@ export type { IGMBundleEntry } from './bind/GMBundleEntryBase';
 // —— ui/ ——
 export { GMComponent } from './ui/GMComponent'; // UI 通用基类；业务 onInit/onStart/onRemove；watch 随节点卸
 export { GMLayer } from './ui/GMLayer'; // Layer 基类；Ly* 继承；mask+panel 入场；场景不套
+export { GMAlert } from './ui/GMAlert'; // 确认框基类；皮在本游戏常驻包
 export { GMScene } from './ui/GMScene'; // 场景基类；Sc* 继承（→Layer→Component）；默认 opacity
 export { GMUIManager } from './ui/GMUIManager'; // 视图门面：openScene / showLayer / addClick / createTs / alert；窗=设计分辨率
 export type { GMOpenSceneOptions, GMShowLayerOptions, GMLoadingShowOptions, GMAddClickOpts, GMCreateTsNodeParm, GMAlertParams, GMAlertBtn } from './ui/GMUIManager';
@@ -38,5 +39,10 @@ export type { GMDataRoot, GMLocalRoot, GMWatchCb, GMWatchRoot } from './data/GMS
 
 // —— launch/ ——
 export { config } from './config'; // 框架配置（版本）；跟 gmajor/ 走
-export { gm, gd, gl, gu, registerBundleEntry } from './launch/GMLauncher'; // gm 全局单例；gd===gm.data；gl===gm.local；gu===gm.ui
+export { gm, gd, gl, gu, gp, registerBundleEntry } from './launch/GMLauncher'; // gm 全局单例；gd===gm.data；gl===gm.local；gu===gm.ui；gp===gm.platform
 export type { GMCore } from './launch/GMLauncher';
+export type { GMGameConfig, GMBootOpts } from './launch/GMBoot'; // 项目开机配置；gm.boot 吃这个
+
+// —— platform/ ——
+export { GMPlatform } from './platform/GMPlatform'; // 平台基类；游戏只喊 gp
+export type { GMPlatformId, GMPlatformParams } from './platform/GMPlatform';

@@ -22,3 +22,9 @@ node_modules/
 # WebStorm
 #//////////////////////////
 .idea/
+
+# 本地密钥，禁止入库
+.env
+.env.local
+.cursor/mcp.json
+docs/素材/.secrets/

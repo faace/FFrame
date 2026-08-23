@@ -1,5 +1,5 @@
 import { _decorator, Color, Graphics, Label, Node, UITransform } from 'cc';
-import { GMLayer } from '../../../gmajor';
+import { GMLayer } from '../../../../gmajor';
 
 const { ccclass } = _decorator;
 

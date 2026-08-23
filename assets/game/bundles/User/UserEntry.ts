@@ -10,7 +10,6 @@ class UserEntry extends GMBundleEntryBase {
         return new Promise((resolve, reject) => {
             gd.sync('User', (err) => {
                 if (err) return reject(err);
-                console.info('[User] 就绪', gd.User);
                 resolve();
             });
         });

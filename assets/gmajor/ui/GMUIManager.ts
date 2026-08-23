@@ -374,6 +374,11 @@ export class GMUIManager {
         return ts;
     }
 
+    /** 常驻包 onBind 预载后登记；之后 gu.alert 不再 load */
+    setAlertPrefab(prefab: Prefab): void {
+        this.alertPrefab = prefab;
+    }
+
     /** 系统确认框。字符串 = 仅确定。content+按钮文案相同则不新建 */
     alert(param: string | GMAlertParams): void {
         const p: GMAlertParams = typeof param === 'string' ? { content: param } : param;
@@ -410,14 +415,8 @@ export class GMUIManager {
             this.runHook(ts as GMLayer, 'onEnter', () => {}, id);
         };
         if (this.alertPrefab) return open(this.alertPrefab);
-        this.resource.load('Widget', 'LyAlert', Prefab, (err, prefab) => {
-            if (err || !prefab) {
-                this.alertPending.delete(key);
-                return console.error('[gm.ui] load LyAlert 失败', err);
-            }
-            this.alertPrefab = prefab;
-            open(prefab);
-        });
+        this.alertPending.delete(key);
+        console.error('[gm.ui] alert 皮未预载，请在常驻包 onBind 里 setAlertPrefab');
     }
 
     loadingHide(actionName: string): void {

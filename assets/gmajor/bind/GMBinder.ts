@@ -50,14 +50,18 @@ export class GMBinder {
         return [...this.nodes.keys()];
     }
 
-    /** 按序 load+bind；已就绪的跳过。名单由项目传入，核心不内置 */
-    bindInOrder(names: string[], onComplete: GMAsyncComplete): void {
+    /** 按序 load+bind；已就绪的跳过。名单由项目传入，核心不内置。onProgress(已完成包数, 总包数) */
+    bindInOrder(names: string[], onComplete: GMAsyncComplete, onProgress?: GMAsyncProgress): void {
+        const total = names.length;
         const next = (i: number): void => {
             if (i >= names.length) return onComplete(null);
             const name = names[i];
             this.loadBundle(name, (err) => {
                 if (err) return onComplete(err);
-                void this.bind(name).then(() => next(i + 1), (bindErr) => onComplete(bindErr));
+                void this.bind(name).then(() => {
+                    onProgress?.(i + 1, total);
+                    next(i + 1);
+                }, (bindErr) => onComplete(bindErr));
             });
         };
         next(0);

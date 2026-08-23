@@ -1,6 +1,6 @@
 ---
-description: Bundle/功能目录/绑定名、Sc/Ly/Pf、双基类、layer 结构（根+panel、mask 克隆）、数据 watch、业务事件 on、loading、addClick、createTs、动态 UI 挂 Canvas、双窗数据权。新建或改 Bundle、场景、预制体、gmajor/bundles 脚本时引用。用户说数据变了刷新 UI、金币/字段变化、监听事件、新建功能包、异步等待、挡住操作、loading、注册点击、addClick、列表项、createTs、按钮看不见、动态创建节点、新建 Ly、layer 结构、mask、panel、生成 Ly 预制体、双窗、第二窗、指令回矿、UI 不落盘时也引用。
-globs: assets/bundles/**,assets/gmajor/**,**/*.{scene,prefab}
+description: Bundle/功能目录/绑定名、Sc/Ly/Pf、双基类、layer 结构（根+panel、mask 克隆）、数据 watch、业务事件 on、loading、addClick、createTs、动态 UI 挂 Canvas、双窗数据权。新建或改 Bundle、场景、预制体、gmajor/game 脚本时引用。用户说数据变了刷新 UI、金币/字段变化、监听事件、新建功能包、异步等待、挡住操作、loading、注册点击、addClick、列表项、createTs、按钮看不见、动态创建节点、新建 Ly、layer 结构、mask、panel、生成 Ly 预制体、双窗、第二窗、指令回矿、UI 不落盘时也引用。
+globs: assets/game/**,assets/gmajor/**,**/*.{scene,prefab}
 alwaysApply: false
 ---
 
@@ -8,21 +8,20 @@ alwaysApply: false
 
 ## Bundle 与功能目录
 
-- `assets/bundles/` 下的**功能目录名** = **Bundle 名** = **绑定名**，必须使用 **大驼峰（PascalCase）**。
+- `assets/game/bundles/` 下的**功能目录名** = **Bundle 名** = **绑定名**，必须使用 **大驼峰（PascalCase）**。
 - **禁止**使用连字符 `-`、下划线蛇形（如 `demo_home`）作为功能/Bundle 名。
 
 ```text
-✅ assets/bundles/DemoHome/
-✅ assets/bundles/Demo/DemoHome/     # Demo 仅为分组（如测试组），不配 Bundle
-✅ assets/bundles/Base/User/         # Base 为基础包分组，不配 Bundle
-✅ assets/bundles/Core/SomeFeature/  # Core 同理，仅为分组
+✅ assets/game/bundles/DemoHome/
+✅ assets/game/bundles/Demo/DemoHome/     # Demo 仅为分组（如测试组），不配 Bundle
+✅ assets/game/bundles/User/              # 本游戏包，不是全局系统包
 ✅ loadBundle('DemoHome') / bind('DemoHome')   # 绑定名 = 叶子目录名
 
-❌ assets/bundles/demo-home/
-❌ assets/bundles/demo_home/
-❌ assets/bundles/demoHome/          # 小驼峰：不作 Bundle/功能目录名
+❌ assets/game/bundles/demo-home/
+❌ assets/game/bundles/demo_home/
+❌ assets/game/bundles/demoHome/          # 小驼峰：不作 Bundle/功能目录名
 ❌ 把中间分组目录也配成 Asset Bundle（首版不做 Bundle 套 Bundle）
-❌ 绑定名写成全路径（如 Core/DemoHome）— 默认只用叶子名
+❌ 绑定名写成全路径（如 Demo/DemoHome）— 默认只用叶子名
 ```
 
 ## 多层分组（D23）
@@ -44,13 +43,14 @@ alwaysApply: false
 
 | 种类 | 风格 | 示例 |
 |------|------|------|
-| 系统/脚手架目录 | **小写**（对齐 Cocos `resources`） | `gmajor/`、`main/`、`bundles/` |
+| 系统/脚手架目录 | **小写**（对齐 Cocos `resources`） | `gmajor/`、`game/`、`bundles/` |
 | 分组目录 | **大驼峰** | `Demo/`、`Base/`、`Core/` |
 | 功能叶子 / Bundle / 绑定名 | **大驼峰** | `DemoHome/` |
 
-- 核心：`assets/gmajor/`（固定）
-- 入口：`assets/main/`（固定；启动场景 `ScMain.scene`）
-- 功能根：`assets/bundles/`（固定小写；其下再分组/功能）
+- 核心：`assets/gmajor/`（固定；无开机名单）
+- 项目：`assets/game/`（固定；`ScMain.scene` + `ScMain.ts` + `config.ts` 同层）
+- 功能根：`assets/game/bundles/`（固定小写；其下再分组/功能）
+- 确认框脚本基类在 gmajor（`GMAlert`）；皮在本游戏常驻包（如 `GameUI`），开机 `onBind` 预载
 
 ## 场景（Scene）
 
@@ -188,6 +188,6 @@ export class PfX extends GMScene {}
 ❌ player.prefab / PFPlayer.prefab（缺 Pf 或大小写不对）
 ❌ 场景脚本直接挂在 Canvas / Camera 上；预制体脚本挂在子节点
 ❌ Sc*/Ly*/Pf* 直接 extends Component
-✅ node tools/create-ly-prefab.mjs assets/bundles/Demo/DemoHome LyShop（默认带 panel）
+✅ node tools/create-ly-prefab.mjs assets/game/bundles/Demo/DemoHome LyShop（默认带 panel）
 ❌ 空节点另存成 Ly prefab 再补 panel；根上挂 Graphics
 ```

@@ -1,20 +1,11 @@
 import { _decorator, Color, Graphics, Label, Node, UITransform } from 'cc';
-import { GMLayer, gu } from '../../../gmajor';
+import { GMAlert } from '../../../gmajor';
 
 const { ccclass } = _decorator;
 
-/** 系统确认框：内容画在 panel 上；mask 由 GMLayer 克隆 */
+/** Demo 皮：脚本画灰底；正式游戏改预制体节点即可，不必走这里 */
 @ccclass('LyAlert')
-export class LyAlert extends GMLayer {
-    private body: Label | null = null;
-    private okLabel: Label | null = null;
-    private cancelLabel: Label | null = null;
-    private btnOk: Node | null = null;
-    private btnCancel: Node | null = null;
-    private onOk: (() => void) | undefined;
-    private onCancel: (() => void) | undefined;
-    private close: (() => void) | undefined;
-
+export class LyAlert extends GMAlert {
     onInit(): void {
         const panel = this.panel;
         if (!panel) return;
@@ -31,32 +22,6 @@ export class LyAlert extends GMLayer {
         this.cancelLabel = this.btnCancel.getChildByName('label')?.getComponent(Label) ?? null;
         this.okLabel = this.btnOk.getChildByName('label')?.getComponent(Label) ?? null;
         console.info('[LyAlert] onInit');
-    }
-
-    init(parm?: {
-        content: string;
-        okText: string;
-        cancelText: string;
-        showCancel: boolean;
-        onOk?: () => void;
-        onCancel?: () => void;
-        close: () => void;
-    }): void {
-        if (!parm) return;
-        if (this.body) this.body.string = parm.content;
-        if (this.okLabel) this.okLabel.string = parm.okText;
-        if (this.cancelLabel) this.cancelLabel.string = parm.cancelText;
-        this.onOk = parm.onOk;
-        this.onCancel = parm.onCancel;
-        this.close = parm.close;
-        if (this.btnCancel) this.btnCancel.active = parm.showCancel;
-        if (this.btnOk) {
-            this.btnOk.setPosition(parm.showCancel ? 110 : 0, -80, 0);
-            gu.addClick(this.btnOk, () => { this.onOk?.(); this.close?.(); });
-        }
-        if (parm.showCancel && this.btnCancel) {
-            gu.addClick(this.btnCancel, () => { this.onCancel?.(); this.close?.(); });
-        }
     }
 
     onRemove(): void {

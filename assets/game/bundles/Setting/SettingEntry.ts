@@ -12,7 +12,6 @@ class SettingEntry extends GMBundleEntryBase {
         if (setting.bgmVolume === undefined) setting.bgmVolume = 1;
         if (setting.sfxVolume === undefined) setting.sfxVolume = 1;
         if (setting.language === undefined) setting.language = 'zh';
-        console.info('[Setting] 就绪', setting);
     }
 }
 

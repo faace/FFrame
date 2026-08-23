@@ -19,7 +19,7 @@ alwaysApply: true
 | 注册点击、addClick、不要拖 Button | `01-naming` |
 | 动态创建 UI、按钮看不见 | `01-naming` |
 | 列表项、createTs、握脚本改数量 | `01-naming` |
-| 新写/改公共异步 API、完成回调、进度回调 | `01-async-callback` |
+| 新写/改公共异步 API、完成回调、进度回调、几步才要 onProgress | `01-async-callback` |
 | 写临时/工具脚本（`tools/`） | `01-nodejs-temp-scripts` |
 | 消息含 `#rule`、grilling 收尾要沉淀规范 | 本文件（下方流程） |
 
@@ -32,8 +32,8 @@ alwaysApply: true
 | 规则 | 触发 | description |
 |------|------|-------------|
 | `00-meta.mdc` | Always | 规则索引与 #rule 写入流程（Always） |
-| `01-async-callback.mdc` | Agent/按需 | 新写或改写公共异步 API / 完成回调 / onProgress 时引用：error-first；完成在前、进度可选 |
-| `01-naming.mdc` | globs: `assets/bundles/**,assets/gmajor/**,**/*.{scene,prefab}`；Agent/按需 | Bundle/功能目录/绑定名、Sc/Ly/Pf、双基类、layer 结构（根+panel、mask 克隆）、数据 watch、业务事件 on、loading、addClick、createTs、动态 UI 挂 Canvas、双窗数据权。新建或改 Bundle、场景、预制体、gmajor/bundles 脚本时引用。用户说数据变了刷新 UI、金币/字段变化、监听事件、新建功能包、异步等待、挡住操作、loading、注册点击、addClick、列表项、createTs、按钮看不见、动态创建节点、新建 Ly、layer 结构、mask、panel、生成 Ly 预制体、双窗、第二窗、指令回矿、UI 不落盘时也引用。 |
+| `01-async-callback.mdc` | Agent/按需 | 新写或改写公共异步 API / 完成回调 / onProgress 时引用：error-first；完成在前、进度可选；≥4 步或开机/热更必须留 onProgress |
+| `01-naming.mdc` | globs: `assets/game/**,assets/gmajor/**,**/*.{scene,prefab}`；Agent/按需 | Bundle/功能目录/绑定名、Sc/Ly/Pf、双基类、layer 结构（根+panel、mask 克隆）、数据 watch、业务事件 on、loading、addClick、createTs、动态 UI 挂 Canvas、双窗数据权。新建或改 Bundle、场景、预制体、gmajor/game 脚本时引用。用户说数据变了刷新 UI、金币/字段变化、监听事件、新建功能包、异步等待、挡住操作、loading、注册点击、addClick、列表项、createTs、按钮看不见、动态创建节点、新建 Ly、layer 结构、mask、panel、生成 Ly 预制体、双窗、第二窗、指令回矿、UI 不落盘时也引用。 |
 | `01-nodejs-temp-scripts.mdc` | globs: `tools/**`；Agent/按需 | 编写临时/工具脚本，或把脚本放到 tools 时引用：优先 Node.js；临时脚本放 tools/temp |
 | `01-typescript-style.mdc` | Agent/按需 | 编写或改写 TypeScript 时：4 空格缩进、行尾注释优先、签名尽量单行、简单失败早退一行；维护 index.ts / docs/架构 时也引用 |
 
@@ -61,4 +61,4 @@ grilling 达成共识后，**必须问**要不要把可执行短条并进 Rule�
 - 用户只是「提到规则 / 加到规则」但**没有 `#rule`**、也**未经 grilling 收尾确认**时：可整理草案并询问，**默认不落盘**。
 - 不要把未整理的聊天原文整段塞进 rule；要压缩成约定条目。
 - 不要把业务规则设为 `alwaysApply: true`（仅本 `00-meta` 为 Always）。
-- 不要给「凡编辑 TS 就引用」写过宽的 `description` / `globs: **/*.ts`（会抵消按需加载）。`assets/bundles/**` 与 `assets/gmajor/**` 可以（写这些文件时需要规范）。
+- 不要给「凡编辑 TS 就引用」写过宽的 `description` / `globs: **/*.ts`（会抵消按需加载）。`assets/game/**` 与 `assets/gmajor/**` 可以（写这些文件时需要规范）。

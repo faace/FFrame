@@ -2,7 +2,7 @@
 /**
  * 生成 Ly* 预制体默认结构：根（脚本+UITransform）+ 空 panel。mask 不进 prefab。
  * 用法：node tools/create-ly-prefab.mjs <目录> Ly名字
- * 例：node tools/create-ly-prefab.mjs assets/bundles/Demo/DemoHome LyShop
+ * 例：node tools/create-ly-prefab.mjs assets/game/bundles/Demo/DemoHome LyShop
  */
 import crypto from 'node:crypto';
 import fs from 'node:fs';

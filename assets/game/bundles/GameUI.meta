@@ -8,7 +8,7 @@
   "userData": {
     "isBundle": true,
     "bundleConfigID": "default",
-    "bundleName": "Widget",
+    "bundleName": "GameUI",
     "priority": 9
   }
 }

@@ -17,7 +17,7 @@ export class GMBindContext {
 
     /** 嵌套绑定子 Bundle；子随父解绑/回滚 */
     bindChild(name: string): Promise<void> {
-        return this.binder.bind(name, { parentPath: this.bindPath, parentName: this.bundleName });
+        return this.binder.bind(name, { loadIfNeeded: true, parentPath: this.bindPath, parentName: this.bundleName });
     }
 
     openScene(sceneName: string, onComplete?: GMAsyncComplete, onProgress?: GMAsyncProgress): void {

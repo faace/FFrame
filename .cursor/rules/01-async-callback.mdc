@@ -1,5 +1,5 @@
 ---
-description: 新写或改写公共异步 API / 完成回调 / onProgress 时引用：error-first；完成在前、进度可选
+description: 新写或改写公共异步 API / 完成回调 / onProgress 时引用：error-first；完成在前、进度可选；≥4 步或开机/热更必须留 onProgress
 alwaysApply: false
 ---
 
@@ -28,6 +28,22 @@ onComplete(data, err)
 - `onProgress` **不是**完成回调，不走 error-first；约定为 `(finished, total, ...)`（具体语义由 API 注明）。
 - 对接 Cocos 等引擎时，在实现层映射字段名（如 `onFileProgress`），对外保持 `onProgress`。
 - 共用类型：`assets/gmajor/resource/GMAsyncCallback.ts`（`GMAsyncComplete` / `GMAsyncProgress`）；后续资源加载等沿用。
+
+## 什么时候必须留 `onProgress?`
+
+「一步」= 调用方能当进度格子的单位：bind 一个包、load 一份具名资源。不算函数内部微任务。
+
+- **1～3 步**：可以只有 `onComplete`。
+- **≥4 步**：API **必须**带 `onProgress?`（调用方不需要可以不传）。
+- **开机（`gm.boot`）/ 热更**：步数再少也必须留进度口（人会盯着等）。
+
+```ts
+// ✅ 开机
+gm.boot(config, (err) => { if (err) return; }, (finished, total) => { /* 进度条以后接 */ });
+
+// ✅ 单次 load：不必强求 onProgress
+gm.resource.load('GameUI', 'LyAlert', Prefab, (err, prefab) => { if (err || !prefab) return; });
+```
 
 ## 适用范围
 

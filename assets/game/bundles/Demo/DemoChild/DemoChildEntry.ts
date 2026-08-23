@@ -1,4 +1,4 @@
-import { GMBindContext, GMBundleEntryBase, registerBundleEntry } from '../../../gmajor';
+import { GMBindContext, GMBundleEntryBase, registerBundleEntry } from '../../../../gmajor';
 
 /** 示范子功能：被 DemoHome 嵌套绑定 */
 class DemoChildEntry extends GMBundleEntryBase {
