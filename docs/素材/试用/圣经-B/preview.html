@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>风格圣经 B · PixelLab 试笔</title>
+    <style>
+        :root {
+            --bg: #1a1814;
+            --paper: #2a261f;
+            --ink: #f4efe4;
+            --muted: #9a9184;
+            --line: #3f392e;
+            --accent: #d4a24c;
+        }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            color: var(--ink);
+            background: var(--bg);
+            font: 15px/1.55 "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+        }
+        .wrap { max-width: 1100px; margin: 0 auto; padding: 28px 18px 64px; }
+        h1 { font-size: 24px; margin: 0 0 6px; }
+        h2 { font-size: 18px; margin: 36px 0 10px; }
+        .lead, .note { color: var(--muted); }
+        .note { font-size: 13px; }
+        .row {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+        }
+        .card {
+            background: var(--paper);
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            padding: 12px;
+        }
+        .card.r5 { border-color: #e6c15a; box-shadow: 0 0 0 2px #e6c15a55; }
+        .card.r4 { border-color: #7eb56a; }
+        .card.r3 { border-color: #c9a227; }
+        .card.r2 { border-color: #7a6a4a; }
+        .card.r1 { border-color: #5a4038; opacity: 0.78; }
+        .head { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 8px; }
+        .card h3 { margin: 0; font-size: 14px; }
+        .stars { letter-spacing: 1px; font-size: 14px; white-space: nowrap; }
+        .r5 .stars { color: #f4d36a; }
+        .r4 .stars { color: #8fd47a; }
+        .r3 .stars { color: #e0b84a; }
+        .r2 .stars { color: #9a8b6a; }
+        .r1 .stars { color: #6a5348; }
+        .chip {
+            display: inline-block;
+            margin-left: 6px;
+            padding: 0 7px;
+            border-radius: 999px;
+            font-size: 11px;
+            line-height: 1.7;
+        }
+        .r5 .chip { background: #e6c15a; color: #1a1814; }
+        .r4 .chip { background: #3d6b3a; color: #d9f0d6; }
+        .r3 .chip { background: #6b5a1a; color: #f3e2a0; }
+        .r2 .chip { background: #3f392e; color: #cfc6b6; }
+        .r1 .chip { background: #3a2420; color: #d9b2a8; }
+        .stage {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 180px;
+            background:
+                linear-gradient(45deg, #3a342b 25%, transparent 25%),
+                linear-gradient(-45deg, #3a342b 25%, transparent 25%),
+                linear-gradient(45deg, transparent 75%, #3a342b 75%),
+                linear-gradient(-45deg, transparent 75%, #3a342b 75%);
+            background-size: 16px 16px;
+            background-position: 0 0, 0 8px, 8px -8px, -8px 0;
+            background-color: #241f19;
+            border-radius: 8px;
+            overflow: auto;
+        }
+        .stage img {
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+            height: var(--zoom, 128px);
+            width: auto;
+        }
+        .meta { margin: 8px 0 0; font-size: 12px; color: var(--muted); }
+        .toolbar, .legend { display: flex; gap: 8px; flex-wrap: wrap; margin: 12px 0 8px; align-items: center; }
+        .legend span { font-size: 12px; padding: 2px 8px; border-radius: 999px; }
+        .l5 { background: #e6c15a; color: #1a1814; }
+        .l4 { background: #3d6b3a; color: #d9f0d6; }
+        .l3 { background: #6b5a1a; color: #f3e2a0; }
+        .l2 { background: #3f392e; color: #cfc6b6; }
+        .l1 { background: #3a2420; color: #d9b2a8; }
+        button {
+            border: 1px solid var(--line);
+            background: #3a342b;
+            color: var(--ink);
+            border-radius: 999px;
+            padding: 4px 12px;
+            cursor: pointer;
+        }
+        button.active { background: var(--accent); color: #1a1814; }
+        @media (max-width: 800px) { .row { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+<div class="wrap">
+    <h1>风格圣经 B · PixelLab 试笔</h1>
+    <p class="lead">每类按推荐从高到低排。星和边框颜色同一套：金最好，绿能用，黄凑合，灰弱，红褐淘汰。</p>
+    <p class="note">这批是俯视试笔，只证明 PixelLab 能出图。地面建筑等策划。摄像机已改成正视矿格；木头井只是验证方向，不是定稿。</p>
+    <div class="legend">
+        <span class="l5">★★★★★ 首选</span>
+        <span class="l4">★★★★☆ 能用</span>
+        <span class="l3">★★★☆☆ 凑合</span>
+        <span class="l2">★★☆☆☆ 弱</span>
+        <span class="l1">★☆☆☆☆ 淘汰</span>
+    </div>
+    <div class="toolbar">
+        <span class="note">预览放大</span>
+        <button type="button" data-zoom="64">×2</button>
+        <button type="button" class="active" data-zoom="128">×4</button>
+        <button type="button" data-zoom="192">×6</button>
+        <button type="button" data-zoom="256">×8</button>
+    </div>
+
+    <h2>色板</h2>
+    <div class="row">
+        <article class="card r3">
+            <div class="head">
+                <h3>palette-1 <span class="chip">凑合</span></h3>
+                <span class="stars">★★★☆☆</span>
+            </div>
+            <div class="stage"><img src="palette-1.png" alt="palette-1"></div>
+            <p class="meta">最接近色条，背后有农场景。不锁图，只拿来吸色。</p>
+        </article>
+        <article class="card r2">
+            <div class="head">
+                <h3>palette-2 <span class="chip">弱</span></h3>
+                <span class="stars">★★☆☆☆</span>
+            </div>
+            <div class="stage"><img src="palette-2.png" alt="palette-2"></div>
+            <p class="meta">地形拼贴，不是色板。</p>
+        </article>
+        <article class="card r1">
+            <div class="head">
+                <h3>palette-3 <span class="chip">淘汰</span></h3>
+                <span class="stars">★☆☆☆☆</span>
+            </div>
+            <div class="stage"><img src="palette-3.png" alt="palette-3"></div>
+            <p class="meta">环境条 + 字，不能当圣经。</p>
+        </article>
+    </div>
+
+    <h2>矿格</h2>
+    <div class="row">
+        <article class="card r5">
+            <div class="head">
+                <h3>tile-2 · 32×32 <span class="chip">首选</span></h3>
+                <span class="stars">★★★★★</span>
+            </div>
+            <div class="stage"><img src="tile-2.png" alt="tile-2"></div>
+            <p class="meta">碎石铺地，最像矿底。俯视，下一批改成正视剖面。</p>
+        </article>
+        <article class="card r3">
+            <div class="head">
+                <h3>tile-3 · 32×32 <span class="chip">凑合</span></h3>
+                <span class="stars">★★★☆☆</span>
+            </div>
+            <div class="stage"><img src="tile-3.png" alt="tile-3"></div>
+            <p class="meta">木砖能拼，偏室内地板。</p>
+        </article>
+        <article class="card r1">
+            <div class="head">
+                <h3>tile-1 · 32×32 <span class="chip">淘汰</span></h3>
+                <span class="stars">★☆☆☆☆</span>
+            </div>
+            <div class="stage"><img src="tile-1.png" alt="tile-1"></div>
+            <p class="meta">2×2 图标，不是地砖。</p>
+        </article>
+    </div>
+
+    <h2>工人</h2>
+    <div class="row">
+        <article class="card r5">
+            <div class="head">
+                <h3>worker-3 · 32×64 <span class="chip">首选</span></h3>
+                <span class="stars">★★★★★</span>
+            </div>
+            <div class="stage"><img src="worker-3.png" alt="worker-3"></div>
+            <p class="meta">稿 + 灯，主题对。比例偏 JRPG，下一批改侧站略 3/4。</p>
+        </article>
+        <article class="card r3">
+            <div class="head">
+                <h3>worker-2 · 32×64 <span class="chip">凑合</span></h3>
+                <span class="stars">★★★☆☆</span>
+            </div>
+            <div class="stage"><img src="worker-2.png" alt="worker-2"></div>
+            <p class="meta">草帽农夫，气质暖，职业不对。</p>
+        </article>
+        <article class="card r2">
+            <div class="head">
+                <h3>worker-1 · 32×64 <span class="chip">弱</span></h3>
+                <span class="stars">★★☆☆☆</span>
+            </div>
+            <div class="stage"><img src="worker-1.png" alt="worker-1"></div>
+            <p class="meta">拿镰刀，更偏收割。</p>
+        </article>
+    </div>
+
+    <h2>面板</h2>
+    <div class="row">
+        <article class="card r5">
+            <div class="head">
+                <h3>panel-1 · 96×64 <span class="chip">首选</span></h3>
+                <span class="stars">★★★★★</span>
+            </div>
+            <div class="stage"><img src="panel-1.png" alt="panel-1"></div>
+            <p class="meta">木框 + 羊皮纸，最像窗。</p>
+        </article>
+        <article class="card r2">
+            <div class="head">
+                <h3>panel-2 · 96×64 <span class="chip">弱</span></h3>
+                <span class="stars">★★☆☆☆</span>
+            </div>
+            <div class="stage"><img src="panel-2.png" alt="panel-2"></div>
+            <p class="meta">背包格 + 食物，不是空面板。</p>
+        </article>
+        <article class="card r1">
+            <div class="head">
+                <h3>panel-3 · 96×64 <span class="chip">淘汰</span></h3>
+                <span class="stars">★☆☆☆☆</span>
+            </div>
+            <div class="stage"><img src="panel-3.png" alt="panel-3"></div>
+            <p class="meta">罐子机，不是窗。</p>
+        </article>
+    </div>
+</div>
+<script>
+    document.querySelectorAll("[data-zoom]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+            document.querySelectorAll("[data-zoom]").forEach((b) => b.classList.remove("active"));
+            btn.classList.add("active");
+            document.querySelectorAll(".stage").forEach((el) => {
+                el.style.setProperty("--zoom", btn.getAttribute("data-zoom") + "px");
+            });
+        });
+    });
+</script>
+</body>
+</html>

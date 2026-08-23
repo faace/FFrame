@@ -1,0 +1,115 @@
+{
+  "style": "Stardew Valley warm 16-bit pixel art, Terraria side-view front-view, limited palette, 1px hard outlines, no anti-aliasing, no watermark",
+  "jobs": [
+    {
+      "file": "cell-1.png",
+      "w": 80,
+      "h": 64,
+      "bg": false,
+      "description": "Stardew Valley warm 16-bit pixel art, Terraria side-view front-view, limited palette, 1px hard outlines, no anti-aliasing, no watermark, ONE complete underground mine CELL, WIDER than tall, landscape rectangle, NOT a tall portrait. OUTER CONTOUR: thick dark cave-rock rim surrounding all four sides. INSIDE: a clear grid of 4 COLUMNS by 3 ROWS (col=4, row=3, exactly 12 square ore tiles), grey packed stones, some gold chunks embedded, thin dark grid lines. Front-view cross-section, no character, no sky, no house, no text, 80 by 64 canvas",
+      "ok": true,
+      "outW": 80,
+      "outH": 64,
+      "usage": {
+        "type": "generations",
+        "generations": 1
+      },
+      "ms": 34174
+    },
+    {
+      "file": "cell-2.png",
+      "w": 96,
+      "h": 72,
+      "bg": false,
+      "description": "Stardew Valley warm 16-bit pixel art, Terraria side-view front-view, limited palette, 1px hard outlines, no anti-aliasing, no watermark, ONE complete underground mine CELL, WIDER than tall, landscape rectangle, NOT a tall portrait. OUTER CONTOUR: thick dark cave-rock rim surrounding all four sides. INSIDE: a clear grid of 4 COLUMNS by 3 ROWS (col=4, row=3, exactly 12 square ore tiles), grey packed stones, some gold chunks embedded, thin dark grid lines. Front-view cross-section, no character, no sky, no house, no text, 96 by 72 canvas so the 4 by 3 grid is obvious",
+      "ok": true,
+      "outW": 96,
+      "outH": 72,
+      "usage": {
+        "type": "generations",
+        "generations": 1
+      },
+      "ms": 42520
+    },
+    {
+      "file": "miner-empty.png",
+      "w": 32,
+      "h": 64,
+      "bg": true,
+      "alt": [
+        32,
+        64
+      ],
+      "description": "Stardew Valley warm 16-bit pixel art, Terraria side-view front-view, limited palette, 1px hard outlines, no anti-aliasing, no watermark, side-view miner facing right, yellow hard hat with lamp, orange vest, blue pants, brown boots, EMPTY HANDS, NO pickaxe, NO tool, right arm slightly forward as if holding a handle, isolated sprite, transparent background",
+      "ok": true,
+      "outW": 32,
+      "outH": 64,
+      "usage": {
+        "type": "generations",
+        "generations": 1
+      },
+      "ms": 23262
+    },
+    {
+      "file": "pick-up.png",
+      "w": 32,
+      "h": 32,
+      "bg": true,
+      "description": "Stardew Valley warm 16-bit pixel art, Terraria side-view front-view, limited palette, 1px hard outlines, no anti-aliasing, no watermark, ONE isolated pickaxe only, wooden handle, iron head, NO person, NO hands, transparent background, grip at lower-left, head pointing UP-RIGHT for mining upward and forward",
+      "ok": true,
+      "outW": 32,
+      "outH": 32,
+      "usage": {
+        "type": "generations",
+        "generations": 1
+      },
+      "ms": 35524
+    },
+    {
+      "file": "pick-mid.png",
+      "w": 32,
+      "h": 32,
+      "bg": true,
+      "description": "Stardew Valley warm 16-bit pixel art, Terraria side-view front-view, limited palette, 1px hard outlines, no anti-aliasing, no watermark, ONE isolated pickaxe only, wooden handle, iron head, NO person, NO hands, transparent background, grip at lower-left, head pointing RIGHT, held horizontally forward for mining ahead",
+      "ok": true,
+      "outW": 32,
+      "outH": 32,
+      "usage": {
+        "type": "generations",
+        "generations": 1
+      },
+      "ms": 31254
+    },
+    {
+      "file": "pick-down.png",
+      "w": 32,
+      "h": 32,
+      "bg": true,
+      "description": "Stardew Valley warm 16-bit pixel art, Terraria side-view front-view, limited palette, 1px hard outlines, no anti-aliasing, no watermark, ONE isolated pickaxe only, wooden handle, iron head, NO person, NO hands, transparent background, grip at lower-left, head pointing DOWN-RIGHT for mining downward and forward",
+      "ok": true,
+      "outW": 32,
+      "outH": 32,
+      "usage": {
+        "type": "generations",
+        "generations": 1
+      },
+      "ms": 36858
+    },
+    {
+      "file": "swing-*.png",
+      "ok": true,
+      "files": [
+        "swing-0.png",
+        "swing-1.png",
+        "swing-2.png",
+        "swing-3.png",
+        "swing-4.png"
+      ],
+      "usage": {
+        "type": "generations",
+        "generations": 1
+      },
+      "ms": 49994
+    }
+  ]
+}

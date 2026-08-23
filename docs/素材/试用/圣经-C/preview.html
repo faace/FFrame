@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>风格圣经 C · 正视验证</title>
+    <style>
+        :root { --bg:#1a1814; --paper:#2a261f; --ink:#f4efe4; --muted:#9a9184; --line:#3f392e; --accent:#d4a24c; }
+        * { box-sizing: border-box; }
+        body { margin:0; color:var(--ink); background:var(--bg); font:15px/1.55 "Segoe UI","PingFang SC","Microsoft YaHei",sans-serif; }
+        .wrap { max-width:1100px; margin:0 auto; padding:28px 18px 64px; }
+        h1 { font-size:24px; margin:0 0 6px; }
+        h2 { font-size:18px; margin:36px 0 10px; }
+        .lead,.note,.meta { color:var(--muted); }
+        .note,.meta { font-size:13px; }
+        .row { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
+        .row.wide { grid-template-columns:1fr 1fr; }
+        .card { background:var(--paper); border:1px solid var(--line); border-radius:10px; padding:12px; }
+        .card.r5 { border-color:#e6c15a; box-shadow:0 0 0 2px #e6c15a55; }
+        .card.r4 { border-color:#7eb56a; }
+        .card.r3 { border-color:#c9a227; }
+        .card.r2 { border-color:#7a6a4a; }
+        .card.r1 { border-color:#5a4038; opacity:.78; }
+        .head { display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:8px; }
+        h3 { margin:0; font-size:14px; }
+        .stars { letter-spacing:1px; }
+        .r5 .stars { color:#f4d36a; } .r4 .stars { color:#8fd47a; } .r3 .stars { color:#e0b84a; }
+        .r2 .stars { color:#9a8b6a; } .r1 .stars { color:#6a5348; }
+        .chip { display:inline-block; margin-left:6px; padding:0 7px; border-radius:999px; font-size:11px; line-height:1.7; }
+        .r5 .chip { background:#e6c15a; color:#1a1814; }
+        .r4 .chip { background:#3d6b3a; color:#d9f0d6; }
+        .r3 .chip { background:#6b5a1a; color:#f3e2a0; }
+        .r2 .chip { background:#3f392e; color:#cfc6b6; }
+        .r1 .chip { background:#3a2420; color:#d9b2a8; }
+        .stage {
+            display:flex; align-items:center; justify-content:center; min-height:180px; border-radius:8px;
+            background-color:#241f19;
+            background-image:linear-gradient(45deg,#3a342b 25%,transparent 25%),linear-gradient(-45deg,#3a342b 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#3a342b 75%),linear-gradient(-45deg,transparent 75%,#3a342b 75%);
+            background-size:16px 16px; background-position:0 0,0 8px,8px -8px,-8px 0;
+        }
+        .stage img { image-rendering:pixelated; height:var(--zoom,128px); width:auto; }
+        .legend,.toolbar { display:flex; gap:8px; flex-wrap:wrap; margin:12px 0 8px; align-items:center; }
+        .legend span { font-size:12px; padding:2px 8px; border-radius:999px; }
+        .l5 { background:#e6c15a; color:#1a1814; } .l4 { background:#3d6b3a; color:#d9f0d6; }
+        .l3 { background:#6b5a1a; color:#f3e2a0; } .l2 { background:#3f392e; color:#cfc6b6; }
+        .l1 { background:#3a2420; color:#d9b2a8; }
+        button { border:1px solid var(--line); background:#3a342b; color:var(--ink); border-radius:999px; padding:4px 12px; cursor:pointer; }
+        button.active { background:var(--accent); color:#1a1814; }
+        @media (max-width:800px) { .row,.row.wide { grid-template-columns:1fr; } }
+    </style>
+</head>
+<body>
+<div class="wrap">
+    <h1>风格圣经 C · 正视验证</h1>
+    <p class="lead">地面构图是临时设想，不锁策划。每类按推荐从高到低。Pixen：16×16 矿石接口能过，16×32 工人/井口被拒，自动升到 32。</p>
+    <div class="legend">
+        <span class="l5">★★★★★ 首选</span>
+        <span class="l4">★★★★☆ 能用</span>
+        <span class="l3">★★★☆☆ 凑合</span>
+        <span class="l2">★★☆☆☆ 弱</span>
+        <span class="l1">★☆☆☆☆ 淘汰</span>
+    </div>
+    <div class="toolbar">
+        <span class="note">预览放大</span>
+        <button type="button" data-zoom="64">×2</button>
+        <button type="button" class="active" data-zoom="128">×4</button>
+        <button type="button" data-zoom="192">×6</button>
+        <button type="button" data-zoom="256">×8</button>
+    </div>
+
+    <h2>整段地面（蓝天、左房、中井、右树+牌）</h2>
+    <div class="row wide">
+        <article class="card r5">
+            <div class="head"><h3>scene-1 · 128×64 <span class="chip">首选</span></h3><span class="stars">★★★★★</span></div>
+            <div class="stage"><img src="scene-1.png" alt="scene-1"></div>
+            <p class="meta">构图最贴：左小屋、中木矿井、右树下指示牌、蓝天白云。地下还是实心土，没有挖开的洞。</p>
+        </article>
+        <article class="card r4">
+            <div class="head"><h3>scene-2 · 128×64 <span class="chip">能用</span></h3><span class="stars">★★★★☆</span></div>
+            <div class="stage"><img src="scene-2.png" alt="scene-2"></div>
+            <p class="meta">井变成了出水井，牌在树旁不是树下。地下有一点石圈，仍不像矿坑。</p>
+        </article>
+    </div>
+
+    <h2>散件（用来拼，不是定稿）</h2>
+    <div class="row">
+        <article class="card r4">
+            <div class="head"><h3>tree-1 · 32×48 <span class="chip">能用</span></h3><span class="stars">★★★★☆</span></div>
+            <div class="stage"><img src="tree-1.png" alt="tree-1"></div>
+            <p class="meta">树 + 牌，侧视清楚。</p>
+        </article>
+        <article class="card r3">
+            <div class="head"><h3>house-1 · 32×32 <span class="chip">凑合</span></h3><span class="stars">★★★☆☆</span></div>
+            <div class="stage"><img src="house-1.png" alt="house-1"></div>
+            <p class="meta">小屋认得出，3/4 比正视多。</p>
+        </article>
+        <article class="card r2">
+            <div class="head"><h3>well-1 · 32×32 <span class="chip">弱</span></h3><span class="stars">★★☆☆☆</span></div>
+            <div class="stage"><img src="well-1.png" alt="well-1"></div>
+            <p class="meta">更像帐篷/拱门，不是木头矿井。16×32 被接口拒了。</p>
+        </article>
+    </div>
+
+    <h2>坑下（围岩 / 平铺矿石）</h2>
+    <div class="row">
+        <article class="card r4">
+            <div class="head"><h3>cave-gold-1 · 16×16 <span class="chip">能用</span></h3><span class="stars">★★★★☆</span></div>
+            <div class="stage"><img src="cave-gold-1.png" alt="cave-gold-1"></div>
+            <p class="meta">唯一像矿石：深岩嵌浅金。16 原生成功。</p>
+        </article>
+        <article class="card r3">
+            <div class="head"><h3>cave-hole-1 · 32×32 <span class="chip">凑合</span></h3><span class="stars">★★★☆☆</span></div>
+            <div class="stage"><img src="cave-hole-1.png" alt="cave-hole-1"></div>
+            <p class="meta">有洞的感觉，但是图标，不是围岩坑壁。</p>
+        </article>
+        <article class="card r2">
+            <div class="head"><h3>cave-wall-1 · 16×16 <span class="chip">弱</span></h3><span class="stars">★★☆☆☆</span></div>
+            <div class="stage"><img src="cave-wall-1.png" alt="cave-wall-1"></div>
+            <p class="meta">接口过了，内容不像围岩，像小人和块。</p>
+        </article>
+        <article class="card r1">
+            <div class="head"><h3>cave-ore-1 · 16×16 <span class="chip">淘汰</span></h3><span class="stars">★☆☆☆☆</span></div>
+            <div class="stage"><img src="cave-ore-1.png" alt="cave-ore-1"></div>
+            <p class="meta">生成成了小人，平铺失败。</p>
+        </article>
+    </div>
+
+    <h2>矿工（要帽子）</h2>
+    <div class="row">
+        <article class="card r5">
+            <div class="head"><h3>worker-2 · 32×64 <span class="chip">首选</span></h3><span class="stars">★★★★★</span></div>
+            <div class="stage"><img src="worker-2.png" alt="worker-2"></div>
+            <p class="meta">黄安全帽 + 头灯 + 稿扛肩，侧站最认。</p>
+        </article>
+        <article class="card r4">
+            <div class="head"><h3>worker-3 · 32×64 <span class="chip">能用</span></h3><span class="stars">★★★★☆</span></div>
+            <div class="stage"><img src="worker-3.png" alt="worker-3"></div>
+            <p class="meta">皮帽蜡烛 + 稿 + 背包。</p>
+        </article>
+        <article class="card r4">
+            <div class="head"><h3>worker-1 · 32×64 <span class="chip">能用</span></h3><span class="stars">★★★★☆</span></div>
+            <div class="stage"><img src="worker-1.png" alt="worker-1"></div>
+            <p class="meta">矿帽头灯 + 稿。16×32 被拒，升到 32×64。</p>
+        </article>
+    </div>
+</div>
+<script>
+    document.querySelectorAll("[data-zoom]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+            document.querySelectorAll("[data-zoom]").forEach((b) => b.classList.remove("active"));
+            btn.classList.add("active");
+            document.querySelectorAll(".stage").forEach((el) => el.style.setProperty("--zoom", btn.getAttribute("data-zoom") + "px"));
+        });
+    });
+</script>
+</body>
+</html>
