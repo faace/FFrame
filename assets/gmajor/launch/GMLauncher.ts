@@ -5,13 +5,14 @@ import { GMCocosResource } from '../resource/GMCocosResource';
 import { bindGMEvents } from '../event/GMEventHost';
 import { GMEventManager } from '../event/GMEventManager';
 import type { IGMResource } from '../resource/IGMResource';
-import { config } from '../config';
 import { GMStoreHub, type GMDataRoot, type GMLocalRoot } from '../data/GMStoreHub';
 import { GMUIManager } from '../ui/GMUIManager';
 import { createPlatform } from '../platform/GMPlatformCreate';
 import type { GMPlatform } from '../platform/GMPlatform';
 import type { GMAsyncComplete, GMAsyncProgress } from '../resource/GMAsyncCallback';
 import type { GMBootOpts, GMGameConfig } from './GMBoot';
+
+export const version = '0.3.1'; // 框架版本；升级只改这一处
 
 /** 全局核心句柄（模块加载时创建；用法 gm.binder / gm.events / gm.ui / gd / gl / gu / gp …） */
 export interface GMCore {
@@ -23,7 +24,7 @@ export interface GMCore {
     readonly data: GMDataRoot; // === gd
     readonly local: GMLocalRoot; // === gl
     readonly platform: GMPlatform; // === gp
-    readonly config: typeof config; // 框架配置（版本等）
+    readonly version: string; // 框架版本
     boot(game: GMGameConfig, onComplete: GMAsyncComplete, onProgress?: GMAsyncProgress): void;
     boot(game: GMGameConfig, opts: GMBootOpts, onComplete: GMAsyncComplete, onProgress?: GMAsyncProgress): void;
 }
@@ -62,7 +63,7 @@ function boot(game: GMGameConfig, a: GMBootOpts | GMAsyncComplete, b?: GMAsyncCo
 }
 
 /** GMajor 全局单例 */
-export const gm: GMCore = { events, resource, registry, binder, ui, data: gd, local: gl, platform: gp, config, boot };
+export const gm: GMCore = { events, resource, registry, binder, ui, data: gd, local: gl, platform: gp, version, boot };
 
 declare global {
     interface Window {
@@ -86,5 +87,5 @@ export function registerBundleEntry(name: string, entry: IGMBundleEntry): void {
     gm.registry.register(name, entry);
 }
 
-console.info('[gmajor] 核心已就绪', config.version);
+console.info('[gmajor] 核心已就绪', version);
 console.info('[gp]', gp.id, 'hasWindow', gp.hasWindow, 'role', gp.params.role || 'web');

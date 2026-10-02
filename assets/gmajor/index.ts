@@ -38,8 +38,7 @@ export { GMStoreHub } from './data/GMStoreHub'; // gd / gl 枢纽：建拆树、
 export type { GMDataRoot, GMLocalRoot, GMWatchCb, GMWatchRoot } from './data/GMStoreHub';
 
 // —— launch/ ——
-export { config } from './config'; // 框架配置（版本）；跟 gmajor/ 走
-export { gm, gd, gl, gu, gp, registerBundleEntry } from './launch/GMLauncher'; // gm 全局单例；gd===gm.data；gl===gm.local；gu===gm.ui；gp===gm.platform
+export { gm, gd, gl, gu, gp, version, registerBundleEntry } from './launch/GMLauncher'; // gm 全局单例；gd===gm.data；gl===gm.local；gu===gm.ui；gp===gm.platform；version 框架版本
 export type { GMCore } from './launch/GMLauncher';
 export type { GMGameConfig, GMBootOpts } from './launch/GMBoot'; // 项目开机配置；gm.boot 吃这个
 
