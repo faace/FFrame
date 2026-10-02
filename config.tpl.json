@@ -1,0 +1,7 @@
+{
+  "v": 1,
+  "version": { "app": "0.1.0" },
+  "boot": ["GameUI", "User", "Setting"],
+  "entry": { "web": "DemoHome" },
+  "skinBundle": "GameUI"
+}

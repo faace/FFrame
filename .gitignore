@@ -27,4 +27,9 @@ node_modules/
 .env
 .env.local
 .cursor/mcp.json
+
+# 具体 App，独立 git，克隆到此目录
+/assets/game/
+
+# 本地密钥，禁止入库
 docs/素材/.secrets/
