@@ -1,0 +1,433 @@
+{
+  "source": "ui-sheet-v3.png",
+  "background": {
+    "r": 248,
+    "g": 238,
+    "b": 211,
+    "n": 256
+  },
+  "count": 28,
+  "leftover": [],
+  "sprites": [
+    {
+      "name": "BtnPrimary",
+      "file": "BtnPrimary.png",
+      "x": 35,
+      "y": 114,
+      "w": 382,
+      "h": 114,
+      "border": {
+        "left": 21,
+        "right": 21,
+        "top": 23,
+        "bottom": 23
+      },
+      "uuid": "075aa98d-9fff-42ff-8f75-29838e2f1f3b"
+    },
+    {
+      "name": "BtnSecondary",
+      "file": "BtnSecondary.png",
+      "x": 35,
+      "y": 256,
+      "w": 382,
+      "h": 121,
+      "border": {
+        "left": 21,
+        "right": 21,
+        "top": 24,
+        "bottom": 24
+      },
+      "uuid": "52e1493a-81de-4f8f-898e-085c83bf35e4"
+    },
+    {
+      "name": "BtnAd",
+      "file": "BtnAd.png",
+      "x": 35,
+      "y": 405,
+      "w": 381,
+      "h": 117,
+      "border": {
+        "left": 21,
+        "right": 21,
+        "top": 23,
+        "bottom": 23
+      },
+      "uuid": "ac6ca380-fe84-43d0-96da-ff64249cbd40"
+    },
+    {
+      "name": "BtnGold",
+      "file": "BtnGold.png",
+      "x": 35,
+      "y": 550,
+      "w": 382,
+      "h": 118,
+      "border": {
+        "left": 21,
+        "right": 21,
+        "top": 24,
+        "bottom": 24
+      },
+      "uuid": "6c8659ed-ba4c-4bae-856e-4488093b8f09"
+    },
+    {
+      "name": "BtnDiamond",
+      "file": "BtnDiamond.png",
+      "x": 35,
+      "y": 697,
+      "w": 381,
+      "h": 119,
+      "border": {
+        "left": 21,
+        "right": 21,
+        "top": 24,
+        "bottom": 24
+      },
+      "uuid": "5d3b001a-4057-449b-a2d8-4360ad000087"
+    },
+    {
+      "name": "TitleBar",
+      "file": "TitleBar.png",
+      "x": 498,
+      "y": 114,
+      "w": 551,
+      "h": 81,
+      "border": {
+        "left": 46,
+        "right": 46,
+        "top": 24,
+        "bottom": 24
+      },
+      "uuid": "dd9a36cd-47bd-42b6-86fe-ea7b536602de"
+    },
+    {
+      "name": "Panel",
+      "file": "Panel.png",
+      "x": 499,
+      "y": 252,
+      "w": 256,
+      "h": 265,
+      "border": {
+        "left": 51,
+        "right": 51,
+        "top": 53,
+        "bottom": 53
+      },
+      "uuid": "55407d1a-c65c-4d01-b710-32e4cd23d8dd"
+    },
+    {
+      "name": "SlotItem",
+      "file": "SlotItem.png",
+      "x": 784,
+      "y": 286,
+      "w": 107,
+      "h": 124,
+      "border": {
+        "left": 0,
+        "right": 0,
+        "top": 0,
+        "bottom": 0
+      },
+      "uuid": "28e65745-b4e7-4dcd-88ba-f04b5db12601"
+    },
+    {
+      "name": "FrameSelect",
+      "file": "FrameSelect.png",
+      "x": 914,
+      "y": 286,
+      "w": 107,
+      "h": 124,
+      "border": {
+        "left": 0,
+        "right": 0,
+        "top": 0,
+        "bottom": 0
+      },
+      "uuid": "9cfbd4e0-90f4-4688-aa0d-cf4768350c67"
+    },
+    {
+      "name": "BtnClose",
+      "file": "BtnClose.png",
+      "x": 1057,
+      "y": 297,
+      "w": 84,
+      "h": 95,
+      "border": {
+        "left": 0,
+        "right": 0,
+        "top": 0,
+        "bottom": 0
+      },
+      "uuid": "5a5aa32a-76a2-49d5-bd38-e9abc571d458"
+    },
+    {
+      "name": "BtnHelp",
+      "file": "BtnHelp.png",
+      "x": 1150,
+      "y": 297,
+      "w": 84,
+      "h": 95,
+      "border": {
+        "left": 0,
+        "right": 0,
+        "top": 0,
+        "bottom": 0
+      },
+      "uuid": "cfc5a1cb-2918-4ae4-ac60-484894727533"
+    },
+    {
+      "name": "TabNormal",
+      "file": "TabNormal.png",
+      "x": 498,
+      "y": 568,
+      "w": 250,
+      "h": 81,
+      "border": {
+        "left": 25,
+        "right": 25,
+        "top": 16,
+        "bottom": 16
+      },
+      "uuid": "b1f7b927-6f8b-4c4b-96f8-9534f2117ebc"
+    },
+    {
+      "name": "TabSelected",
+      "file": "TabSelected.png",
+      "x": 827,
+      "y": 568,
+      "w": 239,
+      "h": 80,
+      "border": {
+        "left": 24,
+        "right": 24,
+        "top": 16,
+        "bottom": 16
+      },
+      "uuid": "05c42b36-4316-43c2-952c-b59b9d57b614"
+    },
+    {
+      "name": "PlateStepper",
+      "file": "PlateStepper.png",
+      "x": 498,
+      "y": 708,
+      "w": 267,
+      "h": 100,
+      "border": {
+        "left": 33,
+        "right": 33,
+        "top": 20,
+        "bottom": 20
+      },
+      "uuid": "b3406ac1-ddfa-4265-88aa-68897d36fd53"
+    },
+    {
+      "name": "BtnSmallPrimary",
+      "file": "BtnSmallPrimary.png",
+      "x": 840,
+      "y": 707,
+      "w": 97,
+      "h": 101,
+      "border": {
+        "left": 0,
+        "right": 0,
+        "top": 0,
+        "bottom": 0
+      },
+      "uuid": "0e40903b-f45d-4f09-b4e5-2e6e2688897b"
+    },
+    {
+      "name": "BtnSmallSecondary",
+      "file": "BtnSmallSecondary.png",
+      "x": 966,
+      "y": 708,
+      "w": 100,
+      "h": 100,
+      "border": {
+        "left": 0,
+        "right": 0,
+        "top": 0,
+        "bottom": 0
+      },
+      "uuid": "8d526c91-1108-4941-887a-542128a51512"
+    },
+    {
+      "name": "SliderTrack",
+      "file": "SliderTrack.png",
+      "x": 487,
+      "y": 882,
+      "w": 288,
+      "h": 24,
+      "border": {
+        "left": 24,
+        "right": 24,
+        "top": 8,
+        "bottom": 8
+      },
+      "uuid": "1929048c-26c9-4e62-8ebb-4e611f126238"
+    },
+    {
+      "name": "ProgressFill",
+      "file": "ProgressFill.png",
+      "x": 922,
+      "y": 880,
+      "w": 275,
+      "h": 32,
+      "border": {
+        "left": 23,
+        "right": 23,
+        "top": 8,
+        "bottom": 8
+      },
+      "uuid": "aee23aba-4262-42c0-bd58-d03810eae5b5"
+    },
+    {
+      "name": "SliderThumb",
+      "file": "SliderThumb.png",
+      "x": 804,
+      "y": 864,
+      "w": 59,
+      "h": 62,
+      "border": {
+        "left": 0,
+        "right": 0,
+        "top": 0,
+        "bottom": 0
+      },
+      "uuid": "8d07ec81-2287-418b-ac3b-4a73da311637"
+    },
+    {
+      "name": "IconGold",
+      "file": "IconGold.png",
+      "x": 68,
+      "y": 1020,
+      "w": 90,
+      "h": 95,
+      "border": {
+        "left": 0,
+        "right": 0,
+        "top": 0,
+        "bottom": 0
+      },
+      "uuid": "9795a873-f410-422d-8bf6-2067ee1b5457"
+    },
+    {
+      "name": "IconDiamond",
+      "file": "IconDiamond.png",
+      "x": 208,
+      "y": 1025,
+      "w": 98,
+      "h": 89,
+      "border": {
+        "left": 0,
+        "right": 0,
+        "top": 0,
+        "bottom": 0
+      },
+      "uuid": "4986a4a6-c9d4-43ea-a228-fc8f2268af08"
+    },
+    {
+      "name": "IconEnergy",
+      "file": "IconEnergy.png",
+      "x": 360,
+      "y": 1013,
+      "w": 64,
+      "h": 108,
+      "border": {
+        "left": 0,
+        "right": 0,
+        "top": 0,
+        "bottom": 0
+      },
+      "uuid": "6c8529cd-0b0b-4786-b24e-686ccb340bf2"
+    },
+    {
+      "name": "IconMusic",
+      "file": "IconMusic.png",
+      "x": 477,
+      "y": 1016,
+      "w": 78,
+      "h": 94,
+      "border": {
+        "left": 0,
+        "right": 0,
+        "top": 0,
+        "bottom": 0
+      },
+      "uuid": "a0fe798e-e359-431e-aef5-84842a772f78"
+    },
+    {
+      "name": "IconSfx",
+      "file": "IconSfx.png",
+      "x": 607,
+      "y": 1020,
+      "w": 97,
+      "h": 94,
+      "border": {
+        "left": 0,
+        "right": 0,
+        "top": 0,
+        "bottom": 0
+      },
+      "uuid": "fb1c73a2-6187-449d-8d38-31ba0dad395e"
+    },
+    {
+      "name": "IconLanguage",
+      "file": "IconLanguage.png",
+      "x": 755,
+      "y": 1020,
+      "w": 89,
+      "h": 95,
+      "border": {
+        "left": 0,
+        "right": 0,
+        "top": 0,
+        "bottom": 0
+      },
+      "uuid": "237b290d-0eb8-4b03-9b83-3b3eb6f09ce3"
+    },
+    {
+      "name": "IconAd",
+      "file": "IconAd.png",
+      "x": 896,
+      "y": 1025,
+      "w": 67,
+      "h": 85,
+      "border": {
+        "left": 0,
+        "right": 0,
+        "top": 0,
+        "bottom": 0
+      },
+      "uuid": "580da328-23d9-4a00-b335-8cba8ebd4a72"
+    },
+    {
+      "name": "IconPlus",
+      "file": "IconPlus.png",
+      "x": 1009,
+      "y": 1025,
+      "w": 77,
+      "h": 85,
+      "border": {
+        "left": 0,
+        "right": 0,
+        "top": 0,
+        "bottom": 0
+      },
+      "uuid": "48fdb5f8-5e45-4263-937f-76e77e54051a"
+    },
+    {
+      "name": "IconMinus",
+      "file": "IconMinus.png",
+      "x": 1128,
+      "y": 1051,
+      "w": 77,
+      "h": 34,
+      "border": {
+        "left": 0,
+        "right": 0,
+        "top": 0,
+        "bottom": 0
+      },
+      "uuid": "04b21fc9-bef8-4f86-bb35-eb6f25cf9120"
+    }
+  ]
+}

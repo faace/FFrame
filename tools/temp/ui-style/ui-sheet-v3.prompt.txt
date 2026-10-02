@@ -1,0 +1,52 @@
+[STYLE]
+Same pixel craft as a bright cozy zoo map: lawn green, sand-path cream, pond blue, sunflower yellow, and the pale oak of wooden animal signs and fences. Chubby rounded signboards, visible medium pixel grain, crisp edges, clean color blocks, thin dark-olive outlines. High-key and saturated, not washed out. Not glossy plastic, not thick chocolate frames, not 8-bit, not gray, not photoreal.
+
+[CAMERA]
+flat front view, zero perspective, orthographic, every widget face-on. Not top-down, not isometric.
+
+[LIGHTING]
+even soft light. One-pixel darker rim inside each widget. No cast shadows, no glossy highlights.
+
+[ASSETS]
+30 separate widgets. The dialog is two pieces: a title plank and a body board. They must not be joined.
+- title plank 240x48, pale oak bar like a zoo sign header, empty, no letters
+- panel 176x168, ONE pale-oak frame and ONE flat cream paper center, like a single animal signboard, no second inner frame, no header baked in
+- resource bar 96x64, pale oak rim, cream center
+- item slot 96x96, pale oak square frame, empty cream center
+- selection frame 104x104, hollow lawn-green outline, empty center
+- count plate 48x32, small oak badge, cream center
+- primary button 288x80, lawn green, empty
+- secondary button 288x80, cream face, pale oak rim, empty
+- watch-ad button 288x80, sunflower yellow, empty
+- gold-pay button 288x80, warm sand, empty
+- diamond-pay button 288x80, pond blue, empty
+- close button 72x72, pale oak square, dark X
+- help button 72x72, pale oak square, dark question mark
+- slider track 96x24, thin oak groove
+- slider thumb 40x40, separate cream knob
+- progress fill 96x16, solid lawn-green bar
+- nine bare icons, object only, no plate, no frame: gold coin, blue diamond, yellow lightning, music note, speaker, globe, play triangle, plus sign, minus sign
+- tab normal 160x80, cream sign with pale oak rim, empty
+- tab selected 160x80, lawn green, empty
+- small primary button 80x80, lawn green square, empty
+- small secondary button 80x80, cream square, pale oak rim, empty
+- stepper number plate 128x80, cream inset, pale oak rim, no digits
+
+[LAYOUT]
+1024x1024 canvas. Do not enlarge widgets to fill the sheet. Every piece is isolated.
+Left column: the five wide buttons stacked, with a clear gap between each.
+Right side, kept far from the buttons:
+1. title plank alone at the top
+2. a wide empty gap, then the panel below it. The plank and the panel must not touch
+3. item slot and selection frame to the right of the panel, each separated
+4. close and help further right, separated
+5. tab normal, then a large empty gap at least 80 pixels wide, then tab selected. The two tabs must not touch or overlap
+6. stepper plate, then the two small squares, all separated
+7. slider track, slider thumb, and progress fill as three objects that do not touch
+8. the nine icons in one bottom row, each object floating with space around it, no squares behind them
+
+[BACKGROUND]
+flat warm cream, the color of a zoo sand path, one solid color.
+
+[RESTRICTIONS]
+no words, no digits, no labels, no watermark, no animals, no people, no buildings, no map. No overlapping widgets. No nested double frame on the panel. Icons have no backing plates.

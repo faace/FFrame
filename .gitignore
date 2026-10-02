@@ -4,6 +4,8 @@
 #///////////////////////////
 library/
 temp/
+!tools/temp/
+!tools/temp/**
 local/
 build/
 profiles/
