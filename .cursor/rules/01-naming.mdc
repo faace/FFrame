@@ -141,9 +141,11 @@ export class PfX extends GMScene {}
 - **框架自带预制体：`Pf` + `GM` + 名**。按钮 `PfGMBtn`，标题 `PfGMTitle`。弹层预制体同样：`Ly` + `GM` + 名（`LyGMXxx`）。先看出是 Pf 还是 Ly，再看出是框架的。
 - 不要 `PfBtn`（太泛），不要 `PfFFBtn`（`FF*` 已废），不要只叫 `GMBtn`（看不出是预制体，也分不清 Ly/Pf）。
 - **本游戏**仍是 `PfShopItem` / `LyAlert`，中间不加 `GM`。纯基类仍是 `GMComponent` / `GMAlert` / `GMLayer`（没有对应预制体文件）。
-- **默认皮在 FFrame**：`assets/gmajor/ui/skin/`（Bundle `GMSkin`）。槽名 `BtnPrimary`、`TitleBar`、`Panel`…。切图脚本 `tools/temp/slice-ui-sheet.mjs` 直接切进这里。
-- 本游戏要换皮：同名槽盖掉默认。没换的槽继续用默认。不要为换皮再抄一份按钮类。
-- 控件 `setSkin` 只换 `SpriteFrame`，不要 import 本游戏 `SkinKit`。点击仍用 `gu.addClick`，控件不包一层点击。
+- 界面图在游戏 `assets/game/bundles/Skin/`（Bundle `Skin`）。不放 `gmajor`。开机 `loadBundle('Skin')`，不写进 `config.boot`，不绑入口。
+- 没有这个包，或少某一张：该槽用 Cocos 内置白图，打一条日志，开机不停。编辑器与播放按文件名取同一张；编辑器查 `db://assets/game/bundles/Skin/<名>.png/spriteFrame`。
+- 按钮 `theme` 与底板文件同名：`primary`、`secondary`、`warning`、`neutral`、`info`。脚本不挂底板属性。保存后节点 `Sprite` 上可以留下 uuid；播放时按主题名再贴。
+- 图标和文字拖入或设入才显示，没设就空着。`PfGMTitle` 自己取 `TitleBar`。其它图保持原文件名（`Panel`、`IconClose`…）。
+- 取图只给 `SpriteFrame`。按钮和标题自己切九宫格；其它节点由使用方设 `SLICED`。控件不要 import 游戏 `SkinKit`。点击仍用 `gu.addClick`，控件不包一层点击。
 - 正文仍是 `panel` 下 `body`；`GMAlert` 认 `body` / `btnOk` / `btnCancel`，按钮字节点叫 `label`。分层说明：`docs/界面组件/说明.md`。
 
 ## 数据与事件（写逻辑/UI 时）

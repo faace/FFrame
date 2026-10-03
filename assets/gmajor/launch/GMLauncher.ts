@@ -11,6 +11,7 @@ import { createPlatform } from '../platform/GMPlatformCreate';
 import type { GMPlatform } from '../platform/GMPlatform';
 import type { GMAsyncComplete, GMAsyncProgress } from '../resource/GMAsyncCallback';
 import type { GMBootOpts, GMGameConfig } from './GMBoot';
+import { loadSkin } from '../ui/GMSkin';
 
 export const version = '0.3.1'; // 框架版本；升级只改这一处
 
@@ -36,7 +37,7 @@ const resource = new GMCocosResource();
 const registry = new GMBundleRegistry();
 const binder = new GMBinder(registry, resource, events);
 const ui = new GMUIManager(resource);
-ui.bindPixelFit(); // 窗多大，逻辑分辨率就多大
+ui.bindPixelFit(); // 设计分辨率 720×1280，宽适配
 const store = new GMStoreHub();
 binder.attachUI(ui);
 binder.attachStore(store);
@@ -59,7 +60,10 @@ function boot(game: GMGameConfig, a: GMBootOpts | GMAsyncComplete, b?: GMAsyncCo
     const names = game.boot.slice();
     if (names.indexOf(entry) < 0) names.push(entry);
     console.info('[gm.boot] role', role, 'packs', names.join(','));
-    binder.bindInOrder(names, onComplete, onProgress);
+    loadSkin((err) => {
+        if (err) return onComplete(err);
+        binder.bindInOrder(names, onComplete, onProgress);
+    });
 }
 
 /** GMajor 全局单例 */
