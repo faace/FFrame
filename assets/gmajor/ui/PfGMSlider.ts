@@ -43,8 +43,8 @@ export class PfGMSlider extends GMComponent {
     onInit(): void {
         if (!this.bindNodes()) return console.error('[PfGMSlider] 需要子节点 track 和 thumb');
         if (!this.node.getComponent(BlockInputEvents)) this.node.addComponent(BlockInputEvents); // 热区用根的 44 高，不在根上挂会把子节点透明度乘成 0 的 Sprite
-        this.dress(this.track, 'SliderTrack', true);
-        this.dress(this.thumb, 'SliderThumb', false);
+        this.dress(this.track, 'slider_track', true);
+        this.dress(this.thumb, 'slider_thumb', false);
         this.layout();
         if (editing) return;
         this.bindTouch();

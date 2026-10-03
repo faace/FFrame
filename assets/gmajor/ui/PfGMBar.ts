@@ -35,8 +35,8 @@ export class PfGMBar extends GMComponent {
 
     onInit(): void {
         if (!this.bindNodes()) return console.error('[PfGMBar] 需要子节点 bg 和 fill');
-        this.dress(this.bg, 'BarBg');
-        this.dress(this.fill, 'BarFill');
+        this.dress(this.bg, 'bar_bg');
+        this.dress(this.fill, 'bar_fill');
         this.layout();
     }
 

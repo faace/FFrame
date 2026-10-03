@@ -13,7 +13,7 @@ import type { GMAsyncComplete, GMAsyncProgress } from '../resource/GMAsyncCallba
 import type { GMBootOpts, GMGameConfig } from './GMBoot';
 import { loadSkin } from '../ui/GMSkin';
 
-export const version = '0.3.1'; // 框架版本；升级只改这一处
+export const version = '0.4.0'; // 框架版本；升级只改这一处
 
 /** 全局核心句柄（模块加载时创建；用法 gm.binder / gm.events / gm.ui / gd / gl / gu / gp …） */
 export interface GMCore {

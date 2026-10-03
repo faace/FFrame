@@ -25,8 +25,8 @@ export type { IGMBundleEntry } from './bind/GMBundleEntryBase';
 
 // —— ui/ ——
 export { GMComponent } from './ui/GMComponent'; // UI 通用基类；业务 onInit/onStart/onRemove；watch 随节点卸
-export { PfGMBtn, PfGMBtnSize, PfGMBtnStyle, PfGMBtnTheme } from './ui/PfGMBtn'; // 框架按钮；theme 对 Skin 同名底板，style 版式，size 档位
-export { PfGMTitle } from './ui/PfGMTitle'; // 框架标题；自己取 TitleBar；setText 按字宽拉条
+export { PfGMBtn, PfGMBtnSize, PfGMBtnStyle, PfGMBtnTheme } from './ui/PfGMBtn'; // 框架按钮；底板 btn_加主题名，style 版式，size 档位
+export { PfGMTitle } from './ui/PfGMTitle'; // 框架标题；自己取 title_bar；setText 按字宽拉条
 export { PfGMSlider } from './ui/PfGMSlider'; // 框架滑条；轨道+滑块；value 0–1；自己听拖动
 export { PfGMBar } from './ui/PfGMBar'; // 框架进度条；槽+填充；value 0–1；九宫格拉宽
 export { PfGMStepper } from './ui/PfGMStepper'; // 框架步进；嵌套 PfGMBtn；整数 value/min/max/step

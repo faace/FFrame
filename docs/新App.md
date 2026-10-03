@@ -2,7 +2,7 @@
 
 一个 Creator 工程。框架在本仓库，具体游戏在独立 git，克隆到 `assets/game`。本仓库忽略该目录。示例：[FFrame-example](https://github.com/faace/FFrame-example)。
 
-当前 `main` 上的开机仍是游戏目录里的 `config.ts` 和 `ScMain`。下面是已经定下、尚未改代码的目标接法。示例仓库在框架改完之前，仍用现在这套 Demo 来跑。
+编辑器播放 `assets/game/ScMain.scene`。`ScMain` 只调 `gm.boot(config)`。常驻包、入口、确认框皮写在 `assets/game/config.ts`。字段和仓库根的 `config.tpl.json` 相同：`v`、`version`、`boot`、`entry`、`alert`。
 
 ## 现在就能跑
 
@@ -10,29 +10,24 @@
 git clone https://github.com/faace/FFrame-example.git assets/game
 ```
 
-编辑器播放 `assets/game/ScMain.scene`。常驻包、入口、确认框皮写在 `assets/game/config.ts`。
+## 最小游戏
 
-## 目标接法
+新游戏不必带示例里的 `Demo`、`User`、`Setting`。最少要有：
 
-1. 编辑器始终播放 `gmajor` 里的启动场景。它不 import 游戏代码。
-2. 没有 Bundle `App` 时，打开框架预览场景。默认贴图只被这个预览场景引用。
-3. 有 `App` 时，读取 `assets/game/App/config.json`。结构见仓库根的 `config.tpl.json`。
-4. JSON 解析失败，或写了 `skinBundle` 但包加载失败：开机停住。
-5. 成功则在绑定 `boot` 之前，按预制体名把皮肤包装上。没有某张皮，或者缺了关键节点，只这一槽用代码绘制。
-6. 再绑定 `boot`。皮肤包不要写进 `boot`。
+- `ScMain.scene`、`ScMain.ts`、`config.ts`
+- `config.entry` 指向的入口包（叶子 Bundle + 已登记入口）
+- `config.boot` 里写了的每一个包，同样要有入口
 
-`assets/game` 本身不要标成 Bundle。`App` 与 `GameUI` 等包同级，不能嵌套。
+`boot` 可以是空数组。没有入口包时 `gm.boot` 失败。
 
-不写 `skinBundle` 时，基础控件用框架默认皮（`assets/gmajor/ui/skin/`，Bundle `GMSkin`）。缺槽仍可用代码绘制。槽名在框架里增加，不写进 config。游戏自己的业务窗口不占槽。
+## 皮肤
 
-控件脚本在 FFrame，本游戏只换皮。分层见 [界面组件/说明.md](./界面组件/说明.md)。
+播放只加载 Bundle `Skin`（`assets/game/bundles/Skin/`）。不写进 `boot`，不绑入口。没有这个包，或缺某一张，该槽用内置白图，打一条日志，开机继续。
 
-| 预制体名 | 节点 |
-|---|---|
-| `alert` | `panel` 下 `body`、`btnOk`、`btnCancel`，按钮下 `label` |
-| `mask` | 根节点是铺满屏幕的图 |
-| `loading` | 子节点 `label` |
+框架会取哪些文件名，写在仓库根 README 的「皮肤槽」。样图在 `assets/gmajor/ui/skin/`，文件名和槽相同，播放不读这个目录。要样子时，把同名 png 复制进游戏的 `bundles/Skin`。
 
-发行构建不选预览场景。产物里若出现默认贴图，构建失败。
+不要在 `GameUI/Skin` 再放一套图。
+
+控件脚本在 FFrame。确认框基类 `GMAlert` 在框架，皮是游戏常驻包里的预制体（示例是 `GameUI` / `LyAlert`）。不用确认框就可以不预载。分层见 [界面组件/说明.md](./界面组件/说明.md)。
 
 换一个游戏，就是换掉整个 `assets/game` 目录。

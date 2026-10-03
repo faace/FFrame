@@ -106,7 +106,7 @@ export class PfGMStepper extends GMComponent {
     private dress(): void {
         const plate = this.plate;
         if (!plate) return;
-        applySkin('PlateStepper', (frame) => {
+        applySkin('stepper_plate', (frame) => {
             if (!plate.isValid) return;
             plate.spriteFrame = frame;
             plate.sizeMode = Sprite.SizeMode.CUSTOM;
