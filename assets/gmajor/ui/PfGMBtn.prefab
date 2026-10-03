@@ -74,6 +74,7 @@
     "node": { "__id__": 1 },
     "_enabled": true,
     "__prefab": { "__id__": 7 },
+    "size": 1,
     "theme": 0,
     "style": 1,
     "icon": null,

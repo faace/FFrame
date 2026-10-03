@@ -16,6 +16,8 @@ const LOADING_TIMEOUT = 20; // 秒；到期自动 hide
 const ENTER_LEAVE_FALLBACK = 5; // 秒；子类忘调 done 时兜底
 const PRESS_SCALE = 0.96; // 按下缩小；松开回到按下前
 const PRESS_DIM = 0.75; // 按下时底板、图标、字和描边乘这系数
+const DESIGN_W = 720; // 跟 settings 里的设计分辨率一致
+const DESIGN_H = 1280;
 
 export interface GMOpenSceneOptions {
     bundle: string; // 必填：加载来源 = unbind 占用者
@@ -79,7 +81,7 @@ interface AlertItem {
     closing: boolean;
 }
 
-/** 视图门面：真场景切换、layer 栈、loading 令牌；persist Overlay；窗=设计分辨率 */
+/** 视图门面：真场景切换、layer 栈、loading 令牌；persist Overlay；设计分辨率 720×1280，宽适配 */
 export class GMUIManager {
     private overlay: Node | null = null;
     private overlayCamera: Camera | null = null;
@@ -109,7 +111,7 @@ export class GMUIManager {
 
     constructor(private readonly resource: IGMResource) {}
 
-    /** 核心启动：设计分辨率跟窗口逻辑像素走（1 单位 = 1 像素）；resize 再同步 */
+    /** 核心启动：设计分辨率锁 720×1280、宽适配；窗口变了只重铺 Overlay */
     bindPixelFit(): void {
         if (this.fitBound) return;
         this.fitBound = true;
@@ -272,6 +274,7 @@ export class GMUIManager {
             const item: LayerItem = { name: layerName, bundle: bundleName, node };
             this.layers.push(item);
             this.preparingLayers.delete(layerName);
+            console.info('[gm.ui] 打开 layer', bundleName, layerName);
 
             this.runHook(node.getComponent(GMLayer), 'onEnter', () => {
                 this.pendingBundles.delete(bundleName);
@@ -607,6 +610,7 @@ export class GMUIManager {
     }
 
     private destroyLayer(item: LayerItem, fromList: boolean): void {
+        console.info('[gm.ui] 关闭 layer', item.bundle, item.name);
         if (fromList) {
             const i = this.layers.indexOf(item);
             if (i !== -1) this.layers.splice(i, 1);
@@ -679,17 +683,15 @@ export class GMUIManager {
         onComplete?.(new Error(message));
     }
 
-    /** 逻辑像素 = 物理窗口 / DPR；DPI 缩放以后再grilling */
+    /** 设计分辨率始终是 720×1280。宽适配：窗口再变，也只改可见高度，不改设计分辨率 */
     private applyPixelFit(): void {
-        const dpr = screen.devicePixelRatio || 1;
-        const w = Math.max(1, Math.round(screen.windowSize.width / dpr));
-        const h = Math.max(1, Math.round(screen.windowSize.height / dpr));
-        if (w === this.lastFitW && h === this.lastFitH) return this.syncOverlayToView();
-        this.lastFitW = w;
-        this.lastFitH = h;
-        view.setDesignResolutionSize(w, h, ResolutionPolicy.SHOW_ALL);
+        if (this.lastFitW !== DESIGN_W || this.lastFitH !== DESIGN_H) {
+            this.lastFitW = DESIGN_W;
+            this.lastFitH = DESIGN_H;
+            view.setDesignResolutionSize(DESIGN_W, DESIGN_H, ResolutionPolicy.FIXED_WIDTH);
+            console.info('[gm.ui] 设计分辨率', DESIGN_W, DESIGN_H);
+        }
         this.syncOverlayToView();
-        console.info('[gm.ui] 设计分辨率', w, h);
     }
 
     private syncOverlayToView(): void {

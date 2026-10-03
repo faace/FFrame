@@ -25,11 +25,12 @@ export type { IGMBundleEntry } from './bind/GMBundleEntryBase';
 
 // —— ui/ ——
 export { GMComponent } from './ui/GMComponent'; // UI 通用基类；业务 onInit/onStart/onRemove；watch 随节点卸
-export { PfGMBtn, PfGMBtnStyle, PfGMBtnTheme } from './ui/PfGMBtn'; // 框架按钮；theme 对 Skin 同名底板，style 版式
+export { PfGMBtn, PfGMBtnSize, PfGMBtnStyle, PfGMBtnTheme } from './ui/PfGMBtn'; // 框架按钮；theme 对 Skin 同名底板，style 版式，size 档位
 export { PfGMTitle } from './ui/PfGMTitle'; // 框架标题；自己取 TitleBar；setText 按字宽拉条
 export { loadSkin, applySkin, skinFrame, SKIN_BUNDLE } from './ui/GMSkin'; // 游戏 Skin 包；缺槽用内置白图
 export { GMLayer } from './ui/GMLayer'; // Layer 基类；Ly* 继承；mask+panel 入场；场景不套
 export { GMAlert } from './ui/GMAlert'; // 确认框基类；皮在本游戏常驻包
+export type { GMAlertInit } from './ui/GMAlert'; // gu.alert 填进确认框的文案和关闭
 export { GMScene } from './ui/GMScene'; // 场景基类；Sc* 继承（→Layer→Component）；默认 opacity
 export { GMUIManager } from './ui/GMUIManager'; // 视图门面：openScene / showLayer / addClick / createTs / alert；设计分辨率 720×1280，宽适配
 export type { GMOpenSceneOptions, GMShowLayerOptions, GMLoadingShowOptions, GMAddClickOpts, GMClickPress, GMCreateTsNodeParm, GMAlertParams, GMAlertBtn } from './ui/GMUIManager';

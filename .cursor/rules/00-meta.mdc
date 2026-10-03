@@ -12,7 +12,7 @@ alwaysApply: true
 | 编写/改写普通 TS（风格、注释、排版） | `01-typescript-style` |
 | 新建功能 / Bundle / 绑定名 / 基类，或 Sc、Pf、Ly | `01-naming` |
 | 按钮/标题等通用控件、PfGMBtn、默认皮、换皮、Skin | `01-naming` |
-| 新建 Ly 预制体、layer 结构、mask / panel | `01-naming`（生成用 `tools/create-ly-prefab.mjs`） |
+| 新建 Ly 预制体、layer 结构、mask / panel、弹窗标题和关闭钮 | `01-naming`（生成用 `tools/create-ly-prefab.mjs`） |
 | 数据变了刷新 UI、金币/字段变化、watch | `01-naming` |
 | 监听业务事件（on / off / emit） | `01-naming` |
 | 事件前缀、Gp、平台通道、gp.call、原生回包 | `01-naming` |
@@ -35,7 +35,7 @@ alwaysApply: true
 |------|------|-------------|
 | `00-meta.mdc` | Always | 规则索引与 #rule 写入流程（Always） |
 | `01-async-callback.mdc` | Agent/按需 | 新写或改写公共异步 API / 完成回调 / onProgress 时引用：error-first；完成在前、进度可选；≥4 步或开机/热更必须留 onProgress |
-| `01-naming.mdc` | globs: `assets/game/**,assets/gmajor/**,**/*.{scene,prefab}`；Agent/按需 | Bundle/功能目录/绑定名、Sc/Ly/Pf、双基类、layer 结构（根+panel、mask 克隆）、界面控件进 gmajor、默认皮、换皮、数据 watch、业务事件 on、事件大类前缀（Gp/Bind）、平台 gp.call/send、loading、addClick、createTs、动态 UI 挂 Canvas、双窗数据权。新建或改 Bundle、场景、预制体、gmajor/game 脚本时引用。用户说数据变了刷新 UI、金币/字段变化、监听事件、事件前缀、Gp、gp.call、平台通道、原生回包、新建功能包、异步等待、挡住操作、loading、注册点击、addClick、列表项、createTs、按钮看不见、动态创建节点、新建 Ly、layer 结构、mask、panel、生成 Ly 预制体、按钮组件、PfGMBtn、默认皮、换皮、Skin、双窗、第二窗、指令回矿、UI 不落盘时也引用。 |
+| `01-naming.mdc` | globs: `assets/game/**,assets/gmajor/**,**/*.{scene,prefab}`；Agent/按需 | Bundle/功能目录/绑定名、Sc/Ly/Pf、双基类、layer 结构（根+panel、mask 克隆）、界面控件进 gmajor、默认皮、换皮、数据 watch、业务事件 on、事件大类前缀（Gp/Bind）、平台 gp.call/send、loading、addClick、createTs、动态 UI 挂 Canvas、双窗数据权。新建或改 Bundle、场景、预制体、gmajor/game 脚本时引用。用户说数据变了刷新 UI、金币/字段变化、监听事件、事件前缀、Gp、gp.call、平台通道、原生回包、新建功能包、异步等待、挡住操作、loading、注册点击、addClick、列表项、createTs、按钮看不见、动态创建节点、新建 Ly、layer 结构、mask、panel、生成 Ly 预制体、弹窗标题、关闭钮、Ly 后不加 Popup、按钮组件、PfGMBtn、默认皮、换皮、Skin、双窗、第二窗、指令回矿、UI 不落盘时也引用。 |
 | `01-nodejs-temp-scripts.mdc` | globs: `tools/**`；Agent/按需 | 编写临时/工具脚本，或把脚本放到 tools 时引用：优先 Node.js；临时脚本放 tools/temp |
 | `01-typescript-style.mdc` | Agent/按需 | 编写或改写 TypeScript 时：4 空格缩进、行尾注释优先、签名尽量单行、简单失败早退一行；维护 index.ts / docs/架构 时也引用 |
 

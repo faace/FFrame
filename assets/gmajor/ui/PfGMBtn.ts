@@ -7,16 +7,16 @@ const { ccclass, executeInEditMode, property } = _decorator;
 /**
  * 按钮可调参数。改数字改这里。
  * 字体资源：assets/gmajor/fonts/main.ttf，挂在子节点 label 上。
- * 小档、大档以后在 sizes 里加一行，并把 size 指过去。
+ * 大档是原来的 380 宽。中档 260 宽，720 宽的确认框一行放得下两颗。
  * 底板按 theme 从 Skin 包取同名文件，不序列化在这个组件上。
  */
 const PF_GM_BTN = {
     disabledMul: 0.55, // 禁用时底板、图标、字和描边一起乘。按下的缩小和压暗在 gu.addClick
     outlineWidth: 4,
     iconScale: 0.8, // 图标相对档位尺寸
-    size: 'medium' as const,
     sizes: {
-        medium: { width: 380, height: 120, square: 120, icon: 110, padX: 16, fontSize: 48 },
+        medium: { width: 260, height: 88, square: 88, icon: 80, padX: 12, fontSize: 36 },
+        large: { width: 380, height: 120, square: 120, icon: 110, padX: 16, fontSize: 48 },
     },
     outline: {
         primary: [30, 80, 16],
@@ -43,6 +43,12 @@ export enum PfGMBtnStyle {
 }
 Enum(PfGMBtnStyle);
 
+export enum PfGMBtnSize {
+    medium = 0, // 确认框一行两个
+    large = 1, // 首页宽按钮；原来的 380×120
+}
+Enum(PfGMBtnSize);
+
 type RGB = readonly [number, number, number];
 
 function rgb(c: RGB): Color {
@@ -62,7 +68,11 @@ export class PfGMBtn extends GMComponent {
     private plate: Sprite | null = null;
     private _interactive = true;
     private stamp = '';
-    private preferredWidth = PF_GM_BTN.sizes.medium.width;
+    private preferredWidth = PF_GM_BTN.sizes.large.width;
+    private appliedSize = -1;
+
+    @property({ type: Enum(PfGMBtnSize) })
+    size = PfGMBtnSize.large;
 
     @property({ type: Enum(PfGMBtnTheme) })
     theme = PfGMBtnTheme.primary;
@@ -88,6 +98,12 @@ export class PfGMBtn extends GMComponent {
 
     update(): void { // 检查器改了属性，编辑态和运行态都重排
         if (this.mark() === this.stamp) return;
+        this.refresh();
+    }
+
+    /** 换档。中档给确认框并排，大档给首页宽按钮 */
+    setSize(size: PfGMBtnSize): void {
+        this.size = size;
         this.refresh();
     }
 
@@ -124,7 +140,7 @@ export class PfGMBtn extends GMComponent {
     }
 
     private mark(): string {
-        return `${this.theme}|${this.style}|${this.text}|${this.icon?.uuid ?? ''}`;
+        return `${this.size}|${this.theme}|${this.style}|${this.text}|${this.icon?.uuid ?? ''}`;
     }
 
     private bindNodes(): boolean {
@@ -135,7 +151,8 @@ export class PfGMBtn extends GMComponent {
     }
 
     private tier() {
-        return PF_GM_BTN.sizes[PF_GM_BTN.size];
+        const name = PfGMBtnSize[this.size] as keyof typeof PF_GM_BTN.sizes;
+        return PF_GM_BTN.sizes[name] ?? PF_GM_BTN.sizes.large;
     }
 
     private refresh(): void {
@@ -173,7 +190,10 @@ export class PfGMBtn extends GMComponent {
             this.applyColors();
             return;
         }
-        if (uit.height === tier.height && uit.width >= tier.width) this.preferredWidth = uit.width;
+        if (this.appliedSize !== this.size) { // 换档时丢掉上一档拉宽的宽度
+            this.preferredWidth = uit.height === tier.height && uit.width >= tier.width ? uit.width : tier.width;
+            this.appliedSize = this.size;
+        } else if (uit.height === tier.height && uit.width >= tier.width) this.preferredWidth = uit.width;
         const width = Math.max(tier.width, this.preferredWidth);
         uit.setContentSize(width, tier.height);
         this.place(width, tier, showText, showIcon);

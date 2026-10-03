@@ -1,5 +1,5 @@
 ---
-description: Bundle/功能目录/绑定名、Sc/Ly/Pf、双基类、layer 结构（根+panel、mask 克隆）、界面控件进 gmajor、默认皮、换皮、数据 watch、业务事件 on、事件大类前缀（Gp/Bind）、平台 gp.call/send、loading、addClick、createTs、动态 UI 挂 Canvas、双窗数据权。新建或改 Bundle、场景、预制体、gmajor/game 脚本时引用。用户说数据变了刷新 UI、金币/字段变化、监听事件、事件前缀、Gp、gp.call、平台通道、原生回包、新建功能包、异步等待、挡住操作、loading、注册点击、addClick、列表项、createTs、按钮看不见、动态创建节点、新建 Ly、layer 结构、mask、panel、生成 Ly 预制体、按钮组件、PfGMBtn、默认皮、换皮、Skin、双窗、第二窗、指令回矿、UI 不落盘时也引用。
+description: Bundle/功能目录/绑定名、Sc/Ly/Pf、双基类、layer 结构（根+panel、mask 克隆）、界面控件进 gmajor、默认皮、换皮、数据 watch、业务事件 on、事件大类前缀（Gp/Bind）、平台 gp.call/send、loading、addClick、createTs、动态 UI 挂 Canvas、双窗数据权。新建或改 Bundle、场景、预制体、gmajor/game 脚本时引用。用户说数据变了刷新 UI、金币/字段变化、监听事件、事件前缀、Gp、gp.call、平台通道、原生回包、新建功能包、异步等待、挡住操作、loading、注册点击、addClick、列表项、createTs、按钮看不见、动态创建节点、新建 Ly、layer 结构、mask、panel、生成 Ly 预制体、弹窗标题、关闭钮、Ly 后不加 Popup、按钮组件、PfGMBtn、默认皮、换皮、Skin、双窗、第二窗、指令回矿、UI 不落盘时也引用。
 globs: assets/game/**,assets/gmajor/**,**/*.{scene,prefab}
 alwaysApply: false
 ---
@@ -82,7 +82,8 @@ ScMain          # 场景根
 
 ## Layer
 
-- 文件名 / 类名：`Ly` + 大驼峰语义名（如 `LyHUD`）
+- 文件名 / 类名：`Ly` + 大驼峰语义名。`Ly` 就是弹窗，语义用窗口内容，例如设置是 `LySetting`，确认框是 `LyAlert`。
+- 不要在 `Ly` 后面再加 `Popup`、`Dialog`、`Window`（`LySettingPopup` 是重复）。
 - 关联脚本与节点约定随具体 Layer 用途；基类见下
 
 ## Layer 结构（`Ly*` / Alert 必守；场景不算）
@@ -93,6 +94,8 @@ ScMain          # 场景根
 - **子节点**：新建 Ly 预制体时，默认结构就必须是根 + 空 `panel`（生成时带上，不是事后补）。mask **不进 prefab**。用 `node tools/create-ly-prefab.mjs <目录> Ly名字`。不要从空节点另存成 prefab。运行时没有 `panel` 仍报错——那是预制体没按规范生成。
 - **mask**：Overlay 上有隐藏模板；入树时基类克隆到根下、sibling 最低。半透黑、挡穿透。
 - **内容**：只往 `this.panel` 上长，禁止挂根上。
+- **顶栏**（以后的弹窗都这样，以 `LyAlert` 为准）：标题嵌套 `PfGMTitle`，水平居中，中心在 panel 顶边往下约 15（条身压在顶边上）。关闭是中档纯图标 `PfGMBtn`（`secondary`、`IconClose`、无文字），与标题同一高度，中心距 panel 右边缘约 15。不要另做一条标题。
+- **正文**：`body` 放在标题条下沿和底栏按钮上沿之间的空白里，垂直居中。
 - **动效**：不动根。进场 mask 透明→半透，同时 panel `0→1.1→1`，时长对齐；退场反过来。
 
 ```text
@@ -124,7 +127,7 @@ LyXxx          # 根：脚本 + UITransform
 // ✅
 export class PfRewardPopup extends GMComponent {}
 export class PfGMBtn extends GMComponent {}
-export class LyHUD extends GMLayer {}
+export class LySetting extends GMLayer {}
 export class ScMain extends GMScene {}
 
 // ❌
@@ -199,7 +202,7 @@ export class PfX extends GMScene {}
 | 种类 | 前缀 | 示例资产 | 示例脚本 / 类 | 基类 |
 |------|------|----------|----------------|------|
 | 场景 | `Sc` | `ScMain.scene` | `ScMain.ts` / `ScMain` | `GMScene` |
-| Layer | `Ly` | — | `LyHUD.ts` / `LyHUD` | `GMLayer` |
+| Layer | `Ly` | `LySetting.prefab` | `LySetting.ts` / `LySetting` | `GMLayer` |
 | 预制体（本游戏） | `Pf` | `PfPlayer.prefab` | `PfPlayer.ts` / `PfPlayer` | `GMComponent` |
 | 预制体（框架） | `PfGM` | `PfGMBtn.prefab` | `PfGMBtn.ts` / `PfGMBtn` | `GMComponent` |
 | 弹层（框架） | `LyGM` | `LyGMXxx.prefab` | `LyGMXxx.ts` / `LyGMXxx` | `GMLayer` |
@@ -210,6 +213,7 @@ export class PfX extends GMScene {}
 ✅ DemoHome/PfRewardPopup.prefab + DemoHome/PfRewardPopup.ts（同目录，挂根节点；extends GMComponent）
 ✅ gmajor/…/PfGMBtn.prefab + PfGMBtn.ts（框架预制体；extends GMComponent）
 ❌ PfBtn（太泛）/ PfFFBtn（FF 已废）/ GMBtn（看不出 Pf 还是 Ly）
+❌ LySettingPopup / LyDialog（Ly 已是弹窗）
 ❌ DemoHome/scenes/… 与 DemoHome/scripts/… 分目录存放
 ❌ main.scene / Main.scene / SCMain.scene（缺 Sc 或大小写不对）
 ❌ player.prefab / PFPlayer.prefab（缺 Pf 或大小写不对）
