@@ -23,7 +23,9 @@ git clone https://github.com/faace/FFrame-example.git assets/game
 
 `assets/game` 本身不要标成 Bundle。`App` 与 `GameUI` 等包同级，不能嵌套。
 
-不写 `skinBundle` 时，基础控件全部用代码绘制。槽名在框架里增加，不写进 config。游戏自己的业务窗口不占槽。
+不写 `skinBundle` 时，基础控件用框架默认皮（`assets/gmajor/ui/skin/`，Bundle `GMSkin`）。缺槽仍可用代码绘制。槽名在框架里增加，不写进 config。游戏自己的业务窗口不占槽。
+
+控件脚本在 FFrame，本游戏只换皮。分层见 [界面组件/说明.md](./界面组件/说明.md)。
 
 | 预制体名 | 节点 |
 |---|---|

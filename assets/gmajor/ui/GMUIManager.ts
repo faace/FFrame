@@ -1,11 +1,12 @@
 import {
-    BlockInputEvents, Button, Camera, Canvas, Color, director, Game, game, instantiate, Label, Layers, Node,
+    BlockInputEvents, Button, Camera, Canvas, Color, director, Game, game, instantiate, Label, Layers, Node, Vec3,
     Prefab, ResolutionPolicy, SceneAsset, Sprite, SpriteFrame, Texture2D, UIOpacity, UITransform, Widget, screen, view,
 } from 'cc';
 import type { GMAsyncComplete, GMAsyncProgress } from '../resource/GMAsyncCallback';
 import type { IGMResource } from '../resource/IGMResource';
 import { GMComponent } from './GMComponent';
 import { GMLayer, bindLayerMaskTpl } from './GMLayer';
+import { PfGMBtn } from './PfGMBtn';
 import { GMOverlayHost } from './GMOverlayHost';
 import { GMScene } from './GMScene';
 
@@ -13,6 +14,8 @@ const OVERLAY_LAYER = 1 << 19; // 独立层，避免被场景 UI 相机画两次
 const LOADING_DELAY = 1.5; // 秒；之后才出转圈
 const LOADING_TIMEOUT = 20; // 秒；到期自动 hide
 const ENTER_LEAVE_FALLBACK = 5; // 秒；子类忘调 done 时兜底
+const PRESS_SCALE = 0.96; // 按下缩小；松开回到按下前
+const PRESS_DIM = 0.75; // 按下时底板、图标、字和描边乘这系数
 
 export interface GMOpenSceneOptions {
     bundle: string; // 必填：加载来源 = unbind 占用者
@@ -27,8 +30,22 @@ export interface GMLoadingShowOptions {
     timeout?: number; // 默认 20；到期自动 hide 该 key；Infinity = 不自动关
 }
 
+export type GMClickPress = 'both' | 'scale' | 'dim' | 'none'; // 默认 both
+
+interface GMPressColor {
+    sprite?: Sprite;
+    label?: Label;
+    color: Color;
+    outline?: Color; // Label 描边；松开时写回
+}
+
+function dimRgb(c: Color, k: number): Color {
+    return new Color(Math.round(c.r * k), Math.round(c.g * k), Math.round(c.b * k), c.a);
+}
+
 export interface GMAddClickOpts {
     lockTime?: number; // 秒；有值才锁。默认不锁
+    press?: GMClickPress; // 按下反馈。默认 both：缩小并压暗
 }
 
 export interface GMCreateTsNodeParm {
@@ -85,6 +102,8 @@ export class GMUIManager {
     private lastFitW = 0;
     private lastFitH = 0;
     private clickUnlockAt = 0; // 有 lockTime 的点击共用；无 lockTime 的不查
+    private readonly pressBinds = new Map<Node, { start: () => void; end: () => void }>();
+    private readonly pressHold = new Map<Node, { scale: Vec3; colors: GMPressColor[] }>();
     private maskTpl: Node | null = null;
     private _whiteFrame: SpriteFrame | null = null;
 
@@ -310,15 +329,19 @@ export class GMUIManager {
         }
     }
 
-    /** 代码里加 Button 并听 click；同一节点再绑会换掉旧回调。编辑器不用拖 Button */
+    /** 代码里加 Button 并听 click；同一节点再绑会换掉旧回调。编辑器不用拖 Button。按下默认缩小并压暗 */
     addClick(target: Node, cb: (ev?: unknown) => void, opts?: GMAddClickOpts): void {
         if (!target?.isValid) return;
         if (!target.getComponent(Button)) {
             const btn = target.addComponent(Button);
             btn.transition = Button.Transition.NONE;
+            const widget = target.getComponent(PfGMBtn);
+            if (widget && !widget.interactive) btn.interactable = false; // 先禁用再注册，不要把按钮重新点亮
         }
+        this.bindPress(target, opts?.press ?? 'both');
         target.off(Button.EventType.CLICK);
         target.on(Button.EventType.CLICK, (ev?: unknown) => {
+            this.endPress(target); // 先还原外观，再进回调，避免回调里改色被按下状态盖回去
             const underAlert = this.isUnder(target, this.alertsRoot);
             if (!underAlert && this.loadingNames.length > 0) return; // Alert 在 loading 之上，仍可点
             const lock = opts?.lockTime;
@@ -337,8 +360,76 @@ export class GMUIManager {
     /** 卸 click 并拆掉 Button；节点销毁也会自己卸，这是主动摘 */
     removeClick(target: Node): void {
         if (!target?.isValid) return;
+        this.endPress(target);
+        this.unbindPress(target);
         target.off(Button.EventType.CLICK);
         target.removeComponent(Button);
+    }
+
+    private bindPress(target: Node, mode: GMClickPress): void {
+        this.endPress(target);
+        this.unbindPress(target);
+        if (mode === 'none') return;
+        const start = () => this.beginPress(target, mode);
+        const end = () => this.endPress(target);
+        target.on(Node.EventType.TOUCH_START, start);
+        target.on(Node.EventType.TOUCH_END, end);
+        target.on(Node.EventType.TOUCH_CANCEL, end);
+        target.once(Node.EventType.NODE_DESTROYED, () => {
+            this.pressHold.delete(target);
+            this.pressBinds.delete(target);
+        });
+        this.pressBinds.set(target, { start, end });
+    }
+
+    private unbindPress(target: Node): void {
+        const prev = this.pressBinds.get(target);
+        if (!prev) return;
+        target.off(Node.EventType.TOUCH_START, prev.start);
+        target.off(Node.EventType.TOUCH_END, prev.end);
+        target.off(Node.EventType.TOUCH_CANCEL, prev.end);
+        this.pressBinds.delete(target);
+    }
+
+    private beginPress(target: Node, mode: GMClickPress): void {
+        if (!target.isValid || this.pressHold.has(target)) return;
+        const button = target.getComponent(Button);
+        if (button && !button.interactable) return;
+        const scale = target.scale.clone();
+        const colors: GMPressColor[] = [];
+        if (mode === 'both' || mode === 'dim') this.dimTree(target, colors);
+        if (mode === 'both' || mode === 'scale') target.setScale(scale.x * PRESS_SCALE, scale.y * PRESS_SCALE, scale.z);
+        this.pressHold.set(target, { scale, colors });
+    }
+
+    private endPress(target: Node): void {
+        const held = this.pressHold.get(target);
+        if (!held) return;
+        this.pressHold.delete(target);
+        if (!target.isValid) return;
+        target.setScale(held.scale);
+        for (const item of held.colors) {
+            if (item.sprite?.isValid) item.sprite.color = item.color;
+            if (!item.label?.isValid) continue;
+            item.label.color = item.color;
+            if (item.outline) item.label.outlineColor = item.outline;
+        }
+    }
+
+    private dimTree(node: Node, out: GMPressColor[]): void {
+        const sprite = node.getComponent(Sprite);
+        const label = node.getComponent(Label);
+        if (sprite) {
+            out.push({ sprite, color: sprite.color.clone() });
+            sprite.color = dimRgb(sprite.color, PRESS_DIM);
+        }
+        if (label) {
+            const outline = label.outlineColor.clone();
+            out.push({ label, color: label.color.clone(), outline });
+            label.color = dimRgb(label.color, PRESS_DIM);
+            label.outlineColor = dimRgb(outline, PRESS_DIM);
+        }
+        for (const child of node.children) this.dimTree(child, out);
     }
 
     /**

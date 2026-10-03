@@ -1,5 +1,5 @@
 ---
-description: Bundle/功能目录/绑定名、Sc/Ly/Pf、双基类、layer 结构（根+panel、mask 克隆）、数据 watch、业务事件 on、事件大类前缀（Gp/Bind）、平台 gp.call/send、loading、addClick、createTs、动态 UI 挂 Canvas、双窗数据权。新建或改 Bundle、场景、预制体、gmajor/game 脚本时引用。用户说数据变了刷新 UI、金币/字段变化、监听事件、事件前缀、Gp、gp.call、平台通道、原生回包、新建功能包、异步等待、挡住操作、loading、注册点击、addClick、列表项、createTs、按钮看不见、动态创建节点、新建 Ly、layer 结构、mask、panel、生成 Ly 预制体、双窗、第二窗、指令回矿、UI 不落盘时也引用。
+description: Bundle/功能目录/绑定名、Sc/Ly/Pf、双基类、layer 结构（根+panel、mask 克隆）、界面控件进 gmajor、默认皮、换皮、数据 watch、业务事件 on、事件大类前缀（Gp/Bind）、平台 gp.call/send、loading、addClick、createTs、动态 UI 挂 Canvas、双窗数据权。新建或改 Bundle、场景、预制体、gmajor/game 脚本时引用。用户说数据变了刷新 UI、金币/字段变化、监听事件、事件前缀、Gp、gp.call、平台通道、原生回包、新建功能包、异步等待、挡住操作、loading、注册点击、addClick、列表项、createTs、按钮看不见、动态创建节点、新建 Ly、layer 结构、mask、panel、生成 Ly 预制体、按钮组件、PfGMBtn、默认皮、换皮、Skin、双窗、第二窗、指令回矿、UI 不落盘时也引用。
 globs: assets/game/**,assets/gmajor/**,**/*.{scene,prefab}
 alwaysApply: false
 ---
@@ -50,7 +50,7 @@ alwaysApply: false
 - 核心：`assets/gmajor/`（固定；无开机名单）
 - 项目：`assets/game/`（固定；`ScMain.scene` + `ScMain.ts` + `config.ts` 同层）
 - 功能根：`assets/game/bundles/`（固定小写；其下再分组/功能）
-- 确认框脚本基类在 gmajor（`GMAlert`）；皮在本游戏常驻包（如 `GameUI`），开机 `onBind` 预载
+- 确认框脚本基类在 gmajor（`GMAlert`）；节点约定见下。皮见「界面控件与默认皮」
 
 ## 场景（Scene）
 
@@ -116,13 +116,14 @@ LyXxx          # 根：脚本 + UITransform
 
 | 前缀 | 必须继承 | 禁止 |
 |------|----------|------|
-| `Pf*` | `GMComponent` | 直接 `Component` |
-| `Ly*` | `GMLayer` | 直接 `Component` / `GMComponent` |
+| `Pf*` | `GMComponent` | 直接 `Component`。本游戏：`PfShopItem`。框架自带：`PfGMBtn` |
+| `Ly*` | `GMLayer` | 直接 `Component` / `GMComponent`。本游戏：`LyAlert`。框架自带弹层预制体：`LyGMXxx` |
 | `Sc*` | `GMScene` | 直接 `Component` / `GMComponent` / `GMLayer` |
 
 ```ts
 // ✅
 export class PfRewardPopup extends GMComponent {}
+export class PfGMBtn extends GMComponent {}
 export class LyHUD extends GMLayer {}
 export class ScMain extends GMScene {}
 
@@ -133,6 +134,17 @@ export class PfX extends GMScene {}
 ```
 
 - `GMLayer` 弹层有统一 mask + panel；`GMScene` 仍只做 Canvas opacity，不套 mask。
+
+## 界面控件与默认皮
+
+- 可复用控件（按钮、标题等）的**脚本和结构**进 `gmajor`，不进本游戏功能包，不另开 Widget 库。
+- **框架自带预制体：`Pf` + `GM` + 名**。按钮 `PfGMBtn`，标题 `PfGMTitle`。弹层预制体同样：`Ly` + `GM` + 名（`LyGMXxx`）。先看出是 Pf 还是 Ly，再看出是框架的。
+- 不要 `PfBtn`（太泛），不要 `PfFFBtn`（`FF*` 已废），不要只叫 `GMBtn`（看不出是预制体，也分不清 Ly/Pf）。
+- **本游戏**仍是 `PfShopItem` / `LyAlert`，中间不加 `GM`。纯基类仍是 `GMComponent` / `GMAlert` / `GMLayer`（没有对应预制体文件）。
+- **默认皮在 FFrame**：`assets/gmajor/ui/skin/`（Bundle `GMSkin`）。槽名 `BtnPrimary`、`TitleBar`、`Panel`…。切图脚本 `tools/temp/slice-ui-sheet.mjs` 直接切进这里。
+- 本游戏要换皮：同名槽盖掉默认。没换的槽继续用默认。不要为换皮再抄一份按钮类。
+- 控件 `setSkin` 只换 `SpriteFrame`，不要 import 本游戏 `SkinKit`。点击仍用 `gu.addClick`，控件不包一层点击。
+- 正文仍是 `panel` 下 `body`；`GMAlert` 认 `body` / `btnOk` / `btnCancel`，按钮字节点叫 `label`。分层说明：`docs/界面组件/说明.md`。
 
 ## 数据与事件（写逻辑/UI 时）
 
@@ -164,7 +176,8 @@ export class PfX extends GMScene {}
 - 给节点注册点击用 `gu.addClick(node, cb, opts?)`（`gu === gm.ui`）。**不要**在编辑器里拖 Button；代码里会加。
 - 基类不加 `this.addClick`。节点销毁会自己卸。主动摘用 `gu.removeClick(node)`。
 - loading 开着时回调不进（按下时还没菊花、松开时已经有，也要丢掉）。挡操作靠 loading，不做总开关。
-- 默认不锁。要防连点才传 `{ lockTime: 秒 }`。锁住时由 `gu` 打 `[gm.ui] addClick 已锁，忽略`，不进回调。变色/缩放后做。
+- 默认不锁。要防连点才传 `{ lockTime: 秒 }`。锁住时由 `gu` 打 `[gm.ui] addClick 已锁，忽略`，不进回调。
+- 按下默认两件事：缩到 0.96，并把节点上的 Sprite、Label（含描边）乘暗。松开还原。只要其中一种或都不要：`{ press: 'scale' | 'dim' | 'none' }`。比例在 `GMUIManager` 顶部的 `PRESS_SCALE` / `PRESS_DIM`。
 - 同一节点再 `addClick` 会换掉旧回调。
 
 ## createTs（实例化拿脚本）
@@ -185,12 +198,16 @@ export class PfX extends GMScene {}
 |------|------|----------|----------------|------|
 | 场景 | `Sc` | `ScMain.scene` | `ScMain.ts` / `ScMain` | `GMScene` |
 | Layer | `Ly` | — | `LyHUD.ts` / `LyHUD` | `GMLayer` |
-| 预制体 | `Pf` | `PfPlayer.prefab` | `PfPlayer.ts` / `PfPlayer` | `GMComponent` |
+| 预制体（本游戏） | `Pf` | `PfPlayer.prefab` | `PfPlayer.ts` / `PfPlayer` | `GMComponent` |
+| 预制体（框架） | `PfGM` | `PfGMBtn.prefab` | `PfGMBtn.ts` / `PfGMBtn` | `GMComponent` |
+| 弹层（框架） | `LyGM` | `LyGMXxx.prefab` | `LyGMXxx.ts` / `LyGMXxx` | `GMLayer` |
 | 逻辑入口 | — | — | `DemoHomeEntry.ts` | `GMBundleEntryBase` |
 
 ```text
 ✅ DemoHome/ScDemoHome.scene + DemoHome/ScDemoHome.ts（同目录；Canvas 下空节点；extends GMScene）
 ✅ DemoHome/PfRewardPopup.prefab + DemoHome/PfRewardPopup.ts（同目录，挂根节点；extends GMComponent）
+✅ gmajor/…/PfGMBtn.prefab + PfGMBtn.ts（框架预制体；extends GMComponent）
+❌ PfBtn（太泛）/ PfFFBtn（FF 已废）/ GMBtn（看不出 Pf 还是 Ly）
 ❌ DemoHome/scenes/… 与 DemoHome/scripts/… 分目录存放
 ❌ main.scene / Main.scene / SCMain.scene（缺 Sc 或大小写不对）
 ❌ player.prefab / PFPlayer.prefab（缺 Pf 或大小写不对）

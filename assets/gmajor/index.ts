@@ -25,11 +25,13 @@ export type { IGMBundleEntry } from './bind/GMBundleEntryBase';
 
 // —— ui/ ——
 export { GMComponent } from './ui/GMComponent'; // UI 通用基类；业务 onInit/onStart/onRemove；watch 随节点卸
+export { PfGMBtn } from './ui/PfGMBtn'; // 框架按钮；配置在脚本顶部；setSkin 同时换字色
+export type { PfGMBtnStyle } from './ui/PfGMBtn';
 export { GMLayer } from './ui/GMLayer'; // Layer 基类；Ly* 继承；mask+panel 入场；场景不套
 export { GMAlert } from './ui/GMAlert'; // 确认框基类；皮在本游戏常驻包
 export { GMScene } from './ui/GMScene'; // 场景基类；Sc* 继承（→Layer→Component）；默认 opacity
 export { GMUIManager } from './ui/GMUIManager'; // 视图门面：openScene / showLayer / addClick / createTs / alert；窗=设计分辨率
-export type { GMOpenSceneOptions, GMShowLayerOptions, GMLoadingShowOptions, GMAddClickOpts, GMCreateTsNodeParm, GMAlertParams, GMAlertBtn } from './ui/GMUIManager';
+export type { GMOpenSceneOptions, GMShowLayerOptions, GMLoadingShowOptions, GMAddClickOpts, GMClickPress, GMCreateTsNodeParm, GMAlertParams, GMAlertBtn } from './ui/GMUIManager';
 
 // —— data/ ——
 export { GMKvStore } from './data/GMKvStore'; // LocalStore / web 假服信封读写
