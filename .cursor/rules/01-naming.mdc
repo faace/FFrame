@@ -1,5 +1,5 @@
 ---
-description: Bundle/功能目录/绑定名、Sc/Ly/Pf、双基类、layer 结构（根+panel、mask 克隆）、界面控件进 gmajor、默认皮、换皮、数据 watch、业务事件 on、事件大类前缀（Gp/Bind）、平台 gp.call/send、loading、addClick、createTs、动态 UI 挂 Canvas、双窗数据权。新建或改 Bundle、场景、预制体、gmajor/game 脚本时引用。用户说数据变了刷新 UI、金币/字段变化、监听事件、事件前缀、Gp、gp.call、平台通道、原生回包、新建功能包、异步等待、挡住操作、loading、注册点击、addClick、列表项、createTs、按钮看不见、动态创建节点、新建 Ly、layer 结构、mask、panel、生成 Ly 预制体、弹窗标题、关闭钮、Ly 后不加 Popup、按钮组件、PfGMBtn、默认皮、换皮、Skin、双窗、第二窗、指令回矿、UI 不落盘时也引用。
+description: Bundle/功能目录/绑定名、Sc/Ly/Pf、双基类、layer 结构（根+panel、mask 克隆）、界面控件进 gmajor、默认皮、换皮、数据 watch、业务事件 on、事件大类前缀（Gp/Bind）、平台 gp.call/send、loading、addClick、createTs、动态 UI 挂 Canvas、双窗数据权。新建或改 Bundle、场景、预制体、gmajor/game 脚本时引用。用户说数据变了刷新 UI、金币/字段变化、监听事件、事件前缀、Gp、gp.call、平台通道、原生回包、新建功能包、异步等待、挡住操作、loading、注册点击、addClick、列表项、createTs、按钮看不见、动态创建节点、新建 Ly、layer 结构、mask、panel、生成 Ly 预制体、弹窗标题、关闭钮、Ly 后不加 Popup、按钮组件、PfGMBtn、PfGMSlider、PfGMBar、PfGMStepper、滑条、进度条、步进、默认皮、换皮、Skin、嵌套覆盖、只留差异项、双窗、第二窗、指令回矿、UI 不落盘时也引用。
 globs: assets/game/**,assets/gmajor/**,**/*.{scene,prefab}
 alwaysApply: false
 ---
@@ -141,14 +141,18 @@ export class PfX extends GMScene {}
 ## 界面控件与默认皮
 
 - 可复用控件（按钮、标题等）的**脚本和结构**进 `gmajor`，不进本游戏功能包，不另开 Widget 库。
-- **框架自带预制体：`Pf` + `GM` + 名**。按钮 `PfGMBtn`，标题 `PfGMTitle`。弹层预制体同样：`Ly` + `GM` + 名（`LyGMXxx`）。先看出是 Pf 还是 Ly，再看出是框架的。
+- **框架自带预制体：`Pf` + `GM` + 名**。按钮 `PfGMBtn`，标题 `PfGMTitle`，滑条 `PfGMSlider`，进度条 `PfGMBar`，步进 `PfGMStepper`。弹层预制体同样：`Ly` + `GM` + 名（`LyGMXxx`）。先看出是 Pf 还是 Ly，再看出是框架的。
+- 框架控件根锚点在中心。滑条只有轨道和滑块，旁边的图标和字由调用方摆。宽读根节点，高不跟。`value` 为 0–1，`setValue` 和检查器同一份。拖动自己听，loading 开着时这次丢掉。`setOnChange` 只在手指按下或移动时叫，`setValue` 不叫。
+- 进度条只有槽和填充。皮 `BarBg`、`BarFill`，自己切九宫格。`value` 为 0–1，不拖、不设 `onChange`。填充的 x 锚点为 0，从左侧往右长。四周留白写在脚本顶部。
+- 步进的加减嵌套中档纯图标 `PfGMBtn`（减 `secondary`，加 `primary`）。点按仍是外层 `gu.addClick`，步进不挂 `Button`。整数 `value` / `min` / `max` / `step` 是同一份属性。到 `min` 禁用减号，到 `max` 禁用加号。
 - 不要 `PfBtn`（太泛），不要 `PfFFBtn`（`FF*` 已废），不要只叫 `GMBtn`（看不出是预制体，也分不清 Ly/Pf）。
 - **本游戏**仍是 `PfShopItem` / `LyAlert`，中间不加 `GM`。纯基类仍是 `GMComponent` / `GMAlert` / `GMLayer`（没有对应预制体文件）。
 - 界面图在游戏 `assets/game/bundles/Skin/`（Bundle `Skin`）。不放 `gmajor`。开机 `loadBundle('Skin')`，不写进 `config.boot`，不绑入口。
 - 没有这个包，或少某一张：该槽用 Cocos 内置白图，打一条日志，开机不停。编辑器与播放按文件名取同一张；编辑器查 `db://assets/game/bundles/Skin/<名>.png/spriteFrame`。
 - 按钮 `theme` 与底板文件同名：`primary`、`secondary`、`warning`、`neutral`、`info`。脚本不挂底板属性。保存后节点 `Sprite` 上可以留下 uuid；播放时按主题名再贴。
 - 图标和文字拖入或设入才显示，没设就空着。`PfGMTitle` 自己取 `TitleBar`。其它图保持原文件名（`Panel`、`IconClose`…）。
-- 取图只给 `SpriteFrame`。按钮和标题自己切九宫格；其它节点由使用方设 `SLICED`。控件不要 import 游戏 `SkinKit`。点击仍用 `gu.addClick`，控件不包一层点击。
+- 嵌套 `PfGMBtn` / `PfGMTitle` 时，实例只覆盖和默认不同的项：节点名、坐标、档位、主题、版式、`text`、图标。底板、描边、字色、显隐、`contentSize` 留给控件预制体和脚本。`PfGMTitle` 没有 `text`，字覆盖在 Label 字符串上。
+- 取图只给 `SpriteFrame`。按钮、标题、滑条轨道、进度条的槽和填充自己切九宫格。其它节点由使用方设 `SLICED`。控件不要 import 游戏 `SkinKit`。点击仍用 `gu.addClick`，控件不包一层点击。滑条的拖动不是点击，不走 `addClick`。
 - 正文仍是 `panel` 下 `body`；`GMAlert` 认 `body` / `btnOk` / `btnCancel`，按钮字节点叫 `label`。分层说明：`docs/界面组件/说明.md`。
 
 ## 数据与事件（写逻辑/UI 时）
@@ -212,6 +216,9 @@ export class PfX extends GMScene {}
 ✅ DemoHome/ScDemoHome.scene + DemoHome/ScDemoHome.ts（同目录；Canvas 下空节点；extends GMScene）
 ✅ DemoHome/PfRewardPopup.prefab + DemoHome/PfRewardPopup.ts（同目录，挂根节点；extends GMComponent）
 ✅ gmajor/…/PfGMBtn.prefab + PfGMBtn.ts（框架预制体；extends GMComponent）
+✅ gmajor/…/PfGMSlider、PfGMBar、PfGMStepper（滑条只含轨道和滑块；进度条 BarBg/BarFill；步进加减嵌套 PfGMBtn）
+✅ 嵌套 PfGMBtn / PfGMTitle 只盖差异项（名、坐标、档位、主题、版式、text、图标；标题字在 Label 上）
+❌ 父预制体再盖底板 uuid、描边、字色、显隐、contentSize
 ❌ PfBtn（太泛）/ PfFFBtn（FF 已废）/ GMBtn（看不出 Pf 还是 Ly）
 ❌ LySettingPopup / LyDialog（Ly 已是弹窗）
 ❌ DemoHome/scenes/… 与 DemoHome/scripts/… 分目录存放
