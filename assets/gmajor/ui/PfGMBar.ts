@@ -7,13 +7,13 @@ const { ccclass, executeInEditMode, property } = _decorator;
 /**
  * 进度条可调参数。改数字改这里。
  * 宽读根节点，默认 320。高固定 64。四周留白 12。
- * 填充九宫格左右边距之和是 38，窄于这个不画。
+ * 填充是胶囊，左右九宫格边之和是 40，窄于这个不画。
  */
 const PF_GM_BAR = {
     height: 64,
     pad: 12,
     defaultWidth: 320,
-    fillMin: 38,
+    fillMin: 40, // 胶囊左右圆头各 20
 };
 
 function clamp01(n: number): number {

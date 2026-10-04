@@ -50,14 +50,14 @@
         "offsetY": 0,
         "trimX": 0,
         "trimY": 0,
-        "width": 384,
-        "height": 123,
-        "rawWidth": 384,
-        "rawHeight": 123,
-        "borderTop": 29,
-        "borderBottom": 29,
-        "borderLeft": 27,
-        "borderRight": 26,
+        "width": 48,
+        "height": 48,
+        "rawWidth": 48,
+        "rawHeight": 48,
+        "borderTop": 16,
+        "borderBottom": 16,
+        "borderLeft": 16,
+        "borderRight": 16,
         "packable": true,
         "pixelsToUnit": 100,
         "pivotX": 0.5,
@@ -67,17 +67,17 @@
         "imageUuidOrDatabaseUri": "afc1b953-ae7c-4fcd-b414-528559f4a01e@6c48a",
         "vertices": {
           "rawPosition": [
-            -192,
-            -61.5,
+            -24,
+            -24,
             0,
-            192,
-            -61.5,
+            24,
+            -24,
             0,
-            -192,
-            61.5,
+            -24,
+            24,
             0,
-            192,
-            61.5,
+            24,
+            24,
             0
           ],
           "indexes": [
@@ -90,12 +90,12 @@
           ],
           "uv": [
             0,
-            123,
-            384,
-            123,
+            48,
+            48,
+            48,
             0,
             0,
-            384,
+            48,
             0
           ],
           "nuv": [
@@ -109,13 +109,13 @@
             1
           ],
           "minPos": [
-            -192,
-            -61.5,
+            -24,
+            -24,
             0
           ],
           "maxPos": [
-            192,
-            61.5,
+            24,
+            24,
             0
           ]
         },

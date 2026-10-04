@@ -7,7 +7,7 @@ const { ccclass, executeInEditMode } = _decorator;
 /**
  * 标题可调参数。改数字改这里。
  * 字体资源：assets/gmajor/fonts/main.ttf，挂在子节点 label 上。
- * 九宫格边距在 title_bar 图上：左 40、右 40、上 22、下 20。只拉宽，不拉高。
+ * 九宫格在 title_bar 上：左 48、右 48、上 20、下 20。只拉宽，不拉高。
  * 小档、大档以后在 sizes 里加一行，并把 size 指过去。
  */
 const PF_GM_TITLE = {

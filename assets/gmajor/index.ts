@@ -30,6 +30,8 @@ export { PfGMTitle } from './ui/PfGMTitle'; // 框架标题；自己取 title_ba
 export { PfGMSlider } from './ui/PfGMSlider'; // 框架滑条；轨道+滑块；value 0–1；自己听拖动
 export { PfGMBar } from './ui/PfGMBar'; // 框架进度条；槽+填充；value 0–1；九宫格拉宽
 export { PfGMStepper } from './ui/PfGMStepper'; // 框架步进；嵌套 PfGMBtn；整数 value/min/max/step
+export { GMTabPage } from './ui/GMTabPage'; // 页签内容基类；onShow/onHide(done)；text/setText
+export { PfGMTabs, GMTabSource } from './ui/PfGMTabs'; // 框架页签；tabs+panel；index；insert/remove
 export { loadSkin, applySkin, skinFrame, SKIN_BUNDLE } from './ui/GMSkin'; // 游戏 Skin 包；缺槽用内置白图
 export { GMLayer } from './ui/GMLayer'; // Layer 基类；Ly* 继承；mask+panel 入场；场景不套
 export { GMAlert } from './ui/GMAlert'; // 确认框基类；皮在本游戏常驻包

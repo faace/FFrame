@@ -13,6 +13,7 @@ const { ccclass, executeInEditMode, property } = _decorator;
 const PF_GM_BTN = {
     disabledMul: 0.55, // 禁用时底板、图标、字和描边一起乘。按下的缩小和压暗在 gu.addClick
     outlineWidth: 4,
+    contentInset: 16, // 九宫格四边。字的缩放框是中心这块，不是按钮外框
     iconScale: 0.8, // 图标相对档位尺寸
     sizes: {
         medium: { width: 260, height: 88, square: 88, icon: 80, padX: 12, fontSize: 36 },
@@ -215,15 +216,11 @@ export class PfGMBtn extends GMComponent {
         label.outlineWidth = PF_GM_BTN.outlineWidth;
         const node = label.node;
         const lut = node.getComponent(UITransform);
-        if (showIcon) {
-            const left = -width / 2 + tier.padX + tier.icon;
-            const right = width / 2 - tier.padX;
-            lut?.setContentSize(Math.max(0, right - left), tier.height);
-            node.setPosition((left + right) / 2, 0, 0);
-            return;
-        }
-        lut?.setContentSize(width, tier.height);
-        node.setPosition(0, 0, 0);
+        const inset = PF_GM_BTN.contentInset;
+        const right = width / 2 - inset;
+        const left = showIcon ? Math.max(-width / 2 + inset, -width / 2 + tier.padX + tier.icon) : -width / 2 + inset;
+        lut?.setContentSize(Math.max(0, right - left), Math.max(0, tier.height - inset * 2));
+        node.setPosition((left + right) / 2, 0, 0);
     }
 
     private applyColors(): void {
