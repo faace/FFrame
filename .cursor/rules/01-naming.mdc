@@ -1,5 +1,5 @@
 ---
-description: Bundle/功能目录/绑定名、Sc/Ly/Pf、双基类、layer 结构（根+panel、mask 克隆）、界面控件进 gmajor、默认皮、换皮、数据 watch、业务事件 on、事件大类前缀（Gp/Bind）、平台 gp.call/send、loading、addClick、createTs、动态 UI 挂 Canvas、双窗数据权。新建或改 Bundle、场景、预制体、gmajor/game 脚本时引用。用户说数据变了刷新 UI、金币/字段变化、监听事件、事件前缀、Gp、gp.call、平台通道、原生回包、新建功能包、异步等待、挡住操作、loading、注册点击、addClick、列表项、createTs、按钮看不见、动态创建节点、新建 Ly、layer 结构、mask、panel、生成 Ly 预制体、弹窗标题、关闭钮、Ly 后不加 Popup、按钮组件、PfGMBtn、PfGMSlider、PfGMBar、PfGMStepper、PfGMTabs、滑条、进度条、步进、页签、默认皮、换皮、Skin、界面图蛇形、btn_、按钮底板、九宫格、圆角、AI 风格稿、改 gmajor 还是游戏、兼容、升 gm.version、嵌套覆盖、只留差异项、双窗、第二窗、指令回矿、UI 不落盘时也引用。
+description: Bundle/功能目录/绑定名、Sc/Ly/Pf、双基类、layer 结构（根+panel、mask 克隆）、界面控件进 gmajor、默认皮、换皮、数据 watch、业务事件 on、事件大类前缀（Gp/Bind）、平台 gp.call/send、loading、addClick、createTs、动态 UI 挂 Canvas、双窗数据权。新建或改 Bundle、场景、预制体、gmajor/game 脚本时引用。用户说数据变了刷新 UI、金币/字段变化、监听事件、事件前缀、Gp、gp.call、平台通道、原生回包、新建功能包、异步等待、挡住操作、loading、注册点击、addClick、列表项、createTs、按钮看不见、动态创建节点、新建 Ly、layer 结构、mask、panel、生成 Ly 预制体、弹窗标题、关闭钮、Ly 后不加 Popup、按钮组件、PfGMBtn、PfGMSlider、PfGMBar、PfGMStepper、PfGMTabs、滑条、进度条、步进、页签、默认皮、换皮、Skin、界面图蛇形、btn_、按钮底板、九宫格、圆角、AI 风格稿、改 gmajor 还是游戏、兼容、升 gm.version、嵌套覆盖、只留差异项、双窗、第二窗、指令回矿、UI 不落盘、Bundle 内 res/spine/font/anim/prefab、目录小驼峰或大驼峰、实例节点、图片蛇形、文件名英文时也引用。
 globs: assets/game/**,assets/gmajor/**,**/*.{scene,prefab}
 alwaysApply: false
 ---
@@ -43,14 +43,42 @@ alwaysApply: false
 
 | 种类 | 风格 | 示例 |
 |------|------|------|
-| 系统/脚手架目录 | **小写**（对齐 Cocos `resources`） | `gmajor/`、`game/`、`bundles/` |
+| 框架目录 | **小驼峰**。一个单词看不出中间的大写 | `assets/`、`game/`、`bundles/`、`res/` |
+| 我们起的目录 | **大驼峰** | `ZooHome/`、`Shop/`、`SouthGate/` |
 | 分组目录 | **大驼峰** | `Demo/`、`Base/`、`Core/` |
 | 功能叶子 / Bundle / 绑定名 | **大驼峰** | `DemoHome/` |
+| 图片文件 | **小写蛇形** | `gate_01.png` |
+| 实例节点（被变量指到） | **小驼峰**，与变量同名 | `pfBtnOk` |
+| 挂脚本的根节点 | **大驼峰**，与类名同名 | `ScZooHome`、`PfBtnOk` |
 
 - 核心：`assets/gmajor/`（固定；无开机名单）
 - 项目：`assets/game/`（固定；`ScMain.scene` + `ScMain.ts` + `config.ts` 同层）
-- 功能根：`assets/game/bundles/`（固定小写；其下再分组/功能）
+- 功能根：`assets/game/bundles/`（其下再分组/功能）
+- 文件名、目录名、节点名用英文。
 - 确认框脚本基类在 gmajor（`GMAlert`）；节点约定见下。皮见「界面控件与默认皮」
+
+## Bundle 内部
+
+有文件才建目录。每一层（Bundle 根，以及 `prefab/` 里的功能夹）结构相同：
+
+- 这一层根上放它自己的场景或 `Ly*` / `Pf*`，以及对应脚本。真正的 Bundle 根上另有 `包名Entry.ts`（`onBind` / `onUnbind`）。
+- `res`、`spine`、`font`、`anim`、`prefab` 放这一层再用的东西。这五个名字是小驼峰架子。
+- `prefab/` 里是内部使用的子 `Ly*` / `Pf*`。可以按功能再开大驼峰文件夹，里面按同样结构再套。功能夹不是 Bundle：不勾 Asset Bundle，没有 Entry。
+- `res` 里可以按需要再开大驼峰子目录。`font`、`anim` 直接放文件。Spine 一个动画一个同名文件夹，里面一般是 `json`、`atlas`、`png`。
+
+```text
+ZooHome/
+  ZooHomeEntry.ts
+  ScZooHome.scene
+  ScZooHome.ts
+  res/SouthGate/gate_01.png
+  prefab/Shop/
+    LyShop.prefab          # 根节点 LyShop
+    LyShop.ts
+    prefab/PfShopItem.prefab
+```
+
+放进父界面、要被变量指到的实例用小驼峰，例如 `pfBtnOk`。预制体文件和它自己的根节点仍用大驼峰 `PfBtnOk`。
 
 ## 场景（Scene）
 
@@ -148,12 +176,12 @@ export class PfX extends GMScene {}
 - 页签是 `PfGMTabs`，不继承 `PfGMBtn`。子节点固定 `tabs`、`panel`。内容必须是 `GMTabPage`（`text` / `setText`，`onShow` / `onHide` 收 `done`）。皮 `tab_normal`、`tab_selected`、`panel`，控件自己切九宫格。高 72，宽按五个中文字不缩放，从左挨着排，第一颗让过 panel 顶边圆角。点击用 `gu.addClick`。
 - 不要 `PfBtn`（太泛），不要 `PfFFBtn`（`FF*` 已废），不要只叫 `GMBtn`（看不出是预制体，也分不清 Ly/Pf）。
 - **本游戏**仍是 `PfShopItem` / `LyAlert`，中间不加 `GM`。纯基类仍是 `GMComponent` / `GMAlert` / `GMLayer`（没有对应预制体文件）。
-- 界面图在游戏 `assets/game/bundles/Skin/`（Bundle `Skin`）。开机 `loadBundle('Skin')`，不写进 `config.boot`，不绑入口。`assets/gmajor/ui/skin/` 是同名样图，播放不加载。不要在 `GameUI/Skin` 再放一套。
+- 界面图只在游戏 `assets/game/bundles/Skin/`（Bundle `Skin`）。开机 `loadBundle('Skin')`，不写进 `config.boot`，不绑入口。框架不带这些图。不要在 `GameUI/Skin` 再放一套。
 - 没有这个包，或少某一张：该槽用 Cocos 内置白图，打一条日志，开机不停。编辑器与播放按文件名取同一张；编辑器查 `db://assets/game/bundles/Skin/<名>.png/spriteFrame`。
 - 界面图文件名用**小写蛇形**，种类在前。按钮底板是 `btn_` 加主题名：`btn_primary`、`btn_secondary`、`btn_warning`、`btn_neutral`、`btn_info`。主题枚举仍是 `primary` 这些，`PfGMBtn` 取图时加 `btn_`。脚本不挂底板属性。
 - 按钮底板源图 **48×48**，外圆角 **12**，九宫格四边 **16**。外轮廓是硬像素台阶，层与层之间硬边，中心纯色。实心主题（`primary`、`warning`、`neutral`、`info`）：顶边 4 描边 + 12 亮边，底边 12 暗边 + 4 描边，左右只有 4 描边。`btn_secondary`：3 深描边 + 4 金框 + 2 奶油内沿，内圆角剩 3，框外到第 16 像素用脸的纯色填上。
-- AI 只出风格稿，不直接当终稿。从参考图直边取各层平色，用脚本按上面的几何重画（`tools/temp/draw-btn-plates.mjs`）。要留下的厚度必须落在这 16 像素里，中心不铺噪点或渐变。样图 `gmajor/ui/skin` 与游戏 `bundles/Skin` 成对替换，sprite 四边保持 16。回到编辑器后重新导入。
-- 其余界面图和按钮同一套画法：硬像素台阶、纯色块、中心不铺噪点。形状仍是各自的。`title_bar` 是带铆钉的木牌（左 48、右 48、上 20、下 20）。`panel` 是厚木框。页签源图 56×32，上圆下方。`bar_bg` / `bar_fill` / `progress_fill` 是胶囊。`slider_thumb` 是圆钮，不切。`frame_select` 是空心环。图标仍是各自的符号，九宫格边为 0。重画脚本 `tools/temp/draw-skin-plates.mjs`。
+- AI 只出风格稿，不直接当终稿。从参考图直边取各层平色，用脚本按上面的几何重画（`tools/temp/draw-btn-plates.mjs`）。要留下的厚度必须落在这 16 像素里，中心不铺噪点或渐变。重画只写入游戏 `bundles/Skin`，sprite 四边保持 16。回到编辑器后重新导入。
+- 其余界面图和按钮同一套画法：硬像素台阶、纯色块、中心不铺噪点。形状仍是各自的。`title_bar` 是带铆钉的木牌（左 48、右 48、上 20、下 20）。`panel` 是厚木框。页签源图 56×32，上圆下方。`bar_bg` / `bar_fill` / `progress_fill` 是胶囊。`slider_thumb` 是圆钮，不切。`frame_select` 是空心环。图标仍是各自的符号，九宫格边为 0。重画脚本 `tools/temp/draw-skin-plates.mjs`，只写入游戏 `bundles/Skin`。
 - 框架会取的其它槽：`title_bar`、`bar_bg`、`bar_fill`、`slider_track`、`slider_thumb`、`stepper_plate`、`tab_normal`、`tab_selected`、`panel`。只有一张、种类就是名字的，不加第二段，例如 `panel`。图标 `icon_close` 这种。Bundle、脚本、预制体仍大驼峰，禁止蛇形。
 - 图标和文字拖入或设入才显示，没设就空着。`PfGMTitle` 自己取 `title_bar`。必取清单在框架仓库 README。
 - 嵌套 `PfGMBtn` / `PfGMTitle` 时，实例只覆盖和默认不同的项：节点名、坐标、档位、主题、版式、`text`、图标。底板、描边、字色、显隐、`contentSize` 留给控件预制体和脚本。`PfGMTitle` 没有 `text`，字覆盖在 Label 字符串上。
@@ -164,7 +192,6 @@ export class PfX extends GMScene {}
 
 - 多个游戏都会用的控件脚本和预制体、开机、绑定、数据、事件、平台、Overlay、皮肤加载机制：改 `gmajor`。
 - 业务包、`config.ts`、`bundles/Skin` 里的图、业务窗口：改游戏仓。框架不 import 游戏代码。
-- 样图可以改 `gmajor/ui/skin`，播放仍只认游戏 `bundles/Skin`。
 
 ## 兼容
 
