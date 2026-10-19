@@ -24,7 +24,7 @@ git clone https://github.com/faace/FFrame-example.git assets/game
 
 播放只加载 Bundle `Skin`（`assets/game/bundles/Skin/`）。不写进 `boot`，不绑入口。没有这个包，或缺某一张，该槽用内置白图，打一条日志，开机继续。
 
-框架会取哪些文件名，写在仓库根 README 的「皮肤槽」。样图在 `assets/gmajor/ui/skin/`，文件名和槽相同，播放不读这个目录。要样子时，把同名 png 复制进游戏的 `bundles/Skin`。
+框架会取哪些文件名，写在仓库根 README 的「皮肤槽」。游戏自己把同名 png 放进 `bundles/Skin`。框架仓库不带这些图。
 
 不要在 `GameUI/Skin` 再放一套图。
 
