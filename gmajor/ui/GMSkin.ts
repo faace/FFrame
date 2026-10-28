@@ -103,11 +103,38 @@ function take(name: string): SpriteFrame {
 function noteMissing(key: string): void {
     if (logged.has(key)) return;
     logged.add(key);
-    if (key === '*') console.warn('[Skin] 没有 Skin 包，用内置白图');
-    else console.warn('[Skin] 缺', key);
+    if (key === '*') console.info('[Skin] 没有 Skin 包，用内置白图'); // 整包没有是正常状态（新 app 还没出图），不当警告
+    else console.warn('[Skin] 缺', key); // 包在但缺这一张，才是要补的
+}
+
+let editorDirOk: boolean | null = null; // 编辑器里 Skin 目录是否存在；null = 还没查
+let editorDirWait: Array<() => void> | null = null;
+
+/** 编辑器里先查一次 Skin 目录。没有就记一条「没有 Skin 包」，不对每个槽各报一次 */
+function checkEditorDir(done: () => void): void {
+    if (editorDirOk !== null) return done();
+    if (editorDirWait) return void editorDirWait.push(done);
+    editorDirWait = [done];
+    queryUuid(SKIN_DB, (uuid) => {
+        editorDirOk = !!uuid;
+        if (!editorDirOk) {
+            missingBundle = true;
+            noteMissing('*');
+        }
+        const pending = editorDirWait ?? [];
+        editorDirWait = null;
+        pending.forEach((fn) => fn());
+    });
 }
 
 function applyInEditor(name: string, apply: (frame: SpriteFrame) => void): void {
+    checkEditorDir(() => {
+        if (!editorDirOk) return apply(whiteFrame());
+        applyInEditorSlot(name, apply);
+    });
+}
+
+function applyInEditorSlot(name: string, apply: (frame: SpriteFrame) => void): void {
     const hit = frames?.get(name);
     if (hit) return apply(hit);
     const queue = editorWait.get(name);
