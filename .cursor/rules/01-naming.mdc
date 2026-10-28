@@ -52,6 +52,7 @@ alwaysApply: false
 | 挂脚本的根节点 | **大驼峰**，与类名同名 | `ScZooHome`、`PfBtnOk` |
 
 - 核心：`gmajor/`（在 FFrame 仓库根，不在 `assets/` 里；固定；无开机名单）。每个工程用 `extensions/gmajor/package.json` 把它挂成资源库 `db://gmajor`。
+- 框架预制体（`PfGM*.prefab`）放 `gmajor/prefabs/`，它是 Bundle `GMUI`，`gm.boot` 开机加载；**该目录不放脚本**（脚本会被打进 Bundle）。`PfGM*.ts` 脚本放 `gmajor/ui/`。新增框架预制体放进 `prefabs/`，否则发布包里按 uuid 动态加载会 404。框架预制体里不要引用 `assets/game` 下的任何资源。
 - 游戏脚本引用框架**只写** `import { ... } from 'db://gmajor/index'`。不要写相对路径 `'../gmajor'`（不在同一资源库，走不通），也不要 import 框架内部子文件。
 - 项目：`assets/game/`（固定；`ScMain.scene` + `ScMain.ts` + `config.ts` 同层）
 - 功能根：`assets/game/bundles/`（其下再分组/功能）

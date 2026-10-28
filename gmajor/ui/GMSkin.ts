@@ -41,21 +41,34 @@ export function loadSkin(onComplete: GMAsyncComplete): void {
     }
     assetManager.loadBundle(SKIN_BUNDLE, (err, bundle) => {
         if (err || !bundle) {
+            console.warn('[Skin] 加载 Skin 包失败', err);
             missingBundle = true;
             frames = new Map();
             noteMissing('*');
             finish(null);
             return;
         }
-        bundle.loadDir('', SpriteFrame, (_loadErr, assets) => {
+        loadDeps(bundle, () => bundle.loadDir('', SpriteFrame, (loadErr, assets) => {
             frames = indexFrames(assets ?? [], bundle);
             if (!frames.size) {
+                if (loadErr) console.warn('[Skin] 界面图加载失败', loadErr);
                 missingBundle = true;
                 noteMissing('*');
             }
             finish(null);
-        });
+        }));
     });
+}
+
+/** Skin 的图和别的 Bundle 共用资源时，Creator 会把共用部分放到高优先级的包里，Skin 就依赖它。先把依赖的包加载好，不然 loadDir 会报 Please load bundle X first */
+function loadDeps(bundle: AssetManager.Bundle, done: () => void): void {
+    const deps = ((bundle as unknown as { deps?: string[] }).deps ?? []).filter((name) => !assetManager.bundles.has(name));
+    if (!deps.length) return done();
+    let left = deps.length;
+    deps.forEach((name) => assetManager.loadBundle(name, (err) => {
+        if (err) console.warn('[Skin] 依赖包加载失败', name, err);
+        if (--left === 0) done();
+    }));
 }
 
 /** 已载入才有值。缺槽时是白图，不是 null */

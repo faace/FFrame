@@ -11,6 +11,7 @@ export type { GMEvent, GMEventListener } from './event/GMEventManager';
 export type { GMAsyncComplete, GMAsyncCompleteWith, GMAsyncProgress } from './resource/GMAsyncCallback'; // 完成在前、onProgress 可选
 export type { IGMResource } from './resource/IGMResource'; // Bundle / 资源加载能力接口
 export { GMCocosResource } from './resource/GMCocosResource'; // assetManager 实现
+export { CORE_BUNDLE, loadCoreBundle } from './resource/GMCoreBundle'; // 框架自带预制体 Bundle GMUI（gmajor/prefabs）；gm.boot 开机加载
 
 // —— bind/ ——
 export { GMBindState } from './bind/GMBindState'; // 入口状态机

@@ -18,6 +18,8 @@ app 在 `config.version.gmajor` 写所按的框架版本。开机只打日志，
 - **临时文件**：每个工程根 `del/`（已忽略），取代 `tools/temp/`。
 - **修复**：`PfGMBar` / `PfGMBtn` / `PfGMSlider` / `PfGMStepper` / `PfGMTitle` 预制体里写死的 `_spriteFrame` 原先指向 demo `bundles/Skin` 里的 png（框架依赖了游戏资源），app 没有同名图时预览报 `The asset ... is missing`。现在统一指向引擎内置白图 `default_sprite_splash`。运行时仍由 `GMSkin` 按文件名从 app 的 `bundles/Skin` 取图，行为不变。**框架预制体里不要引用 `assets/game` 下的任何资源。**
 - **修复**：app 没有 Bundle `Skin` 时，开机不再去加载它（原先会打 404 红日志，预览还弹错误框）。只留一条 `[Skin] 没有 Skin 包，用内置白图` 的 info 日志（编辑器里也只报这一条，不再对每个槽各报一次警告）。包在但缺某一张图，仍然是警告。
+- **修复（Skin 依赖包）**：Skin 的图与别的 Bundle 共用资源时，Creator 会把共用部分放进高优先级的包（如 `GameUI`），Skin 就依赖它，开机 `loadDir` 报 `Please load bundle GameUI first`，所有按钮退回白图。`loadSkin` 现在先加载 Skin 依赖的包再取图。
+- **修复（发布构建）**：`PfGM*` 预制体常被代码按 uuid 动态加载，没有场景静态引用时不会被打进包，发布后按钮加载 404。现在预制体搬到 `gmajor/prefabs/`（原 `gmajor/ui/`，uuid 不变），该目录设为 Bundle `GMUI`，`gm.boot` 开机先加载它（工程里没有该 Bundle 则跳过）。**预制体放 `gmajor/prefabs/`，脚本放 `gmajor/ui/`**：Bundle 目录里不能有脚本，否则脚本会被打进 Bundle。
 
 app 要改的：
 

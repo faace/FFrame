@@ -12,6 +12,7 @@ import type { GMPlatform } from '../platform/GMPlatform';
 import type { GMAsyncComplete, GMAsyncProgress } from '../resource/GMAsyncCallback';
 import type { GMBootOpts, GMGameConfig } from './GMBoot';
 import { loadSkin } from '../ui/GMSkin';
+import { loadCoreBundle } from '../resource/GMCoreBundle';
 
 export const version = '0.5.0'; // 框架版本；升级时同时改 extensions/gmajor/package.json 的 version，并写 CHANGELOG.md
 
@@ -69,9 +70,12 @@ function boot(game: GMGameConfig, a: GMBootOpts | GMAsyncComplete, b?: GMAsyncCo
     const names = game.boot.slice();
     if (names.indexOf(entry) < 0) names.push(entry);
     console.info('[gm.boot] role', role, 'packs', names.join(','));
-    loadSkin((err) => {
-        if (err) return onComplete(err);
-        binder.bindInOrder(names, onComplete, onProgress);
+    loadCoreBundle((coreErr) => {
+        if (coreErr) return onComplete(coreErr);
+        loadSkin((err) => {
+            if (err) return onComplete(err);
+            binder.bindInOrder(names, onComplete, onProgress);
+        });
     });
 }
 
