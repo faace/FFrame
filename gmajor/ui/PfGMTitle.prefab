@@ -53,7 +53,7 @@
     "_srcBlendFactor": 2,
     "_dstBlendFactor": 4,
     "_color": { "__type__": "cc.Color", "r": 255, "g": 255, "b": 255, "a": 255 },
-    "_spriteFrame": { "__uuid__": "dd9a36cd-47bd-42b6-86fe-ea7b536602de@f9941", "__expectedType__": "cc.SpriteFrame" },
+    "_spriteFrame": { "__uuid__": "7d8f9b89-4fd1-4c9f-a3ab-38ec7cded7ca@f9941", "__expectedType__": "cc.SpriteFrame" },
     "_type": 1,
     "_fillType": 0,
     "_sizeMode": 0,
