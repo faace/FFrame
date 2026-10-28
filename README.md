@@ -1,22 +1,42 @@
 # FFrame
 
-Cocos Creator 工程，里面是框架 **gmajor**。具体游戏不在这个 git 里。
+Cocos Creator 框架 **gmajor** 的仓库。同时也是一个 Creator 工程，里面的 `assets/game` 是展示框架和控件基本用法的 demo。
 
-游戏是另一个仓库，克隆到 `assets/game`。本仓库的 `.gitignore` 忽略这个目录。换一个游戏，就换掉整个 `assets/game`。框架代码不 import 游戏代码。
-
-示例游戏：[FFrame-example](https://github.com/faace/FFrame-example)。
+具体游戏（如动物园）是另一个仓库、另一个 Creator 工程。游戏**引用**本仓库的 `gmajor/`，不是被放进本仓库。
 
 ```
-git clone https://github.com/faace/FFrame.git
-git clone https://github.com/faace/FFrame-example.git assets/game
+D:\creator\
+  FFrame\        本仓库：框架 + demo
+  FFrame-zoo\    一个 app：自己的 Creator 工程，把 ..\FFrame\gmajor 挂进来
 ```
 
-编辑器播放 `assets/game/ScMain.scene`。日常怎么写脚本，先看 [docs/架构/README.md](docs/架构/README.md)。
+## 怎么引用
 
+框架代码在仓库根 `gmajor/`，不在 `assets/` 里。每个工程用 Cocos 扩展的资源库挂载引用它：
+
+```
+<工程>/extensions/gmajor/package.json
+  contributions.asset-db.mount.path     相对这个扩展目录的路径，指向 gmajor/
+  contributions.asset-db.mount.readonly app 写 true，FFrame 自己的 demo 写 false
+```
+
+挂载后框架是资源库 `db://gmajor`。游戏脚本这样引用：
+
+```ts
+import { GMScene, gm, gp } from 'db://gmajor/index';
+```
+
+不要写 `'../gmajor'`，两者不在同一个资源库。app 里框架是只读的；要改框架，到本仓库的 `gmajor/` 改。写法示例见 [extensions/gmajor/package.json](extensions/gmajor/package.json)，实验记录见 `D:\creator\FFrame-exp\README.md`。
+
+版本不锁，app 永远用兄弟目录里最新的框架。框架版本是 `gm.version`，改动记在 [CHANGELOG.md](CHANGELOG.md)。app 在 `config.version.gmajor` 写所按的版本，开机只打日志。
+
+日常怎么写脚本，先看 [docs/架构/README.md](docs/架构/README.md)。新建 app 看 [docs/新App.md](docs/新App.md)。
+
+编辑器播放 `assets/game/ScMain.scene` 看 demo。
 ## 目录
 
 ```
-assets/gmajor/          框架代码。固定小写，不是 Asset Bundle
+gmajor/          框架代码。固定小写，不是 Asset Bundle
   index.ts              模块出口。先看这里
   launch/               gm.boot、gm.version
   bind/                 包的加载和生命周期
@@ -26,7 +46,10 @@ assets/gmajor/          框架代码。固定小写，不是 Asset Bundle
   platform/             gp。游戏只喊 gp
   ui/                   场景、弹层、Overlay、PfGM* 控件
   fonts/main.ttf        控件用的字体
-assets/game/            独立 git。本仓库忽略
+assets/game/            demo App（原 FFrame-example）
+extensions/gmajor/     把 gmajor/ 挂成 db://gmajor
+del/                    临时文件，已忽略
+CHANGELOG.md           框架更新日志
 docs/                   架构、新 App、界面控件、设计讨论
 .cursor/rules/          写代码时的约定。01-naming 含改哪边
 config.tpl.json         和游戏 config.ts 相同的字段，给对照
@@ -36,7 +59,7 @@ config.tpl.json         和游戏 config.ts 相同的字段，给对照
 
 ## 开机
 
-`ScMain` 在游戏仓。它只做一件事：把 `assets/game/config.ts` 交给 `gm.boot`。
+`ScMain` 在 app 里（demo 是 `assets/game/ScMain.ts`）。它只做一件事：把 `assets/game/config.ts` 交给 `gm.boot`。
 
 `config` 的字段：
 
@@ -56,7 +79,7 @@ Overlay 是框架自己的常驻节点。第一次打开场景、弹层或确认
 
 ## 新游戏最少要有
 
-从空的本仓库开始时，游戏仓最少这些：
+新建 app 时，`assets/game/` 最少这些：
 
 - `ScMain.scene`、`ScMain.ts`（挂在 Canvas 下同名空节点，与 Camera 同级）
 - `config.ts`
@@ -128,14 +151,14 @@ Overlay 是框架自己的常驻节点。第一次打开场景、弹层或确认
 
 | 改什么 | 仓库 |
 |---|---|
-| 控件脚本和预制体、开机、绑定、数据、事件、平台、Overlay、皮肤怎么加载 | 本仓库 `assets/gmajor/` |
-| 业务包、`config.ts`、界面图、业务窗口 | 游戏仓 `assets/game/` |
+| 控件脚本和预制体、开机、绑定、数据、事件、平台、Overlay、皮肤怎么加载 | 本仓库 `gmajor/` |
+| 业务包、`config.ts`、界面图、业务窗口 | app 工程的 `assets/game/` |
 
-框架不 import 游戏。游戏可以 import `gmajor`。
+框架不 import 游戏。游戏通过 `db://gmajor/index` 引用框架。
 
 ## 兼容
 
-公开面被游戏依赖，改名、删字段、改节点名要升 `gm.version`，并在上面这种「破坏项」里写旧名和新名。
+公开面被游戏依赖，改名、删字段、改节点名要升 `gm.version`，并在 [CHANGELOG.md](CHANGELOG.md) 里写破坏项：旧名、新名、怎么改。
 
 公开面包括：
 
@@ -145,4 +168,4 @@ Overlay 是框架自己的常驻节点。第一次打开场景、弹层或确认
 - 上一节「框架会取的图」
 - `PfGM*` 的子节点名。滑条是 `track`、`thumb`。进度条是 `bg`、`fill`。按钮是 `label`、`icon`。页签是 `tabs`、`panel`
 
-只加可选字段，或只加新的皮肤槽，不记破坏。游戏仓怎么改，不保证别的游戏还能跑。
+只加可选字段，或只加新的皮肤槽，不记破坏。app 里的业务怎么写，不保证别的 app 还能跑。

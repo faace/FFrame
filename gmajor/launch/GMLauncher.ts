@@ -13,7 +13,7 @@ import type { GMAsyncComplete, GMAsyncProgress } from '../resource/GMAsyncCallba
 import type { GMBootOpts, GMGameConfig } from './GMBoot';
 import { loadSkin } from '../ui/GMSkin';
 
-export const version = '0.4.0'; // 框架版本；升级只改这一处
+export const version = '0.5.0'; // 框架版本；升级时同时改 extensions/gmajor/package.json 的 version，并写 CHANGELOG.md
 
 /** 全局核心句柄（模块加载时创建；用法 gm.binder / gm.events / gm.ui / gd / gl / gu / gp …） */
 export interface GMCore {
@@ -47,6 +47,14 @@ export const gl = store.gl; // === gm.local；全是本地
 export const gu = ui; // === gm.ui
 export const gp = createPlatform(events); // === gm.platform；import 时认环境；推送进 events
 
+/** 只打日志，不拦截：app 声明的框架「主.次」与当前不同则警告，由人看 CHANGELOG.md 判断 */
+function checkVersion(declared?: string): void {
+    if (!declared) return console.info('[gm.boot] 框架版本', version, 'app 未声明 version.gmajor');
+    const mm = (v: string) => v.split('.').slice(0, 2).join('.');
+    if (mm(declared) === mm(version)) return console.info('[gm.boot] 框架版本', version, 'app 声明', declared);
+    console.warn('[gm.boot] 框架版本', version, '与 app 声明', declared, '的主.次不同；若异常请对照 CHANGELOG.md');
+}
+
 function boot(game: GMGameConfig, onComplete: GMAsyncComplete, onProgress?: GMAsyncProgress): void;
 function boot(game: GMGameConfig, opts: GMBootOpts, onComplete: GMAsyncComplete, onProgress?: GMAsyncProgress): void;
 function boot(game: GMGameConfig, a: GMBootOpts | GMAsyncComplete, b?: GMAsyncComplete | GMAsyncProgress, c?: GMAsyncProgress): void {
@@ -55,6 +63,7 @@ function boot(game: GMGameConfig, a: GMBootOpts | GMAsyncComplete, b?: GMAsyncCo
     const onComplete = (hasOpts ? b : a) as GMAsyncComplete;
     const onProgress = (hasOpts ? c : b) as GMAsyncProgress | undefined;
     const role = opts?.role || gp.params.role || 'web';
+    checkVersion(game.version.gmajor);
     const entry = game.entry[role];
     if (!entry) return onComplete(new Error(`[gm.boot] 无入口 role=${role}`));
     const names = game.boot.slice();

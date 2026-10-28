@@ -1,0 +1,29 @@
+# 更新日志
+
+只记**对 app 有影响**的改动。版本号 `主.次.修`：0.x 阶段，破坏性改动升「次」；只加可选字段、只加新槽升「修」。版本号在 `gmajor/launch/GMLauncher.ts` 的 `version`，同时改 `extensions/gmajor/package.json` 的 `version`。
+
+app 在 `config.version.gmajor` 写所按的框架版本。开机只打日志，主.次不同时多打一条警告，不拦截。升级后怎么判断：看这里的破坏项，再跑一遍。
+
+## 0.5.0（破坏）
+
+框架引用方式翻转：app 是 Creator 工程，框架是被引用的资源库。
+
+- **框架目录搬家**：`assets/gmajor/` → 仓库根 `gmajor/`。不再是工程 `assets/` 的一部分。
+- **接入方式**：工程里加 `extensions/gmajor/package.json`，用 `contributions.asset-db.mount` 把框架挂成资源库 `db://gmajor`。`path` 必须是相对扩展目录的路径。app 用 `readonly: true`，FFrame 自己的 demo 用 `readonly: false`。写法见 `extensions/gmajor/package.json`。
+- **import 改写**：`from '../gmajor'`、`from '../../../gmajor'` 全部改成 `from 'db://gmajor/index'`。
+- **去掉联接**：不再需要目录联接，也不再需要 `script.preserveSymlinks`。
+- **字体路径**：`assets/gmajor/fonts/main.ttf` → `db://gmajor/fonts/main.ttf`（只影响提示文字）。
+- **新增（可选）**：`config.version.gmajor`，写所按的框架版本。
+- **demo**：原 `FFrame-example` 并入 `assets/game`，不再需要克隆。
+- **临时文件**：每个工程根 `del/`（已忽略），取代 `tools/temp/`。
+
+app 要改的：
+
+1. 加 `extensions/gmajor/package.json`（照 demo 的，改 `path` 和 `readonly`）。
+2. 全局替换 import。
+3. 删掉联接和 `preserveSymlinks`。
+4. `config.ts` 里加 `version.gmajor: '0.5.0'`。
+
+## 0.4.0
+
+此前版本。

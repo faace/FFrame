@@ -1,6 +1,6 @@
 {
   "v": 1,
-  "version": { "app": "0.1.0" },
+  "version": { "app": "0.1.0", "gmajor": "0.5.0" },
   "boot": ["GameUI", "User", "Setting"],
   "entry": { "web": "DemoHome" },
   "alert": { "bundle": "GameUI", "prefab": "LyAlert" }
