@@ -1,6 +1,6 @@
 ---
-description: 编写临时/工具脚本，或把脚本放到 tools 时引用：优先 Node.js；临时脚本放 tools/temp
-globs: tools/**
+description: 编写临时/工具脚本，或需要放测试代码、临时文件、截图时引用：优先 Node.js；一切临时产物放工程根 del/（已忽略，Creator 不导入）
+globs: del/**,tools/**
 alwaysApply: false
 ---
 
@@ -11,18 +11,19 @@ alwaysApply: false
 - 编写脚本时**优先使用 Node.js**（`.js` / `.mjs` / `.ts`）。
 - 除非用户明确要求或其他语言更合适，否则不要默认用 Python、Bash、PowerShell 等写新脚本。
 
-## 临时脚本存放位置
+## 临时文件放 `del/`
 
-- 所有临时脚本、一次性工具脚本统一放在 `tools/temp/` 下。
-- 不要把临时脚本散落在项目根目录、源码目录或其他位置。
+- 每个工程根目录有 `del/`：已被 git 忽略，且在 `assets/` 之外，Creator 不导入。
+- 一次性脚本、测试代码、临时文件、截图、实验产物，统一放 `del/`。不要散落在工程根、`assets/`、`tools/` 或其他目录。
+- `del/` 里的东西随时可以整个清掉，不要被其他代码引用。
+- 可复用、长期维护的工具脚本放 `tools/*.mjs`，不放 `del/`。
+- 新工程要建 `del/`，并在 `.gitignore` 里加 `/del/`。
 
 ```text
-✅ tools/temp/migrate-foo.mjs
-✅ tools/temp/check-bar.ts
+✅ del/migrate-foo.mjs
+✅ del/shot-home.png
+✅ del/check-bar.ts
 ❌ ./tmp-script.js
-❌ scripts/one-off.py
+❌ assets/game/test.ts
+❌ tools/temp/（旧位置，已废弃）
 ```
-
-## 注意
-
-- `tools/temp/` 仅用于临时/探索性脚本；可复用、长期维护的工具脚本另议正式目录（如 `tools/*.mjs`）。
