@@ -17,6 +17,7 @@ app 在 `config.version.gmajor` 写所按的框架版本。开机只打日志，
 - **demo**：原 `FFrame-example` 并入 `assets/game`，不再需要克隆。
 - **临时文件**：每个工程根 `del/`（已忽略），取代 `tools/temp/`。
 - **修复**：`PfGMBar` / `PfGMBtn` / `PfGMSlider` / `PfGMStepper` / `PfGMTitle` 预制体里写死的 `_spriteFrame` 原先指向 demo `bundles/Skin` 里的 png（框架依赖了游戏资源），app 没有同名图时预览报 `The asset ... is missing`。现在统一指向引擎内置白图 `default_sprite_splash`。运行时仍由 `GMSkin` 按文件名从 app 的 `bundles/Skin` 取图，行为不变。**框架预制体里不要引用 `assets/game` 下的任何资源。**
+- **修复**：app 没有 Bundle `Skin` 时，开机不再去加载它（原先会打 404 红日志，预览还弹错误框）。只留一条 `[Skin] 没有 Skin 包，用内置白图` 警告。
 
 app 要改的：
 

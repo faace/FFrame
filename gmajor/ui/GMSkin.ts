@@ -1,4 +1,4 @@
-import { assetManager, AssetManager, SpriteFrame, Texture2D } from 'cc';
+import { assetManager, AssetManager, settings, SpriteFrame, Texture2D } from 'cc';
 import { EDITOR, PREVIEW } from 'cc/env';
 import type { GMAsyncComplete } from '../resource/GMAsyncCallback';
 
@@ -28,6 +28,14 @@ export function loadSkin(onComplete: GMAsyncComplete): void {
     waiters = [onComplete];
     if (editing) {
         frames = new Map();
+        finish(null);
+        return;
+    }
+    const known = settings.querySettings<string[]>('assets', 'projectBundles'); // 工程里有哪些 Bundle；没有 Skin 就不去加载，免得打 404 红日志、弹预览错误框
+    if (known && known.length && known.indexOf(SKIN_BUNDLE) < 0) {
+        missingBundle = true;
+        frames = new Map();
+        noteMissing('*');
         finish(null);
         return;
     }
