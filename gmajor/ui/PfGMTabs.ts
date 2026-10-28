@@ -22,7 +22,7 @@ const PF_GM_TABS = {
     sample: '中中中中中', // 用来量一颗页签的宽
     ink: [92, 64, 32] as const, // 和标题同一套深墨
     fallback: 5, // 秒；页面忘了调用 done
-    font: 'ee40121d-0b21-4bb3-b95c-fa7d2df322b4', // assets/gmajor/fonts/main.ttf
+    font: 'ee40121d-0b21-4bb3-b95c-fa7d2df322b4', // db://gmajor/fonts/main.ttf
     dontSave: CCObjectFlags.DontSave, // 编辑器里生成的页签不写进预制体
 };
 

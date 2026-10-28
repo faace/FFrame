@@ -6,7 +6,7 @@ const { ccclass, executeInEditMode } = _decorator;
 
 /**
  * 标题可调参数。改数字改这里。
- * 字体资源：assets/gmajor/fonts/main.ttf，挂在子节点 label 上。
+ * 字体资源：db://gmajor/fonts/main.ttf，挂在子节点 label 上。
  * 九宫格在 title_bar 上：左 48、右 48、上 20、下 20。只拉宽，不拉高。
  * 小档、大档以后在 sizes 里加一行，并把 size 指过去。
  */
@@ -37,7 +37,7 @@ export class PfGMTitle extends GMComponent {
         this.plate = this.getComponent(Sprite);
         this.label = this.node.getChildByName('label')?.getComponent(Label) ?? null;
         if (!this.plate || !this.label) return console.error('[PfGMTitle] 需要底板 Sprite、子节点 label');
-        if (this.label.isSystemFontUsed || !this.label.font) console.error('[PfGMTitle] label 未挂 assets/gmajor/fonts/main.ttf');
+        if (this.label.isSystemFontUsed || !this.label.font) console.error('[PfGMTitle] label 未挂 db://gmajor/fonts/main.ttf');
         applySkin('title_bar', (frame) => {
             if (!this.plate?.isValid) return;
             this.plate.spriteFrame = frame;

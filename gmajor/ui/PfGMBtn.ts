@@ -6,7 +6,7 @@ const { ccclass, executeInEditMode, property } = _decorator;
 
 /**
  * 按钮可调参数。改数字改这里。
- * 字体资源：assets/gmajor/fonts/main.ttf，挂在子节点 label 上。
+ * 字体资源：db://gmajor/fonts/main.ttf，挂在子节点 label 上。
  * 大档是原来的 380 宽。中档 260 宽，720 宽的确认框一行放得下两颗。
  * 底板从 Skin 包取 btn_ 加主题名，例如 btn_primary。不序列化在这个组件上。
  */
@@ -93,7 +93,7 @@ export class PfGMBtn extends GMComponent {
 
     onInit(): void {
         if (!this.bindNodes()) return console.error('[PfGMBtn] 需要底板 Sprite、子节点 label 和 icon');
-        if (this.labelView!.isSystemFontUsed || !this.labelView!.font) console.error('[PfGMBtn] label 未挂 assets/gmajor/fonts/main.ttf');
+        if (this.labelView!.isSystemFontUsed || !this.labelView!.font) console.error('[PfGMBtn] label 未挂 db://gmajor/fonts/main.ttf');
         this.refresh();
     }
 

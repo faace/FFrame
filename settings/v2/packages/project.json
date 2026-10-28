@@ -7,8 +7,5 @@
       "fitHeight": false,
       "fitWidth": true
     }
-  },
-  "script": {
-    "preserveSymlinks": true
   }
 }
