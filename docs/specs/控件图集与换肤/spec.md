@@ -65,10 +65,12 @@ assets/game/bundles/Skin/
 - `FFrame-asset-line`：`style/ZooV7/` 和 `style/LegacyV3/`（旧版的 v3 原图和切片数据）。
 - `FFrame-zoo`：`资源生成/` 用 Git LFS 入库，需要先改 `.gitignore`，去掉 `资源生成/` 这一行，再 `git lfs track`。不提交 zoo 现有的 5 个未提交改动。
 
-## 待你确认（不影响 ticket 执行，但会影响命名）
+## 已确认
 
-1. 主题目录名用 `ZooV7` 和 `LegacyV3`，不用 `动物园-v7` 这种写法。（共识里的 `动物园-v7` 只是示例。）
-2. v7 母版里的部分件尺寸（例如按钮 288×80）和 2 倍规则不一致。ticket 02 会按 2 倍规则重新出图，不是直接拿 v7 的 1024 图放大。
+状态：spec 已由用户确认（2026-10-30）。下一步：在新 session 里运行 `/implement 01`。
+
+1. 主题目录名用 `ZooV7` 和 `LegacyV3`（英文大驼峰），不用 `动物园-v7` 这种写法。
+2. v7 母版里的部分件尺寸（例如按钮 288×80）和 2 倍规则不一致。ticket 02 按 2 倍规则重新出图，不直接拿 v7 的 1024 图放大。
 
 ## Ticket 清单
 
