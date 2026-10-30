@@ -23,7 +23,8 @@ alwaysApply: true
 | 动态创建 UI、按钮看不见 | `01-naming` |
 | 列表项、createTs、握脚本改数量 | `01-naming` |
 | 新写/改公共异步 API、完成回调、进度回调、几步才要 onProgress | `01-async-callback` |
-| 写临时/工具脚本、测试代码、临时文件、截图（`del/`、`tools/`） | `01-nodejs-temp-scripts` |
+| 写长期工具脚本（`tools/`） | `01-nodejs-temp-scripts` |
+| 写临时脚本、测试代码、临时文件、截图、试跑产物（`del/`） | 用户规则「临时产物」（Cursor 全局，不在本项目规则里） |
 | 消息含 `#rule`、grilling 收尾要沉淀规范 | 本文件（下方流程） |
 
 前缀：`00-` Always 元规则；`01-` 通用工程约定；`02-` 功能域（暂无）。
@@ -37,7 +38,7 @@ alwaysApply: true
 | `00-meta.mdc` | Always | 规则索引与 #rule 写入流程（Always） |
 | `01-async-callback.mdc` | Agent/按需 | 新写或改写公共异步 API / 完成回调 / onProgress 时引用：error-first；完成在前、进度可选；≥4 步或开机/热更必须留 onProgress |
 | `01-naming.mdc` | globs: `assets/game/**,gmajor/**,**/*.{scene,prefab}`；Agent/按需 | Bundle/功能目录/绑定名、Sc/Ly/Pf、双基类、layer 结构（根+panel、mask 克隆）、界面控件进 gmajor、默认皮、换皮、数据 watch、业务事件 on、事件大类前缀（Gp/Bind）、平台 gp.call/send、loading、addClick、createTs、动态 UI 挂 Canvas、双窗数据权。新建或改 Bundle、场景、预制体、gmajor/game 脚本时引用。用户说数据变了刷新 UI、金币/字段变化、监听事件、事件前缀、Gp、gp.call、平台通道、原生回包、新建功能包、异步等待、挡住操作、loading、注册点击、addClick、列表项、createTs、按钮看不见、动态创建节点、新建 Ly、layer 结构、mask、panel、生成 Ly 预制体、弹窗标题、关闭钮、Ly 后不加 Popup、按钮组件、PfGMBtn、PfGMSlider、PfGMBar、PfGMStepper、PfGMTabs、滑条、进度条、步进、页签、默认皮、换皮、Skin、界面图蛇形、btn_、按钮底板、九宫格、圆角、AI 风格稿、改 gmajor 还是游戏、兼容、升 gm.version、嵌套覆盖、只留差异项、双窗、第二窗、指令回矿、UI 不落盘、Bundle 内 res/spine/font/anim/prefab、目录小驼峰或大驼峰、实例节点、图片蛇形、文件名英文时也引用。 |
-| `01-nodejs-temp-scripts.mdc` | globs: `del/**,tools/**`；Agent/按需 | 编写临时/工具脚本，或需要放测试代码、临时文件、截图时引用：优先 Node.js；一切临时产物放工程根 del/（已忽略，Creator 不导入） |
+| `01-nodejs-temp-scripts.mdc` | globs: `tools/**`；Agent/按需 | 编写工具脚本（tools/）时引用：优先 Node.js；可复用的长期脚本放 tools/*.mjs。临时脚本/测试代码/截图等临时产物不在此，见用户规则「临时产物」 |
 | `01-typescript-style.mdc` | Agent/按需 | 编写或改写 TypeScript 时：4 空格缩进、行尾注释优先、签名尽量单行、简单失败早退一行；维护 index.ts / docs/架构 时也引用 |
 
 <!-- AUTO-RULES-END -->

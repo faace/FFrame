@@ -1,6 +1,6 @@
 ---
-description: 编写临时/工具脚本，或需要放测试代码、临时文件、截图时引用：优先 Node.js；一切临时产物放工程根 del/（已忽略，Creator 不导入）
-globs: del/**,tools/**
+description: 编写工具脚本（tools/）时引用：优先 Node.js；可复用的长期脚本放 tools/*.mjs。临时脚本/测试代码/截图等临时产物不在此，见用户规则「临时产物」
+globs: tools/**
 alwaysApply: false
 ---
 
@@ -11,19 +11,7 @@ alwaysApply: false
 - 编写脚本时**优先使用 Node.js**（`.js` / `.mjs` / `.ts`）。
 - 除非用户明确要求或其他语言更合适，否则不要默认用 Python、Bash、PowerShell 等写新脚本。
 
-## 临时文件放 `del/`
+## 长期工具脚本放 `tools/`
 
-- 每个工程根目录有 `del/`：已被 git 忽略，且在 `assets/` 之外，Creator 不导入。
-- 一次性脚本、测试代码、临时文件、截图、实验产物，统一放 `del/`。不要散落在工程根、`assets/`、`tools/` 或其他目录。
-- `del/` 里的东西随时可以整个清掉，不要被其他代码引用。
-- 可复用、长期维护的工具脚本放 `tools/*.mjs`，不放 `del/`。
-- 新工程要建 `del/`，并在 `.gitignore` 里加 `/del/`。
-
-```text
-✅ del/migrate-foo.mjs
-✅ del/shot-home.png
-✅ del/check-bar.ts
-❌ ./tmp-script.js
-❌ assets/game/test.ts
-❌ tools/temp/（旧位置，已废弃）
-```
+- 可复用、长期维护的工具脚本放 `tools/*.mjs`。
+- 一次性脚本、测试代码、临时文件、截图、实验产物不放这里，按用户规则「临时产物」放工程根 `del/`（已被 git 忽略，在 `assets/` 之外，Creator 不导入）。
