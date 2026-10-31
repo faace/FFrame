@@ -81,7 +81,7 @@ assets/game/bundles/Skin/
 - [ ] 04 GMSkin 图集加载：`gmajor` 支持按主题加载两张图集，升 `0.5.1`。代码已写，预览未跑。无依赖。
 - [ ] 05 游戏侧接入：`bundles/Skin` 已分成 `LegacyV3/` 和 `ZooV7/`，开机读 `config.skinTheme`。预览未跑。依赖 02、03、04。
 - [ ] 06 动物园素材入库：`FFrame-zoo/资源生成/` 进 LFS。无依赖。
-- [ ] 07 文档与规则：更新 `docs/界面组件/`，把 `01-naming` 的“界面控件与默认皮”段落按草案合并，运行 `tools/sync-cursor-rules-index.mjs`。依赖 05。
+- [x] 07 文档与规则：更新 `docs/界面组件/` 和 README 的皮肤说明，把 `01-naming` 的“界面控件与默认皮”改成主题 plist，运行 `tools/sync-cursor-rules-index.mjs`。依赖 05。
 
 ## 依赖关系
 
