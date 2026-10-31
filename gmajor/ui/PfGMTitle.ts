@@ -40,11 +40,15 @@ export class PfGMTitle extends GMComponent {
         if (this.label.isSystemFontUsed || !this.label.font) console.error('[PfGMTitle] label 未挂 db://gmajor/fonts/main.ttf');
         applySkin('title_bar', (frame) => {
             if (!this.plate?.isValid) return;
-            this.plate.spriteFrame = frame;
+            const uit = this.node.getComponent(UITransform);
+            const w = uit?.width ?? 0;
+            const h = uit?.height ?? 0;
             this.plate.sizeMode = Sprite.SizeMode.CUSTOM;
             this.plate.type = Sprite.Type.SLICED;
+            this.plate.spriteFrame = frame;
+            if (uit && w > 0 && h > 0) uit.setContentSize(w, h);
+            this.layout();
         });
-        this.layout();
     }
 
     /** 按字宽重排。短于最小宽停在最小宽，长于最大宽则在两侧留白里缩小 */

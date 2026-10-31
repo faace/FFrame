@@ -444,16 +444,12 @@ export class PfGMTabs extends GMComponent {
     }
 
     private loadFrames(): void {
-        applySkin('tab_normal', (frame) => this.takeFrame(frame, 10, 2, 10, 10, false));
-        applySkin('tab_selected', (frame) => this.takeFrame(frame, 10, 2, 10, 10, true));
+        applySkin('tab_normal', (frame) => this.takeFrame(frame, false));
+        applySkin('tab_selected', (frame) => this.takeFrame(frame, true));
     }
 
-    private takeFrame(frame: SpriteFrame, top: number, bottom: number, left: number, right: number, selected: boolean): void {
-        frame.insetTop = top;
-        frame.insetBottom = bottom;
-        frame.insetLeft = left;
-        frame.insetRight = right;
-        if (selected) this.selected = frame;
+    private takeFrame(frame: SpriteFrame, selected: boolean): void {
+        if (selected) this.selected = frame; // 九宫格用图集子图上已经写好的边
         else this.normal = frame;
         this.layout();
     }
@@ -466,8 +462,7 @@ export class PfGMTabs extends GMComponent {
             const uit = sprite.node.getComponent(UITransform);
             const w = uit?.width ?? 0;
             const h = uit?.height ?? 0;
-            frame.insetTop = frame.insetBottom = frame.insetLeft = frame.insetRight = 20;
-            sprite.sizeMode = Sprite.SizeMode.CUSTOM;
+            sprite.sizeMode = Sprite.SizeMode.CUSTOM; // 九宫格用 panel 子图上已经写好的边
             sprite.type = Sprite.Type.SLICED;
             sprite.spriteFrame = frame;
             if (uit && w > 0 && h > 0) uit.setContentSize(w, h); // 贴图会按原图像素改尺寸，锁回去

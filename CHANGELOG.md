@@ -8,11 +8,10 @@ app 在 `config.version.gmajor` 写所按的框架版本。开机只打日志，
 
 `loadSkin` 可以按主题加载图集。不传主题时仍是原来的逐张图。`skinFrame` 和 `applySkin` 没变。
 
-- **新增（可选）**：`loadSkin(theme, onComplete)`。从 `bundles/Skin/<theme>/` 读取 `ctrl.png`、`ctrl.json`、`item.png`、`item.json`，按清单切出 `SpriteFrame`。同名槽控件图优先。
-- 清单 `rect` 的原点在图的左上角。
-- 主题目录一份都没有：一条 info。缺其中一张：一条 warn。缺槽名仍是白图。
-- 编辑器里仍按单张 png 取图。只调用了带主题的 `loadSkin` 时，编辑器预览用白图，不报错。
-- 开机若 `config.skinTheme` 有值，按该主题目录加载。没有图集清单时，把目录里的逐张图按文件名收成槽（`LegacyV3`）。不写 `skinTheme` 时仍和以前一样扫包根。
+- **新增（可选）**：`loadSkin(theme, onComplete)`。从 `bundles/Skin/<theme>/` 读取引擎已导入的 `ctrl.plist`、`item.plist`（同名 png 是实际尺寸）。同名槽控件图优先。运行时不再按清单切 `SpriteFrame`。
+- 主题目录没有 plist：一条 info（整包没有）或按该目录里的逐张图按文件名收成槽（`LegacyV3`）。缺物品图集：一条 warn。缺槽名仍是白图。
+- 编辑器里有 plist 就用图集子图；没有则仍按单张 png 取。
+- 开机若 `config.skinTheme` 有值，按该主题目录加载。不写 `skinTheme` 时仍和以前一样扫包根。
 
 ## 0.5.0（破坏）
 

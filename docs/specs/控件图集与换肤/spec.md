@@ -11,19 +11,20 @@
 ```
 assets/game/bundles/Skin/
   ZooV7/                 当前主题（动物园 v7）
-    ctrl.png             2048×2048，控件图集
-    ctrl.json            控件清单
-    item.png             2048×2048，物品图集
-    item.json            物品清单
+    ctrl.png             1024×1024，控件图，实际尺寸（源图的一半）
+    ctrl.plist           Creator 3.8 图集（format 3）
+    item.png             1024×1024，物品图，实际尺寸
+    item.plist
   LegacyV3/              旧主题（现在的 48 像素逐张图，整体移入）
     ...
 ```
 
 - 主题目录名用大驼峰，和 `01-naming` 一致，不用中文和连字符。
-- 同一个 Bundle 里放多个主题目录。`loadSkin` 不能再 `loadDir('')`，要按主题名 `loadDir(theme)`，否则会把所有主题都载入。
-- 切换主题 = 释放旧主题的 SpriteFrame 和 Texture，再载入新主题目录。
+- 2048 源图和 `ctrl.json` / `item.json` 留在素材仓库。游戏工程只放一半尺寸的 png 和 plist。
+- 同一个 Bundle 里放多个主题目录。`loadSkin` 不能再 `loadDir('')`，要按主题名加载，否则会把所有主题都载入。
+- 切换主题 = 换一套已导入的图集，不再在运行时创建 `SpriteFrame`。
 
-### 2. 清单格式（`ctrl.json` / `item.json`）
+### 2. 源图清单（只在素材仓库，`ctrl.json` / `item.json`）
 
 ```json
 {
@@ -46,11 +47,11 @@ assets/game/bundles/Skin/
 ### 3. 运行时（gmajor）
 
 - `GMSkin.ts`：
-  - `loadSkin(theme, cb)`：加载 `ctrl.png` 和 `item.png` 为 `Texture2D`，读取两份 `json`，为每个槽建一个 `SpriteFrame`（同一张 texture，不同 rect）。
+  - `loadSkin(theme, cb)`：加载 `ctrl.plist`、`item.plist` 为 `SpriteAtlas`，用引擎已经切好的子图。不在运行时 `new SpriteFrame()`。
+  - 九宫格写在每个子图的 `borderLeft` / `borderRight` / `borderTop` / `borderBottom`，数值是源图边的一半。
   - `skinFrame(name)`、`applySkin(name, apply)` 保持不变。框架控件（`PfGMBtn` 等）不用改调用方式。
   - 槽名先查控件图，再查物品图；都没有时返回白图（和现在一样）。
-  - 缺图的日志规则不变：整包缺失打一条 info，缺单张打 warn。
-- 编辑器模式：现在用 `db://assets/game/bundles/Skin/<名>.png/spriteFrame` 查 uuid。图集后要改成按 `ctrl.png` 和 `json` 读取，或者编辑器里直接用白图预览。这一点在 ticket 04 里定。
+  - 缺图的日志规则不变：整包缺失打一条 info，缺单张打 warn。没有 plist 的主题目录仍按逐张 png 加载。
 - 版本：对外接口不变，`gmajor` 升修订版本 `0.5.0 → 0.5.1`，`CHANGELOG.md` 写一条。
 
 ### 4. 预制体引用（游戏侧风险）

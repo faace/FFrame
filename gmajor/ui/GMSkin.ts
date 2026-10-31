@@ -1,4 +1,4 @@
-import { assetManager, Asset, AssetManager, ImageAsset, JsonAsset, Rect, settings, Size, SpriteFrame, Texture2D } from 'cc';
+import { assetManager, AssetManager, settings, SpriteAtlas, SpriteFrame, Texture2D } from 'cc';
 import { EDITOR, PREVIEW } from 'cc/env';
 import type { GMAsyncComplete } from '../resource/GMAsyncCallback';
 
@@ -10,35 +10,32 @@ const BUILTIN_WHITE = '7d8f9b89-4fd1-4c9f-a3ab-38ec7cded7ca@f9941'; // default_s
 
 const editing = EDITOR && !PREVIEW;
 
-type SkinSlot = {
-    rect: [number, number, number, number];
-    border?: [number, number, number, number];
-    sliced?: boolean;
-    reserved?: boolean;
-};
-
-type SkinSheet = {
-    size?: [number, number];
-    slots?: Record<string, SkinSlot>;
-};
-
 let frames: Map<string, SpriteFrame> | null = null;
-let loadedTheme = ''; // 空字符串 = 旧的逐张图；有值 = Skin/<主题>/ 的两张图集
+let loadedTheme = ''; // 空字符串 = 旧的逐张图；有值 = Skin/<主题>/
 let pendingTheme = '';
-let atlas = false; // 当前 frames 是不是本文件切出来的，切出来的才销毁
-const ownedFrames = new Set<SpriteFrame>();
-const ownedTextures = new Set<Texture2D>();
+let packed = false; // 当前主题是 plist 图集。缺槽不再去找同名 png
 let waiters: Array<GMAsyncComplete> | null = null;
 let missingBundle = false;
 const logged = new Set<string>();
 let white: SpriteFrame | null = null;
 const editorWait = new Map<string, Array<(frame: SpriteFrame) => void>>();
 
+let editorSheets = ''; // 编辑器里已经切好的主题；空表示还没切
+let editorSheetWait: Array<() => void> | null = null;
+
+/** 游戏在 import 时调用。编辑器里 PfGM* 取图早于 gm.boot */
+export function setSkinTheme(theme: string): void {
+    if (!theme || theme === loadedTheme) return;
+    loadedTheme = theme;
+    editorSheets = '';
+    if (frames) dropCurrent();
+}
+
 type EditorHost = {
     Message?: { request: (module: string, method: string, url: string) => Promise<string> };
 };
 
-/** 开机或使用方调用。不传主题时仍按逐张图加载。传了主题则读 Skin/<主题>/ctrl、item 两张图集。没有 Skin 包也算完成，缺的槽用白图 */
+/** 开机或使用方调用。不传主题时仍按逐张图加载。传了主题则读 Skin/<主题>/ctrl.plist、item.plist。没有 Skin 包也算完成，缺的槽用白图 */
 export function loadSkin(onComplete: GMAsyncComplete): void;
 export function loadSkin(theme: string, onComplete: GMAsyncComplete): void;
 export function loadSkin(a: string | GMAsyncComplete, b?: GMAsyncComplete): void {
@@ -57,11 +54,7 @@ export function loadSkin(a: string | GMAsyncComplete, b?: GMAsyncComplete): void
     pendingTheme = theme;
     if (frames) dropCurrent();
     loadedTheme = theme;
-    if (editing) {
-        frames = new Map(); // 编辑器不切图集，预览用白图或原来的单张 png，不崩
-        finish(null);
-        return;
-    }
+    if (editing) return finish(null); // 编辑器里由 applySkin 按主题切，不在这里铺空表
     const known = settings.querySettings<string[]>('assets', 'projectBundles'); // 工程里有哪些 Bundle；没有 Skin 就不去加载，免得打 404 红日志、弹预览错误框
     if (known && known.length && known.indexOf(SKIN_BUNDLE) < 0) {
         missingBundle = true;
@@ -103,32 +96,42 @@ function loadDeps(bundle: AssetManager.Bundle, done: () => void): void {
     }));
 }
 
-/** 主题目录整份没有打一条 info；缺 ctrl 或 item 的某一张打一条 warn。清单原点在左上，纹理原点在左下 */
+/** 主题目录有 ctrl.plist 就用引擎导入的图集；没有就按该目录里的逐张图 */
 function loadTheme(bundle: AssetManager.Bundle, theme: string, done: () => void): void {
-    loadDeps(bundle, () => bundle.loadDir(theme, (err, assets) => {
-        const list = assets ?? [];
-        if (err && !list.length) return loadLoose(list, bundle, done);
-        const ctrlImage = findImage(list, 'ctrl');
-        const itemImage = findImage(list, 'item');
-        const ctrlJson = findJson(list, 'ctrl');
-        const itemJson = findJson(list, 'item');
-        if (!(ctrlImage && ctrlJson)) return loadLoose(list, bundle, done); // LegacyV3 这种目录是逐张图，没有图集
-        const map = new Map<string, SpriteFrame>();
-        frames = map;
-        atlas = true;
-        missingBundle = false;
-        if (!itemImage) noteMissing('item.png');
-        if (!itemJson) noteMissing('item.json');
-        fillSlots(map, ctrlImage, ctrlJson.json as SkinSheet); // 控件优先，同名槽不让物品图盖掉
-        if (itemImage && itemJson) fillSlots(map, itemImage, itemJson.json as SkinSheet);
-        done();
-    }));
+    loadDeps(bundle, () => {
+        bundle.load(theme + '/ctrl', SpriteAtlas, (err, ctrl) => {
+            if (err || !ctrl) {
+                bundle.loadDir(theme, SpriteFrame, (_loadErr, assets) => loadLoose(assets ?? [], bundle, theme, done));
+                return;
+            }
+            const map = new Map<string, SpriteFrame>();
+            frames = map;
+            packed = true;
+            missingBundle = false;
+            addAtlas(map, ctrl);
+            bundle.load(theme + '/item', SpriteAtlas, (itemErr, item) => {
+                if (itemErr || !item) noteMissing('item');
+                else addAtlas(map, item);
+                done();
+            });
+        });
+    });
 }
 
-function loadLoose(list: Asset[], bundle: AssetManager.Bundle, done: () => void): void {
+function addAtlas(map: Map<string, SpriteFrame>, sheet: SpriteAtlas): void {
+    const list = sheet.spriteFrames;
+    for (const key of Object.keys(list)) {
+        const frame = list[key];
+        if (!frame) continue;
+        const name = key.replace(/\.png$/i, '');
+        if (!map.has(name)) map.set(name, frame); // 控件图先收，物品图不覆盖同名槽
+    }
+}
+
+function loadLoose(list: SpriteFrame[], bundle: AssetManager.Bundle, theme: string, done: () => void): void {
     const loose = list.filter((asset): asset is SpriteFrame => asset instanceof SpriteFrame);
-    frames = indexFrames(loose, bundle);
-    atlas = false;
+    frames = indexFrames(loose, bundle, theme);
+    packed = false;
     if (!frames.size) {
         missingBundle = true;
         noteMissing('*');
@@ -136,64 +139,9 @@ function loadLoose(list: Asset[], bundle: AssetManager.Bundle, done: () => void)
     done();
 }
 
-function findImage(assets: Asset[], name: string): ImageAsset | null {
-    for (const asset of assets) {
-        if (asset instanceof ImageAsset && asset.name === name) return asset;
-        if (asset instanceof Texture2D && asset.name === name && asset.image instanceof ImageAsset) return asset.image;
-    }
-    for (const asset of assets) { // 导入出来的子资源名叫 spriteFrame，图名在纹理上
-        if (!(asset instanceof SpriteFrame) || !(asset.texture instanceof Texture2D)) continue;
-        const image = asset.texture.image;
-        if (image instanceof ImageAsset && (image.name === name || asset.texture.name === name)) return image;
-    }
-    return null;
-}
-
-function findJson(assets: Asset[], name: string): JsonAsset | null {
-    for (const asset of assets) {
-        if (asset instanceof JsonAsset && asset.name === name) return asset;
-    }
-    return null;
-}
-
-function fillSlots(map: Map<string, SpriteFrame>, image: ImageAsset, sheet: SkinSheet): void {
-    const slots = sheet.slots;
-    if (!slots) return;
-    const tex = new Texture2D();
-    tex.image = image;
-    ownedTextures.add(tex);
-    const sheetH = sheet.size?.[1] || image.height;
-    for (const name of Object.keys(slots)) {
-        const slot = slots[name];
-        if (!slot || slot.reserved || map.has(name)) continue;
-        const [x, y, w, h] = slot.rect;
-        if (!(w > 0 && h > 0)) continue;
-        const frame = new SpriteFrame();
-        frame.texture = tex;
-        frame.rect = new Rect(x, sheetH - y - h, w, h);
-        frame.originalSize = new Size(w, h);
-        frame.packable = false;
-        if (slot.sliced && slot.border) {
-            const [l, r, t, b] = slot.border;
-            frame.insetLeft = l;
-            frame.insetRight = r;
-            frame.insetTop = t;
-            frame.insetBottom = b;
-        }
-        map.set(name, frame);
-        ownedFrames.add(frame);
-    }
-}
-
 function dropCurrent(): void {
-    if (atlas) {
-        ownedFrames.forEach((frame) => frame.destroy());
-        ownedFrames.clear();
-        ownedTextures.forEach((tex) => tex.destroy());
-        ownedTextures.clear();
-    }
     frames = null;
-    atlas = false;
+    packed = false;
     logged.clear();
 }
 
@@ -216,10 +164,10 @@ function finish(err: Error | null): void {
     pending.forEach((fn) => fn(err));
 }
 
-function indexFrames(assets: SpriteFrame[], bundle: AssetManager.Bundle): Map<string, SpriteFrame> {
+function indexFrames(assets: SpriteFrame[], bundle: AssetManager.Bundle, dir = ''): Map<string, SpriteFrame> {
     const map = new Map<string, SpriteFrame>();
     const byUuid = new Map(assets.map((frame) => [frame.uuid, frame]));
-    for (const info of bundle.getDirWithPath('', SpriteFrame)) {
+    for (const info of bundle.getDirWithPath(dir, SpriteFrame)) {
         const parts = info.path.split('/').filter((part) => part && part !== 'spriteFrame');
         const name = parts[parts.length - 1]; // 主题目录在前，槽名在最后
         const frame = byUuid.get(info.uuid) ?? (assetManager.assets.get(info.uuid) as SpriteFrame | undefined);
@@ -270,17 +218,88 @@ function checkEditorDir(done: () => void): void {
 function applyInEditor(name: string, apply: (frame: SpriteFrame) => void): void {
     checkEditorDir(() => {
         if (!editorDirOk) return apply(whiteFrame());
-        applyInEditorSlot(name, apply);
+        ensureEditorTheme(() => ensureEditorSheets(() => applyInEditorSlot(name, apply)));
+    });
+}
+
+let editorThemeWait: Array<() => void> | null = null;
+
+/** 还没人调用 setSkinTheme 时，有 ZooV7 图集就用它，否则按散图主题 */
+function ensureEditorTheme(done: () => void): void {
+    if (loadedTheme) return done();
+    if (editorThemeWait) return void editorThemeWait.push(done);
+    editorThemeWait = [done];
+    queryUuid(SKIN_DB + '/ZooV7/ctrl.plist', (uuid) => {
+        if (!loadedTheme) loadedTheme = uuid ? 'ZooV7' : 'LegacyV3';
+        const pending = editorThemeWait ?? [];
+        editorThemeWait = null;
+        pending.forEach((fn) => fn());
+    });
+}
+
+function ensureEditorSheets(done: () => void): void {
+    if (editorSheets === loadedTheme && frames) return done();
+    if (editorSheetWait) return void editorSheetWait.push(done);
+    editorSheetWait = [done];
+    const theme = loadedTheme;
+    queryUuid(`${SKIN_DB}/${theme}/ctrl.plist`, (plistUuid) => {
+        if (!plistUuid) {
+            packed = false;
+            return finishEditorSheets(theme);
+        }
+        loadEditorAtlas(plistUuid, (ctrl) => {
+            if (!ctrl) {
+                packed = false;
+                return finishEditorSheets(theme);
+            }
+            const map = new Map<string, SpriteFrame>();
+            frames = map;
+            packed = true;
+            missingBundle = false;
+            addAtlas(map, ctrl);
+            queryUuid(`${SKIN_DB}/${theme}/item.plist`, (itemUuid) => {
+                if (!itemUuid) {
+                    noteMissing('item');
+                    return finishEditorSheets(theme);
+                }
+                loadEditorAtlas(itemUuid, (item) => {
+                    if (item) addAtlas(map, item);
+                    else noteMissing('item');
+                    finishEditorSheets(theme);
+                });
+            });
+        });
+    });
+}
+
+function finishEditorSheets(theme: string): void {
+    editorSheets = theme;
+    if (!frames) frames = new Map();
+    const pending = editorSheetWait ?? [];
+    editorSheetWait = null;
+    pending.forEach((fn) => fn());
+}
+
+function loadEditorAtlas(uuid: string, done: (sheet: SpriteAtlas | null) => void): void {
+    assetManager.loadAny({ uuid }, (err: Error | null, asset: SpriteAtlas) => {
+        if (err || !asset?.spriteFrames) return done(null);
+        done(asset);
     });
 }
 
 function applyInEditorSlot(name: string, apply: (frame: SpriteFrame) => void): void {
     const hit = frames?.get(name);
     if (hit) return apply(hit);
+    if (packed) { // 图集里没有这一槽，不再去找同名 png
+        noteMissing(name);
+        return apply(whiteFrame());
+    }
     const queue = editorWait.get(name);
     if (queue) return queue.push(apply);
     editorWait.set(name, [apply]);
-    queryUuid(`${SKIN_DB}/${name}.png/spriteFrame`, (uuid) => {
+    const theme = loadedTheme;
+    const url = theme ? `${SKIN_DB}/${theme}/${name}.png/spriteFrame` : `${SKIN_DB}/${name}.png/spriteFrame`;
+    queryUuid(url, (uuid) => {
         if (!uuid) return doneEditor(name, null);
         assetManager.loadAny({ uuid }, (err: Error | null, asset: SpriteFrame) => {
             if (err || !asset) return doneEditor(name, null);

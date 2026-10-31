@@ -1,6 +1,8 @@
 import { Color, Label, Node, Sprite, SpriteFrame, Texture2D, UITransform, Widget } from 'cc';
-import { loadSkin as loadSkinBundle, PfGMBtn, skinFrame as readSkin } from 'db://gmajor/index';
+import { loadSkin as loadSkinBundle, PfGMBtn, setSkinTheme, skinFrame as readSkin } from 'db://gmajor/index';
 import { config } from '../../config';
+
+if (config.skinTheme) setSkinTheme(config.skinTheme); // 编辑器取图早于开机，先定主题
 
 const SLICED = new Set([
     'title_bar', 'panel', 'btn_primary', 'btn_secondary', 'btn_warning', 'btn_neutral', 'btn_info',

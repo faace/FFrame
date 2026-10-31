@@ -161,11 +161,15 @@ export class PfGMBtn extends GMComponent {
         const theme = PfGMBtnTheme[this.theme] ?? 'primary';
         applySkin('btn_' + theme, (frame) => {
             if (!this.plate?.isValid) return;
-            this.plate.spriteFrame = frame;
-            this.plate.sizeMode = Sprite.SizeMode.CUSTOM;
+            const uit = this.node.getComponent(UITransform);
+            const w = uit?.width ?? 0;
+            const h = uit?.height ?? 0;
+            this.plate.sizeMode = Sprite.SizeMode.CUSTOM; // 先锁自定义，避免 760×240 的原图把节点撑开
             this.plate.type = Sprite.Type.SLICED;
+            this.plate.spriteFrame = frame;
+            if (uit && w > 0 && h > 0) uit.setContentSize(w, h);
+            this.layout();
         });
-        this.layout();
         this.stamp = this.mark();
     }
 
