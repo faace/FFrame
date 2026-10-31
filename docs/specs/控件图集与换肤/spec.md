@@ -67,7 +67,7 @@ assets/game/bundles/Skin/
 
 ## 已确认
 
-状态：spec 已由用户确认（2026-10-30）。ticket 01 已在 2026-10-31 做完。下一步：`/implement 02`。
+状态：spec 已由用户确认（2026-10-30）。ticket 02 已在 2026-10-31 做完。下一步：`/implement 03`。物品图不要用控件那套纯代码填色。
 
 1. 主题目录名用 `ZooV7` 和 `LegacyV3`（英文大驼峰），不用 `动物园-v7` 这种写法。
 2. v7 母版里的部分件尺寸（例如按钮 288×80）和 2 倍规则不一致。ticket 02 按 2 倍规则重新出图，不直接拿 v7 的 1024 图放大。
@@ -75,7 +75,7 @@ assets/game/bundles/Skin/
 ## Ticket 清单
 
 - [x] 01 素材仓库整理：建 `FFrame-asset-line/style/ZooV7/` 和 `LegacyV3/` 结构，从 `legacy/FFrame-del/` 迁入历史版本和脚本。
-- [ ] 02 控件图集：按 2 倍规则出 `ctrl.png` 和 `ctrl.json`，20 件加约 10 个空槽。依赖 01。
+- [x] 02 控件图集：`draw-zoo-v7-ctrl.mjs` 按 2 倍尺寸出 `ctrl.png` 和 `ctrl.json`。名单是 21 个槽，另加 10 个空槽。依赖 01。
 - [ ] 03 物品图集：出 `item.png` 和 `item.json`，8 个图标统一 128×128 格。依赖 01。
 - [ ] 04 GMSkin 图集加载：`gmajor` 支持按主题加载两张图集，升 `0.5.1`。无依赖。
 - [ ] 05 游戏侧接入：`bundles/Skin` 重组（旧图移入 `LegacyV3/`），去掉预制体 uuid 引用，`SkinKit` 迁移，切换主题可用。依赖 02、03、04。
