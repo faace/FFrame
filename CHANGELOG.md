@@ -4,6 +4,16 @@
 
 app 在 `config.version.gmajor` 写所按的框架版本。开机只打日志，主.次不同时多打一条警告，不拦截。升级后怎么判断：看这里的破坏项，再跑一遍。
 
+## 0.5.1
+
+`loadSkin` 可以按主题加载图集。不传主题时仍是原来的逐张图。`skinFrame` 和 `applySkin` 没变。
+
+- **新增（可选）**：`loadSkin(theme, onComplete)`。从 `bundles/Skin/<theme>/` 读取 `ctrl.png`、`ctrl.json`、`item.png`、`item.json`，按清单切出 `SpriteFrame`。同名槽控件图优先。
+- 清单 `rect` 的原点在图的左上角。
+- 主题目录一份都没有：一条 info。缺其中一张：一条 warn。缺槽名仍是白图。
+- 编辑器里仍按单张 png 取图。只调用了带主题的 `loadSkin` 时，编辑器预览用白图，不报错。
+- 开机仍调用 `loadSkin(onComplete)`，不传主题。游戏目录还没按主题拆开时，行为与 0.5.0 相同。
+
 ## 0.5.0（破坏）
 
 框架引用方式翻转：app 是 Creator 工程，框架是被引用的资源库。

@@ -33,7 +33,7 @@ export { PfGMBar } from './ui/PfGMBar'; // 框架进度条；槽+填充；value 
 export { PfGMStepper } from './ui/PfGMStepper'; // 框架步进；嵌套 PfGMBtn；整数 value/min/max/step
 export { GMTabPage } from './ui/GMTabPage'; // 页签内容基类；onShow/onHide(done)；text/setText
 export { PfGMTabs, GMTabSource } from './ui/PfGMTabs'; // 框架页签；tabs+panel；index；insert/remove
-export { loadSkin, applySkin, skinFrame, SKIN_BUNDLE } from './ui/GMSkin'; // 游戏 Skin 包；缺槽用内置白图
+export { loadSkin, applySkin, skinFrame, SKIN_BUNDLE } from './ui/GMSkin'; // 游戏 Skin 包；loadSkin 可传主题名；缺槽用内置白图
 export { GMLayer } from './ui/GMLayer'; // Layer 基类；Ly* 继承；mask+panel 入场；场景不套
 export { GMAlert } from './ui/GMAlert'; // 确认框基类；皮在本游戏常驻包
 export type { GMAlertInit } from './ui/GMAlert'; // gu.alert 填进确认框的文案和关闭

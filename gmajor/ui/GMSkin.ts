@@ -1,4 +1,4 @@
-import { assetManager, AssetManager, settings, SpriteFrame, Texture2D } from 'cc';
+import { assetManager, Asset, AssetManager, ImageAsset, JsonAsset, Rect, settings, Size, SpriteFrame, Texture2D } from 'cc';
 import { EDITOR, PREVIEW } from 'cc/env';
 import type { GMAsyncComplete } from '../resource/GMAsyncCallback';
 
@@ -10,7 +10,24 @@ const BUILTIN_WHITE = '7d8f9b89-4fd1-4c9f-a3ab-38ec7cded7ca@f9941'; // default_s
 
 const editing = EDITOR && !PREVIEW;
 
+type SkinSlot = {
+    rect: [number, number, number, number];
+    border?: [number, number, number, number];
+    sliced?: boolean;
+    reserved?: boolean;
+};
+
+type SkinSheet = {
+    size?: [number, number];
+    slots?: Record<string, SkinSlot>;
+};
+
 let frames: Map<string, SpriteFrame> | null = null;
+let loadedTheme = ''; // 空字符串 = 旧的逐张图；有值 = Skin/<主题>/ 的两张图集
+let pendingTheme = '';
+let atlas = false; // 当前 frames 是不是本文件切出来的，切出来的才销毁
+const ownedFrames = new Set<SpriteFrame>();
+const ownedTextures = new Set<Texture2D>();
 let waiters: Array<GMAsyncComplete> | null = null;
 let missingBundle = false;
 const logged = new Set<string>();
@@ -21,13 +38,27 @@ type EditorHost = {
     Message?: { request: (module: string, method: string, url: string) => Promise<string> };
 };
 
-/** 开机或使用方调用。没有 Skin 包也算完成，缺的槽用白图 */
-export function loadSkin(onComplete: GMAsyncComplete): void {
-    if (frames) return onComplete(null);
-    if (waiters) return waiters.push(onComplete);
+/** 开机或使用方调用。不传主题时仍按逐张图加载。传了主题则读 Skin/<主题>/ctrl、item 两张图集。没有 Skin 包也算完成，缺的槽用白图 */
+export function loadSkin(onComplete: GMAsyncComplete): void;
+export function loadSkin(theme: string, onComplete: GMAsyncComplete): void;
+export function loadSkin(a: string | GMAsyncComplete, b?: GMAsyncComplete): void {
+    const theme = typeof a === 'string' ? a : '';
+    const onComplete = typeof a === 'string' ? b : a;
+    if (typeof onComplete !== 'function') return;
+    if (frames && loadedTheme === theme) return onComplete(null);
+    if (waiters) {
+        if (pendingTheme === theme) return void waiters.push(onComplete);
+        return void waiters.push(() => { // 换主题等当前这次结束再载
+            if (theme) loadSkin(theme, onComplete);
+            else loadSkin(onComplete);
+        });
+    }
     waiters = [onComplete];
+    pendingTheme = theme;
+    if (frames) dropCurrent();
+    loadedTheme = theme;
     if (editing) {
-        frames = new Map();
+        frames = new Map(); // 编辑器不切图集，预览用白图或原来的单张 png，不崩
         finish(null);
         return;
     }
@@ -48,6 +79,7 @@ export function loadSkin(onComplete: GMAsyncComplete): void {
             finish(null);
             return;
         }
+        if (theme) return loadTheme(bundle, theme, () => finish(null));
         loadDeps(bundle, () => bundle.loadDir('', SpriteFrame, (loadErr, assets) => {
             frames = indexFrames(assets ?? [], bundle);
             if (!frames.size) {
@@ -69,6 +101,104 @@ function loadDeps(bundle: AssetManager.Bundle, done: () => void): void {
         if (err) console.warn('[Skin] 依赖包加载失败', name, err);
         if (--left === 0) done();
     }));
+}
+
+/** 主题目录整份没有打一条 info；缺 ctrl 或 item 的某一张打一条 warn。清单原点在左上，纹理原点在左下 */
+function loadTheme(bundle: AssetManager.Bundle, theme: string, done: () => void): void {
+    loadDeps(bundle, () => bundle.loadDir(theme, (err, assets) => {
+        const list = assets ?? [];
+        const map = new Map<string, SpriteFrame>();
+        frames = map;
+        atlas = true;
+        if (err && !list.length) {
+            missingBundle = true;
+            noteMissing('*');
+            done();
+            return;
+        }
+        const ctrlImage = findImage(list, 'ctrl');
+        const itemImage = findImage(list, 'item');
+        const ctrlJson = findJson(list, 'ctrl');
+        const itemJson = findJson(list, 'item');
+        const failed = [
+            ctrlImage ? '' : 'ctrl.png',
+            ctrlJson ? '' : 'ctrl.json',
+            itemImage ? '' : 'item.png',
+            itemJson ? '' : 'item.json',
+        ].filter((name) => name);
+        if (failed.length === 4) {
+            missingBundle = true;
+            noteMissing('*');
+            done();
+            return;
+        }
+        missingBundle = false;
+        failed.forEach((name) => noteMissing(name));
+        if (ctrlImage && ctrlJson) fillSlots(map, ctrlImage, ctrlJson.json as SkinSheet); // 控件优先，同名槽不让物品图盖掉
+        if (itemImage && itemJson) fillSlots(map, itemImage, itemJson.json as SkinSheet);
+        done();
+    }));
+}
+
+function findImage(assets: Asset[], name: string): ImageAsset | null {
+    for (const asset of assets) {
+        if (asset instanceof ImageAsset && asset.name === name) return asset;
+        if (asset instanceof Texture2D && asset.name === name && asset.image instanceof ImageAsset) return asset.image;
+    }
+    for (const asset of assets) { // 导入出来的子资源名叫 spriteFrame，图名在纹理上
+        if (!(asset instanceof SpriteFrame) || !(asset.texture instanceof Texture2D)) continue;
+        const image = asset.texture.image;
+        if (image instanceof ImageAsset && (image.name === name || asset.texture.name === name)) return image;
+    }
+    return null;
+}
+
+function findJson(assets: Asset[], name: string): JsonAsset | null {
+    for (const asset of assets) {
+        if (asset instanceof JsonAsset && asset.name === name) return asset;
+    }
+    return null;
+}
+
+function fillSlots(map: Map<string, SpriteFrame>, image: ImageAsset, sheet: SkinSheet): void {
+    const slots = sheet.slots;
+    if (!slots) return;
+    const tex = new Texture2D();
+    tex.image = image;
+    ownedTextures.add(tex);
+    const sheetH = sheet.size?.[1] || image.height;
+    for (const name of Object.keys(slots)) {
+        const slot = slots[name];
+        if (!slot || slot.reserved || map.has(name)) continue;
+        const [x, y, w, h] = slot.rect;
+        if (!(w > 0 && h > 0)) continue;
+        const frame = new SpriteFrame();
+        frame.texture = tex;
+        frame.rect = new Rect(x, sheetH - y - h, w, h);
+        frame.originalSize = new Size(w, h);
+        frame.packable = false;
+        if (slot.sliced && slot.border) {
+            const [l, r, t, b] = slot.border;
+            frame.insetLeft = l;
+            frame.insetRight = r;
+            frame.insetTop = t;
+            frame.insetBottom = b;
+        }
+        map.set(name, frame);
+        ownedFrames.add(frame);
+    }
+}
+
+function dropCurrent(): void {
+    if (atlas) {
+        ownedFrames.forEach((frame) => frame.destroy());
+        ownedFrames.clear();
+        ownedTextures.forEach((tex) => tex.destroy());
+        ownedTextures.clear();
+    }
+    frames = null;
+    atlas = false;
+    logged.clear();
 }
 
 /** 已载入才有值。缺槽时是白图，不是 null */

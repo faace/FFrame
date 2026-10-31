@@ -16,13 +16,17 @@
 
 ## 验收标准
 
-- [ ] `loadSkin(theme)` 能读取 `bundles/Skin/<theme>/ctrl.png` 和 `ctrl.json`，并为每个槽建 `SpriteFrame`。
-- [ ] `skinFrame(name)` 对所有现有槽名都能返回正确的 `SpriteFrame`（rect 和 border 与清单一致）。
-- [ ] 缺槽时返回白图，行为和现在一致。
-- [ ] 整包缺失时只打一条 info，缺单张打一条 warn。
-- [ ] 编辑器模式下不报错，预览时能显示控件（可以是白图占位，但不能崩）。
-- [ ] `PfGMBtn`、`PfGMSlider`、`PfGMBar`、`PfGMStepper`、`PfGMTitle`、`PfGMTabs` 的代码不需要因为图集改造而改接口。
-- [ ] `CHANGELOG.md` 里有 `0.5.1` 条目，写明接口未变。
+- [ ] `loadSkin(theme)` 能读取 `bundles/Skin/<theme>/ctrl.png` 和 `ctrl.json`，并为每个槽建 `SpriteFrame`。代码已写，游戏包里还没有主题目录，预览里没跑过。
+- [ ] `skinFrame(name)` 对所有现有槽名都能返回正确的 `SpriteFrame`（rect 和 border 与清单一致）。同上，未在预览里对过。
+- [x] 缺槽时返回白图，行为和现在一致。
+- [x] 整包缺失时只打一条 info，缺单张打一条 warn。
+- [x] 编辑器模式下不报错，预览时能显示控件（可以是白图占位，但不能崩）。不传主题时编辑器仍按单张 png 取；传了主题也不去切图。
+- [x] `PfGMBtn`、`PfGMSlider`、`PfGMBar`、`PfGMStepper`、`PfGMTitle`、`PfGMTabs` 的代码不需要因为图集改造而改接口。
+- [x] `CHANGELOG.md` 里有 `0.5.1` 条目，写明接口未变。
+
+## 执行记录（2026-10-31）
+
+`loadSkin(theme, onComplete)` 读 `Skin/<theme>/` 里的 `ctrl`、`item` 图和清单。清单 `rect` 从左上角换成纹理左下角。不传主题时仍走原来的逐张图，开机没有改调用。游戏侧目录还没拆，这一步没有在预览里点过主题图集。
 
 ## 依赖
 

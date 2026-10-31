@@ -14,7 +14,7 @@ import type { GMBootOpts, GMGameConfig } from './GMBoot';
 import { loadSkin } from '../ui/GMSkin';
 import { loadCoreBundle } from '../resource/GMCoreBundle';
 
-export const version = '0.5.0'; // 框架版本；升级时同时改 extensions/gmajor/package.json 的 version，并写 CHANGELOG.md
+export const version = '0.5.1'; // 框架版本；升级时同时改 extensions/gmajor/package.json 的 version，并写 CHANGELOG.md
 
 /** 全局核心句柄（模块加载时创建；用法 gm.binder / gm.events / gm.ui / gd / gl / gu / gp …） */
 export interface GMCore {
