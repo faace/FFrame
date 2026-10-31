@@ -7,6 +7,7 @@ export type GMGameConfig = {
     boot: string[]; // 常驻包，每进程都绑
     entry: { [role: string]: string }; // 参数 → 入口包；缺 key 则失败
     alert: { bundle: string; prefab: string }; // 确认框皮
+    skinTheme?: string; // bundles/Skin/<主题>；缺省仍按包根的逐张图加载
 };
 
 export type GMBootOpts = {

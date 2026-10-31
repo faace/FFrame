@@ -1,6 +1,6 @@
 import { _decorator, Node } from 'cc';
 import { GMLayer, gu, PfGMBar, PfGMStepper } from 'db://gmajor/index';
-import { addSkin, addText, dress, loadSkin, skinInk } from '../../GameUI/SkinKit';
+import { addSkin, addText, dress, loadSkin, redress, skinInk } from '../../GameUI/SkinKit';
 
 const { ccclass } = _decorator;
 
@@ -29,6 +29,7 @@ export class LySetting extends GMLayer {
         loadSkin((err) => {
             if (err) return console.error('[LySetting] 皮加载失败', err);
             for (const [node, name] of this.skins) dress(node, name);
+            if (panel.isValid) redress(panel);
         });
     }
 

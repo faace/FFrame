@@ -72,6 +72,10 @@ function boot(game: GMGameConfig, a: GMBootOpts | GMAsyncComplete, b?: GMAsyncCo
     console.info('[gm.boot] role', role, 'packs', names.join(','));
     loadCoreBundle((coreErr) => {
         if (coreErr) return onComplete(coreErr);
+        if (game.skinTheme) return loadSkin(game.skinTheme, (err) => {
+            if (err) return onComplete(err);
+            binder.bindInOrder(names, onComplete, onProgress);
+        });
         loadSkin((err) => {
             if (err) return onComplete(err);
             binder.bindInOrder(names, onComplete, onProgress);

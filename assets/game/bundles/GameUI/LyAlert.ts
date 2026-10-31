@@ -1,5 +1,6 @@
 import { _decorator } from 'cc';
 import { GMAlert, PfGMBtn, gu, type GMAlertInit } from 'db://gmajor/index';
+import { loadSkin, redress } from './SkinKit';
 
 const { ccclass } = _decorator;
 
@@ -17,6 +18,10 @@ export class LyAlert extends GMAlert {
         if (parm.showCancel) this.panel?.getChildByName('btnCancel')?.getComponent(PfGMBtn)?.setText(parm.cancelText);
         const closeBtn = this.panel?.getChildByName('btnClose');
         if (closeBtn) gu.addClick(closeBtn, () => { parm.onCancel?.(); parm.close(); });
+        loadSkin((err) => {
+            if (err) return console.error('[LyAlert] 皮加载失败', err);
+            if (this.node.isValid) redress(this.node);
+        });
     }
 
     onRemove(): void {

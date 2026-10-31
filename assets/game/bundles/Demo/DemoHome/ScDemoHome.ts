@@ -1,6 +1,6 @@
 import { _decorator, Node, Sprite, UITransform } from 'cc';
 import { GMScene, gu, PfGMTabs } from 'db://gmajor/index';
-import { addPaper } from '../../GameUI/SkinKit';
+import { addPaper, loadSkin, redress } from '../../GameUI/SkinKit';
 import { PfDemoTabPage } from './PfDemoTabPage';
 
 const { ccclass } = _decorator;
@@ -23,6 +23,10 @@ export class ScDemoHome extends GMScene {
         this.click(home, 'btnSetting', () => this.openSetting());
         this.click(home, 'tabSetting', () => this.openSetting());
         this.click(home, 'tabHome', () => this.toggleTabs(home));
+        loadSkin((err) => {
+            if (err) return console.error('[ScDemoHome] 皮加载失败', err);
+            redress(home);
+        });
     }
 
     private click(parent: Node, name: string, fn: () => void): void {

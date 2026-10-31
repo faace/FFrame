@@ -107,37 +107,33 @@ function loadDeps(bundle: AssetManager.Bundle, done: () => void): void {
 function loadTheme(bundle: AssetManager.Bundle, theme: string, done: () => void): void {
     loadDeps(bundle, () => bundle.loadDir(theme, (err, assets) => {
         const list = assets ?? [];
-        const map = new Map<string, SpriteFrame>();
-        frames = map;
-        atlas = true;
-        if (err && !list.length) {
-            missingBundle = true;
-            noteMissing('*');
-            done();
-            return;
-        }
+        if (err && !list.length) return loadLoose(list, bundle, done);
         const ctrlImage = findImage(list, 'ctrl');
         const itemImage = findImage(list, 'item');
         const ctrlJson = findJson(list, 'ctrl');
         const itemJson = findJson(list, 'item');
-        const failed = [
-            ctrlImage ? '' : 'ctrl.png',
-            ctrlJson ? '' : 'ctrl.json',
-            itemImage ? '' : 'item.png',
-            itemJson ? '' : 'item.json',
-        ].filter((name) => name);
-        if (failed.length === 4) {
-            missingBundle = true;
-            noteMissing('*');
-            done();
-            return;
-        }
+        if (!(ctrlImage && ctrlJson)) return loadLoose(list, bundle, done); // LegacyV3 这种目录是逐张图，没有图集
+        const map = new Map<string, SpriteFrame>();
+        frames = map;
+        atlas = true;
         missingBundle = false;
-        failed.forEach((name) => noteMissing(name));
-        if (ctrlImage && ctrlJson) fillSlots(map, ctrlImage, ctrlJson.json as SkinSheet); // 控件优先，同名槽不让物品图盖掉
+        if (!itemImage) noteMissing('item.png');
+        if (!itemJson) noteMissing('item.json');
+        fillSlots(map, ctrlImage, ctrlJson.json as SkinSheet); // 控件优先，同名槽不让物品图盖掉
         if (itemImage && itemJson) fillSlots(map, itemImage, itemJson.json as SkinSheet);
         done();
     }));
+}
+
+function loadLoose(list: Asset[], bundle: AssetManager.Bundle, done: () => void): void {
+    const loose = list.filter((asset): asset is SpriteFrame => asset instanceof SpriteFrame);
+    frames = indexFrames(loose, bundle);
+    atlas = false;
+    if (!frames.size) {
+        missingBundle = true;
+        noteMissing('*');
+    } else missingBundle = false;
+    done();
 }
 
 function findImage(assets: Asset[], name: string): ImageAsset | null {
@@ -224,7 +220,8 @@ function indexFrames(assets: SpriteFrame[], bundle: AssetManager.Bundle): Map<st
     const map = new Map<string, SpriteFrame>();
     const byUuid = new Map(assets.map((frame) => [frame.uuid, frame]));
     for (const info of bundle.getDirWithPath('', SpriteFrame)) {
-        const name = info.path.split('/').find((part) => part && part !== 'spriteFrame');
+        const parts = info.path.split('/').filter((part) => part && part !== 'spriteFrame');
+        const name = parts[parts.length - 1]; // 主题目录在前，槽名在最后
         const frame = byUuid.get(info.uuid) ?? (assetManager.assets.get(info.uuid) as SpriteFrame | undefined);
         if (name && frame) map.set(name, frame);
     }
