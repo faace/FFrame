@@ -2275,7 +2275,7 @@
     "propertyPath": [
       "_string"
     ],
-    "value": "开始"
+    "value": "设置"
   },
   {
     "__type__": "cc.TargetInfo",
@@ -2775,7 +2775,7 @@
     "propertyPath": [
       "_string"
     ],
-    "value": "金币"
+    "value": "按钮和弹窗展示"
   },
   {
     "__type__": "cc.TargetInfo",
@@ -3370,7 +3370,7 @@
     "propertyPath": [
       "text"
     ],
-    "value": "开始"
+    "value": "设置"
   },
   {
     "__type__": "cc.TargetInfo",
@@ -3453,7 +3453,7 @@
     "propertyPath": [
       "text"
     ],
-    "value": "金币"
+    "value": "按钮和弹窗展示"
   },
   {
     "__type__": "cc.TargetInfo",

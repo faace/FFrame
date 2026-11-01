@@ -47,6 +47,8 @@ export class PfGMStepper extends GMComponent {
         if (!this.bindNodes()) return console.error('[PfGMStepper] 需要 plate、label、btnMinus、btnPlus');
         if (this.label!.isSystemFontUsed || !this.label!.font) console.error('[PfGMStepper] label 未挂 db://gmajor/fonts/main.ttf');
         this.dress();
+        applySkin('icon_minus', (frame) => { if (this.minusBtn?.isValid) this.minusBtn.setIcon(frame); });
+        applySkin('icon_plus', (frame) => { if (this.plusBtn?.isValid) this.plusBtn.setIcon(frame); });
         this.layout();
     }
 

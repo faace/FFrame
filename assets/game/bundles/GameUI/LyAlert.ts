@@ -17,7 +17,7 @@ export class LyAlert extends GMAlert {
         this.panel?.getChildByName('btnOk')?.getComponent(PfGMBtn)?.setText(parm.okText);
         if (parm.showCancel) this.panel?.getChildByName('btnCancel')?.getComponent(PfGMBtn)?.setText(parm.cancelText);
         const closeBtn = this.panel?.getChildByName('btnClose');
-        if (closeBtn) gu.addClick(closeBtn, () => { parm.onCancel?.(); parm.close(); });
+        if (parm.showClose && closeBtn) gu.addClick(closeBtn, () => { parm.onCancel?.(); parm.close(); });
         loadSkin((err) => {
             if (err) return console.error('[LyAlert] 皮加载失败', err);
             if (this.node.isValid) redress(this.node);

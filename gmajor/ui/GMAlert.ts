@@ -9,6 +9,8 @@ export type GMAlertInit = {
     okText: string;
     cancelText: string;
     showCancel: boolean;
+    showClose: boolean; // 右上角关闭
+    showTitle: boolean; // 标题条
     onOk?: () => void;
     onCancel?: () => void;
     close: () => void;
@@ -46,6 +48,10 @@ export class GMAlert extends GMLayer {
         this.onCancel = parm.onCancel;
         this.close = parm.close;
         if (this.btnCancel) this.btnCancel.active = parm.showCancel;
+        const closeBtn = this.panel?.getChildByName('btnClose');
+        if (closeBtn) closeBtn.active = parm.showClose;
+        const title = this.panel?.getChildByName('title');
+        if (title) title.active = parm.showTitle;
         if (this.btnOk) {
             if (parm.showCancel === false) this.btnOk.setPosition(0, this.btnOk.position.y, 0);
             gu.addClick(this.btnOk, () => { this.onOk?.(); this.close?.(); });

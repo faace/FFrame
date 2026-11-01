@@ -66,6 +66,8 @@ export interface GMAlertParams {
     content: string;
     ok?: GMAlertBtn; // 缺省「确定」
     cancel?: GMAlertBtn; // 有则双按钮，缺省「取消」
+    showClose?: boolean; // 缺省显示右上角关闭
+    showTitle?: boolean; // 缺省显示标题
 }
 
 interface LayerItem {
@@ -498,6 +500,8 @@ export class GMUIManager {
                 okText,
                 cancelText,
                 showCancel,
+                showClose: p.showClose !== false,
+                showTitle: p.showTitle !== false,
                 onOk: this.btnCb(p.ok),
                 onCancel: this.btnCb(p.cancel),
                 close: () => this.closeAlertItem(item),

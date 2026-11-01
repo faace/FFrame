@@ -4,6 +4,14 @@
 
 app 在 `config.version.gmajor` 写所按的框架版本。开机只打日志，主.次不同时多打一条警告，不拦截。升级后怎么判断：看这里的破坏项，再跑一遍。
 
+## 0.5.2
+
+按钮加了小档和正方形。确认框可以不显示标题、不显示右上角关闭。步进器的加减号从皮肤取图标。旧调用不改也和以前一样。
+
+- **新增（可选）**：`PfGMBtnSize.small`（180×64，正方形边长 64）。`PfGMBtnShape`：`standard` 是宽按钮，`square` 边长等于这一档的高。纯图标仍是正方形。旧预制体不写 `shape` 时仍是宽按钮。
+- **新增（可选）**：`gu.alert` 的 `showTitle`、`showClose`，缺省都是 `true`。
+- **行为**：`PfGMStepper` 的加减按钮运行时换成皮肤槽 `icon_minus`、`icon_plus`。没有这两张图时仍是白图。
+
 ## 0.5.1
 
 `loadSkin` 可以按主题加载图集。不传主题时仍是原来的逐张图。`skinFrame` 和 `applySkin` 没变。

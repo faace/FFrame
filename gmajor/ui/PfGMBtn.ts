@@ -7,7 +7,8 @@ const { ccclass, executeInEditMode, property } = _decorator;
 /**
  * 按钮可调参数。改数字改这里。
  * 字体资源：db://gmajor/fonts/main.ttf，挂在子节点 label 上。
- * 大档是原来的 380 宽。中档 260 宽，720 宽的确认框一行放得下两颗。
+ * 大档 380 宽，中档 260 宽，小档 180 宽。确认框一行两颗用中档。
+ * 形状另算：标准是宽按钮，正方形边长等于这一档的高。纯图标默认正方形。
  * 底板从 Skin 包取 btn_ 加主题名，例如 btn_primary。不序列化在这个组件上。
  */
 const PF_GM_BTN = {
@@ -16,6 +17,7 @@ const PF_GM_BTN = {
     contentInset: 16, // 九宫格四边。字的缩放框是中心这块，不是按钮外框
     iconScale: 0.8, // 图标相对档位尺寸
     sizes: {
+        small: { width: 180, height: 64, square: 64, icon: 48, padX: 10, fontSize: 28 },
         medium: { width: 260, height: 88, square: 88, icon: 80, padX: 12, fontSize: 36 },
         large: { width: 380, height: 120, square: 120, icon: 110, padX: 16, fontSize: 48 },
     },
@@ -40,15 +42,22 @@ Enum(PfGMBtnTheme);
 export enum PfGMBtnStyle {
     iconText = 0, // 图标加文字
     text = 1, // 纯文字
-    icon = 2, // 纯图标，正方形
+    icon = 2, // 纯图标，默认正方形
 }
 Enum(PfGMBtnStyle);
 
 export enum PfGMBtnSize {
     medium = 0, // 确认框一行两个
     large = 1, // 首页宽按钮；原来的 380×120
+    small = 2, // 64 高。九宫格边 16，中间还剩 32
 }
 Enum(PfGMBtnSize);
+
+export enum PfGMBtnShape {
+    standard = 0, // 宽按钮，高跟档位走
+    square = 1, // 边长等于这一档的高
+}
+Enum(PfGMBtnShape);
 
 type RGB = readonly [number, number, number];
 
@@ -80,6 +89,9 @@ export class PfGMBtn extends GMComponent {
 
     @property({ type: Enum(PfGMBtnStyle) })
     style = PfGMBtnStyle.text;
+
+    @property({ type: Enum(PfGMBtnShape) })
+    shape = PfGMBtnShape.standard;
 
     @property(SpriteFrame)
     icon: SpriteFrame | null = null;
@@ -120,6 +132,12 @@ export class PfGMBtn extends GMComponent {
         this.refresh();
     }
 
+    /** 换形状。标准是宽按钮，正方形边长等于这一档的高。纯图标始终是正方形 */
+    setShape(shape: PfGMBtnShape): void {
+        this.shape = shape;
+        this.refresh();
+    }
+
     /** 换图标帧。纯文字版式下不显示 */
     setIcon(frame: SpriteFrame | null): void {
         this.icon = frame;
@@ -141,7 +159,7 @@ export class PfGMBtn extends GMComponent {
     }
 
     private mark(): string {
-        return `${this.size}|${this.theme}|${this.style}|${this.text}|${this.icon?.uuid ?? ''}`;
+        return `${this.size}|${this.theme}|${this.style}|${this.shape}|${this.text}|${this.icon?.uuid ?? ''}`;
     }
 
     private bindNodes(): boolean {
@@ -189,9 +207,11 @@ export class PfGMBtn extends GMComponent {
         const iconSize = tier.icon * PF_GM_BTN.iconScale;
         icon.node.getComponent(UITransform)?.setContentSize(iconSize, iconSize);
         label.string = this.text;
-        if (this.style === PfGMBtnStyle.icon) {
+        const asSquare = this.shape === PfGMBtnShape.square || this.style === PfGMBtnStyle.icon;
+        if (asSquare) { // 纯图标始终是方的；形状选了正方形时，有字也按这一档的边长
             uit.setContentSize(tier.square, tier.square);
-            icon.node.setPosition(0, 0, 0);
+            if (showIcon && !showText) icon.node.setPosition(0, 0, 0);
+            else this.place(tier.square, tier, showText, showIcon);
             this.applyColors();
             return;
         }
