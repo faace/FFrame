@@ -1,17 +1,19 @@
 import { _decorator, Color, Label, Sprite, UITransform } from 'cc';
 import { GMComponent } from './GMComponent';
 import { applySkin } from './GMSkin';
-import { PfGMBtn } from './PfGMBtn';
+import { PfGMBtn, PfGMBtnSize } from './PfGMBtn';
 
 const { ccclass, executeInEditMode, property } = _decorator;
 
 /**
  * 步进可调参数。改数字改这里。
- * 数字板 140×72，字 28 号深墨。按钮是嵌套的中档纯图标，间距 16。
+ * 数字板 140×72，字 28 号深墨。按钮是嵌套的小档纯图标，间距 16。
  */
 const PF_GM_STEPPER = {
     plateW: 140,
     plateH: 72,
+    gap: 16,
+    btn: 64, // 小档纯图标方钮边长
     fontSize: 28,
     ink: [92, 64, 32] as const,
 };
@@ -47,6 +49,8 @@ export class PfGMStepper extends GMComponent {
         if (!this.bindNodes()) return console.error('[PfGMStepper] 需要 plate、label、btnMinus、btnPlus');
         if (this.label!.isSystemFontUsed || !this.label!.font) console.error('[PfGMStepper] label 未挂 db://gmajor/fonts/main.ttf');
         this.dress();
+        this.minusBtn?.setSize(PfGMBtnSize.small);
+        this.plusBtn?.setSize(PfGMBtnSize.small);
         applySkin('icon_minus', (frame) => { if (this.minusBtn?.isValid) this.minusBtn.setIcon(frame); });
         applySkin('icon_plus', (frame) => { if (this.plusBtn?.isValid) this.plusBtn.setIcon(frame); });
         this.layout();
@@ -100,6 +104,9 @@ export class PfGMStepper extends GMComponent {
         const lut = label.node.getComponent(UITransform);
         lut?.setContentSize(PF_GM_STEPPER.plateW, PF_GM_STEPPER.plateH);
         label.node.setPosition(0, 0, 0);
+        const x = PF_GM_STEPPER.plateW / 2 + PF_GM_STEPPER.gap + PF_GM_STEPPER.btn / 2;
+        this.minusBtn?.node.setPosition(-x, 0, 0);
+        this.plusBtn?.node.setPosition(x, 0, 0);
         this.minusBtn?.setEnabled(this.value > this.min);
         this.plusBtn?.setEnabled(this.value < this.max);
         this.stamp = `${this.value}|${this.min}|${this.max}|${this.step}`;

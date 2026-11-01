@@ -124,7 +124,7 @@ ScMain          # 场景根
 - **子节点**：新建 Ly 预制体时，默认结构就必须是根 + 空 `panel`（生成时带上，不是事后补）。mask **不进 prefab**。用 `node tools/create-ly-prefab.mjs <目录> Ly名字`。不要从空节点另存成 prefab。运行时没有 `panel` 仍报错——那是预制体没按规范生成。
 - **mask**：Overlay 上有隐藏模板；入树时基类克隆到根下、sibling 最低。半透黑、挡穿透。
 - **内容**：只往 `this.panel` 上长，禁止挂根上。
-- **普通弹窗**继承 `GMFrame`（它继承 `GMLayer`），不要各自搭顶栏。标题铆钉压在面板棕色顶边上；关闭钮和左上角与标题垂直居中，关闭钮中心距右边缘约 15，左上角对称。默认 620×800、有标题、有关闭、有底框。左上角有回调才出现，图标默认 `icon_help`。不要标题时按钮位置不变，内容从木框内沿开始。不要底框只是不画木框，遮罩还在，位置不变。开关和尺寸写在子类字段上，只写和默认不同的。
+- **普通弹窗**继承 `GMFrame`（它继承 `GMLayer`），不要各自搭顶栏。标题铆钉压在面板棕色顶边上；关闭钮和左上角与标题垂直居中，都是小档纯图标方钮，关闭钮中心距右边缘约 15，左上角对称。默认 620×800、有标题、有关闭、有底框。左上角有回调才出现，图标默认 `icon_help`。不要标题时按钮位置不变，内容从木框内沿开始。不要底框只是不画木框，遮罩还在，位置不变。开关和尺寸写在子类字段上，只写和默认不同的。
 - **确认框**不继承 `GMFrame`。只把标题和关闭钮放在同一条棕色边上，其余仍是原来的正文和按钮。
 - **正文**：普通弹窗的 `body` 由 `GMFrame` 创建。有标题时在标题下沿和面板底边之间。确认框的 `body` 仍是文案。
 - **动效**：不动根。进场 mask 透明→半透，同时 panel `0→1.1→1`，时长对齐；退场反过来。
@@ -175,7 +175,7 @@ export class PfX extends GMScene {}
 - **框架自带预制体：`Pf` + `GM` + 名**。按钮 `PfGMBtn`，标题 `PfGMTitle`，滑条 `PfGMSlider`，进度条 `PfGMBar`，步进 `PfGMStepper`，页签 `PfGMTabs`。弹层预制体同样：`Ly` + `GM` + 名（`LyGMXxx`）。先看出是 Pf 还是 Ly，再看出是框架的。
 - 框架控件根锚点在中心。滑条只有轨道和滑块，旁边的图标和字由调用方摆。宽读根节点，高不跟。`value` 为 0–1，`setValue` 和检查器同一份。拖动自己听，loading 开着时这次丢掉。`setOnChange` 只在手指按下或移动时叫，`setValue` 不叫。
 - 进度条只有槽和填充。皮 `bar_bg`、`bar_fill`，自己切九宫格。`value` 为 0–1，不拖、不设 `onChange`。填充的 x 锚点为 0，从左侧往右长。四周留白写在脚本顶部。
-- 步进的加减嵌套中档纯图标 `PfGMBtn`（减 `secondary`，加 `primary`）。点按仍是外层 `gu.addClick`，步进不挂 `Button`。整数 `value` / `min` / `max` / `step` 是同一份属性。到 `min` 禁用减号，到 `max` 禁用加号。
+- 步进的加减嵌套小档纯图标 `PfGMBtn`（减 `secondary`，加 `primary`）。点按仍是外层 `gu.addClick`，步进不挂 `Button`。整数 `value` / `min` / `max` / `step` 是同一份属性。到 `min` 禁用减号，到 `max` 禁用加号。
 - 页签是 `PfGMTabs`，不继承 `PfGMBtn`。子节点固定 `tabs`、`panel`。内容必须是 `GMTabPage`（`text` / `setText`，`onShow` / `onHide` 收 `done`）。皮 `tab_normal`、`tab_selected`、`panel`，控件自己切九宫格。高 72，宽按五个中文字不缩放，从左挨着排，第一颗让过 panel 顶边圆角。点击用 `gu.addClick`。
 - 不要 `PfBtn`（太泛），不要 `PfFFBtn`（`FF*` 已废），不要只叫 `GMBtn`（看不出是预制体，也分不清 Ly/Pf）。
 - **本游戏**仍是 `PfShopItem` / `LyAlert`，中间不加 `GM`。纯基类仍是 `GMComponent` / `GMAlert` / `GMLayer` / `GMFrame`（没有对应预制体文件）。`GMFrame` 是普通弹窗骨架。

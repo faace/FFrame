@@ -207,7 +207,7 @@ export class GMFrame extends GMLayer {
             btn.node.active = true;
             btn.node.setPosition(x, this.edgeY(), 0);
         }
-        btn.setSize(PfGMBtnSize.medium);
+        btn.setSize(PfGMBtnSize.small); // 关闭和左上角用小档方钮
         btn.setTheme(PfGMBtnTheme.secondary);
         btn.setStyle(PfGMBtnStyle.icon);
         btn.setText('');

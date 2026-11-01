@@ -464,7 +464,7 @@
     ],
     "value": {
       "__type__": "cc.Vec3",
-      "x": -130,
+      "x": -118,
       "y": 0,
       "z": 0
     }
@@ -485,8 +485,8 @@
     ],
     "value": {
       "__type__": "cc.Size",
-      "width": 88,
-      "height": 88
+      "width": 64,
+      "height": 64
     }
   },
   {
@@ -554,7 +554,7 @@
     "propertyPath": [
       "size"
     ],
-    "value": 0
+    "value": 2
   },
   {
     "__type__": "cc.TargetInfo",
@@ -748,7 +748,7 @@
     ],
     "value": {
       "__type__": "cc.Vec3",
-      "x": 130,
+      "x": 118,
       "y": 0,
       "z": 0
     }
@@ -769,8 +769,8 @@
     ],
     "value": {
       "__type__": "cc.Size",
-      "width": 88,
-      "height": 88
+      "width": 64,
+      "height": 64
     }
   },
   {
@@ -838,7 +838,7 @@
     "propertyPath": [
       "size"
     ],
-    "value": 0
+    "value": 2
   },
   {
     "__type__": "cc.TargetInfo",
