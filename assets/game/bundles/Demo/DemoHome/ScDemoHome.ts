@@ -17,8 +17,9 @@ export class ScDemoHome extends GMScene {
         this.click(home, 'btnAd', () => gu.alert({ content: '看完可以领一份奖励。', ok: { text: '领取' } }));
         this.click(home, 'btnGold', () => gu.showLayer('LyButtons', { bundle: 'DemoHome' }));
         this.click(home, 'btnDiamond', () => gu.alert('用钻石买下这一格。'));
+        this.click(home, 'tabHome', () => this.toggleTabs());
         this.click(home, 'tabSetting', () => this.openSetting());
-        this.click(home, 'btnSetting', () => gu.showLayer('LyTabs', { bundle: 'DemoHome' }));
+        this.click(home, 'btnSetting', () => this.openSetting());
         loadSkin((err) => {
             if (err) return console.error('[ScDemoHome] 皮加载失败', err);
             redress(home);
@@ -33,6 +34,13 @@ export class ScDemoHome extends GMScene {
 
     private openSetting(): void {
         gu.showLayer('LySetting', { bundle: 'DemoHome' });
+    }
+
+    /** 顶上「页签」。开着再点一次关掉 */
+    private toggleTabs(): void {
+        const open = this.node.scene?.getChildByName('GMOverlay')?.getChildByName('layers')?.getChildByName('LyTabs');
+        if (open?.isValid) gu.closeLayer('LyTabs');
+        else gu.showLayer('LyTabs', { bundle: 'DemoHome' });
     }
 
 }
