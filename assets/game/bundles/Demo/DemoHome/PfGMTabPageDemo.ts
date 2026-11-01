@@ -7,8 +7,8 @@ const FONT = 'ee40121d-0b21-4bb3-b95c-fa7d2df322b4'; // assets/gmajor/fonts/main
 const INK = new Color(92, 64, 32, 255);
 
 /** 首页页签示例里的一页。记录页会等两秒，用来看到 loading */
-@ccclass('PfDemoTabPage')
-export class PfDemoTabPage extends GMTabPage {
+@ccclass('PfGMTabPageDemo')
+export class PfGMTabPageDemo extends GMTabPage {
     private label: Label | null = null;
 
     onInit(): void {

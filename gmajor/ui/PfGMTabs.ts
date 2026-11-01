@@ -35,9 +35,12 @@ export enum GMTabSource {
 }
 Enum(GMTabSource);
 
-/** 编辑器里的一项。下拉框决定露出节点还是预制体 */
+/** 编辑器里的一项。标题另填。下拉框决定露出节点还是预制体 */
 @ccclass('GMTabSlot')
 export class GMTabSlot {
+    @property
+    text = ''; // 页签上的字。空着就用页面自己的 text
+
     @property({ type: Enum(GMTabSource) })
     source = GMTabSource.node;
 
@@ -129,13 +132,14 @@ export class PfGMTabs extends GMComponent {
         this.onChange = cb;
     }
 
-    /** 插入一页。不传下标就加到末尾。留在当前页 */
-    insert(content: Node | Prefab, index?: number): void {
+    /** 插入一页。text 是页签标题，盖过页面自己的 text。不传下标就加到末尾。留在当前页 */
+    insert(content: Node | Prefab, text = '', index?: number): void {
         if (!content) return console.error('[PfGMTabs] insert 没有内容');
         if (!editing && this.switching) return console.error('[PfGMTabs] 切换中不能插入');
         const at = index === undefined ? this.pages.length : index;
         const claimed = this.claim(content);
         if (!claimed) return;
+        if (text) claimed.page.text = text; // 标题从外面来，不写进页面预制体
         if (!Number.isInteger(at) || at < 0 || at > this.pages.length) {
             if (claimed.made && claimed.page.node.isValid) claimed.page.node.destroy();
             return console.error('[PfGMTabs] insert 下标不合法', index);
@@ -175,7 +179,10 @@ export class PfGMTabs extends GMComponent {
     }
 
     private syncSlots(force: boolean): void {
-        const mark = this.slots.map((slot) => slot.source + ':' + (slot.source === GMTabSource.prefab ? slot.prefab?.uuid ?? '' : slot.page?.uuid ?? '')).join(',');
+        const mark = this.slots.map((slot) => {
+            const id = slot.source === GMTabSource.prefab ? slot.prefab?.uuid ?? '' : slot.page?.uuid ?? '';
+            return slot.source + ':' + id + ':' + slot.text;
+        }).join(',');
         if (!force && mark === this.slotMark) return;
         this.clearMade();
         this.slotMark = mark;
@@ -204,6 +211,7 @@ export class PfGMTabs extends GMComponent {
         if (!content) return console.error('[PfGMTabs] 这一项是空的');
         const claimed = this.claim(content);
         if (!claimed) return;
+        if (slot.text) claimed.page.text = slot.text; // 标题从槽位来，不写进页面自己
         this.pages.push(this.makeEntry(claimed.page, claimed.made));
     }
 

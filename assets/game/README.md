@@ -68,5 +68,5 @@ bundles/Demo/DemoChild/ 子包生命周期示例，开机不绑定
 
 - **LySetting**：设置。滑条、进度条、步进用框架控件。背板和图标用 `Skin` 里的蛇形文件名贴上。遮罩由框架克隆。
 - **PfDemoItem**：列表项。拿到脚本后改数量，不直接改节点。
-- **PfDemoTabPage**：页签内容，继承 `GMTabPage`。首页再点一次「页签」打开或关掉三页（概况、背包、记录）。记录页的 `onShow` 会等两秒，用来看 loading。
+- **PfGMTabPageDemo**：页签内容，继承 `GMTabPage`。首页最下面的「设置」打开三页（概况、背包、记录）。记录页的 `onShow` 会等两秒，用来看 loading。
 - **DemoChild**：子包的绑定生命周期（`onInit` / `onBind` / `onStart` / `onUnbind` / `onRemove`），只打日志。要看它，得由别的包再去绑定 `DemoChild`。
