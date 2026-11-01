@@ -1,5 +1,5 @@
-import { _decorator } from 'cc';
-import { GMAlert, PfGMBtn, gu, type GMAlertInit } from 'db://gmajor/index';
+import { _decorator, UITransform } from 'cc';
+import { FRAME_EDGE, GMAlert, PfGMBtn, gu, type GMAlertInit } from 'db://gmajor/index';
 import { loadSkin, redress } from './SkinKit';
 
 const { ccclass } = _decorator;
@@ -9,6 +9,19 @@ const { ccclass } = _decorator;
 export class LyAlert extends GMAlert {
     onInit(): void {
         console.info('[LyAlert] onInit');
+        this.alignTitle();
+    }
+
+    /** 标题和关闭钮与普通弹窗同一条棕色边。其余布局不动 */
+    private alignTitle(): void {
+        const panel = this.panel;
+        const uit = panel?.getComponent(UITransform);
+        if (!panel || !uit) return;
+        const y = uit.height / 2 - FRAME_EDGE;
+        const title = panel.getChildByName('title');
+        const close = panel.getChildByName('btnClose');
+        if (title) title.setPosition(title.position.x, y, title.position.z);
+        if (close) close.setPosition(close.position.x, y, close.position.z);
     }
 
     init(parm?: GMAlertInit): void {

@@ -35,6 +35,7 @@ export { GMTabPage } from './ui/GMTabPage'; // 页签内容基类；onShow/onHid
 export { PfGMTabs, GMTabSource } from './ui/PfGMTabs'; // 框架页签；tabs+panel；index；insert/remove
 export { loadSkin, setSkinTheme, applySkin, skinFrame, SKIN_BUNDLE } from './ui/GMSkin'; // 游戏 Skin 包；setSkinTheme 告诉编辑器当前主题；缺槽用内置白图
 export { GMLayer } from './ui/GMLayer'; // Layer 基类；Ly* 继承；mask+panel 入场；场景不套
+export { GMFrame, FRAME_EDGE } from './ui/GMFrame'; // 普通弹窗骨架；铆钉压棕色框线；默认 620×800；确认框不走
 export { GMAlert } from './ui/GMAlert'; // 确认框基类；皮在本游戏常驻包
 export type { GMAlertInit } from './ui/GMAlert'; // gu.alert 填进确认框的文案和关闭
 export { GMScene } from './ui/GMScene'; // 场景基类；Sc* 继承（→Layer→Component）；默认 opacity
