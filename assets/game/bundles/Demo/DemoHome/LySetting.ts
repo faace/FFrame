@@ -1,5 +1,5 @@
-import { _decorator, Node } from 'cc';
-import { GMLayer, gu, PfGMBar, PfGMStepper } from 'db://gmajor/index';
+import { _decorator, Node, UITransform } from 'cc';
+import { FRAME_EDGE, GMLayer, gu, PfGMBar, PfGMStepper } from 'db://gmajor/index';
 import { addSkin, addText, dress, loadSkin, redress, skinInk } from '../../GameUI/SkinKit';
 
 const { ccclass } = _decorator;
@@ -12,6 +12,7 @@ export class LySetting extends GMLayer {
     onInit(): void {
         const panel = this.panel;
         if (!panel) return;
+        this.alignTitle();
         const plate = this.put(panel, 'panel', 0, 0, 600, 760);
         plate.setSiblingIndex(0); // 背板垫在预制体里的标题和按钮下面
         const close = panel.getChildByName('btnClose');
@@ -31,6 +32,18 @@ export class LySetting extends GMLayer {
             for (const [node, name] of this.skins) dress(node, name);
             if (panel.isValid) redress(panel);
         });
+    }
+
+    /** 标题铆钉、关闭钮和帮助钮压在面板棕色顶边上 */
+    private alignTitle(): void {
+        const panel = this.panel;
+        const uit = panel?.getComponent(UITransform);
+        if (!panel || !uit) return;
+        const y = uit.height / 2 - FRAME_EDGE;
+        for (const name of ['title', 'btnClose', 'btnHelp']) {
+            const node = panel.getChildByName(name);
+            if (node) node.setPosition(node.position.x, y, node.position.z);
+        }
     }
 
     private put(parent: Node, name: string, x: number, y: number, w: number, h: number): Node {

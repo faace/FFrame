@@ -1651,7 +1651,7 @@
         "__id__": 54
       }
     ],
-    "_active": true,
+    "_active": false,
     "_components": [
       {
         "__id__": 52
@@ -1899,7 +1899,7 @@
         "__id__": 60
       }
     ],
-    "_active": true,
+    "_active": false,
     "_components": [
       {
         "__id__": 58
@@ -3231,7 +3231,7 @@
     "propertyPath": [
       "_string"
     ],
-    "value": "设置"
+    "value": "页签设置"
   },
   {
     "__type__": "cc.TargetInfo",
@@ -3517,7 +3517,7 @@
     "propertyPath": [
       "text"
     ],
-    "value": "设置"
+    "value": "页签设置"
   },
   {
     "__type__": "cc.TargetInfo",

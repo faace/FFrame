@@ -9,9 +9,10 @@ const { ccclass } = _decorator;
 export class LyTabs extends GMFrame {
     width = 640;
     height = 480;
+    showTitle = false;
+    showPlate = false;
 
     protected onLayerInit(): void {
-        this.setTitle('页签');
         const body = this.body;
         if (!body) return;
         const bundle = assetManager.getBundle('GMUI');

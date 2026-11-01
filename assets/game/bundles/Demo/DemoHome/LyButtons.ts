@@ -1,5 +1,5 @@
-import { _decorator } from 'cc';
-import { GMLayer, gu } from 'db://gmajor/index';
+import { _decorator, UITransform } from 'cc';
+import { FRAME_EDGE, GMLayer, gu } from 'db://gmajor/index';
 import { loadSkin, redress } from '../../GameUI/SkinKit';
 
 const { ccclass } = _decorator;
@@ -10,6 +10,7 @@ export class LyButtons extends GMLayer {
     onInit(): void {
         const panel = this.panel;
         if (!panel) return;
+        this.alignTitle();
         const close = panel.getChildByName('btnClose');
         if (close) gu.addClick(close, () => gu.closeLayer('LyButtons'));
         this.click('btnPrimary', () => gu.alert('主色'));
@@ -27,6 +28,18 @@ export class LyButtons extends GMLayer {
             if (err) return console.error('[LyButtons] 皮加载失败', err);
             if (panel.isValid) redress(panel);
         });
+    }
+
+    /** 标题铆钉和关闭钮压在面板棕色顶边上 */
+    private alignTitle(): void {
+        const panel = this.panel;
+        const uit = panel?.getComponent(UITransform);
+        if (!panel || !uit) return;
+        const y = uit.height / 2 - FRAME_EDGE;
+        const title = panel.getChildByName('title');
+        const close = panel.getChildByName('btnClose');
+        if (title) title.setPosition(title.position.x, y, title.position.z);
+        if (close) close.setPosition(close.position.x, y, close.position.z);
     }
 
     private click(name: string, fn: () => void): void {
