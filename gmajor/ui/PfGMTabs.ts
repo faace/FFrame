@@ -9,14 +9,15 @@ const { ccclass, executeInEditMode, property } = _decorator;
 
 /**
  * 页签可调参数。改数字改这里。
- * 外框读根节点，预制体默认 640×480。页签高 72，和首页「页签 / 设置」一样。
- * 字号 26。宽按五个中文字不缩放来排。第一颗从 panel 顶边圆角之后开始，再往右挨着排。
+ * 外框读根节点，预制体默认 640×480。页签高 64，和小档按钮一样。板子比页签宽，页签从左上圆角后往右排，右边留空。
+ * 字号 26。宽按五个中文字不缩放来排，相邻页签边线叠 3 像素。底边黑线压住 panel 顶边黑线。激活的那颗画在最上面。
  * 页签九宫格上 10、下 2、左 10、右 10。panel 四边 20。
  */
 const PF_GM_TABS = {
     width: 640,
-    tabH: 72, // 首页 tabHome / tabSetting 的高度
-    corner: 12, // panel 顶边圆角。原图顶行从 x=12 才实心，第一颗从这里起
+    tabH: 64, // 和小档按钮同高
+    corner: 20, // 左上圆角。第一颗从这里起，板子右边空着
+    join: 3, // 相邻页签各让 3 像素，边线叠成一条
     fontSize: 26,
     padX: 12, // 五个字两侧留白，躲开左右圆角
     sample: '中中中中中', // 用来量一颗页签的宽
@@ -369,20 +370,23 @@ export class PfGMTabs extends GMComponent {
         const height = uit.height >= PF_GM_TABS.tabH ? uit.height : PF_GM_TABS.tabH;
         uit.setContentSize(width, height);
         const tabH = PF_GM_TABS.tabH;
-        const panelH = height - tabH;
+        const overlap = 4; // 底边黑线压住 panel 顶边黑线。再大的话，页签右边的顶边会抬上去
+        const tabBottom = height / 2 - tabH;
+        const panelTop = tabBottom + overlap;
+        const panelBottom = -height / 2;
+        const panelH = panelTop - panelBottom;
         const tabsUt = tabs.getComponent(UITransform) ?? tabs.addComponent(UITransform);
         const panelUt = panel.getComponent(UITransform) ?? panel.addComponent(UITransform);
         tabsUt.setAnchorPoint(0.5, 0.5);
         panelUt.setAnchorPoint(0.5, 0.5);
         tabsUt.setContentSize(width, tabH);
         panelUt.setContentSize(width, panelH);
-        const tabBottom = height / 2 - tabH; // 页签底边，同时是 panel 的上沿
-        tabs.setPosition(0, tabBottom + tabH / 2, 0);
-        panel.setPosition(0, (tabBottom + (-height / 2)) / 2, 0);
+        tabs.setPosition(0, tabBottom + tabH / 2 + 1, 0); // 页签再抬 1 像素，底边黑线压住 panel 顶边
+        panel.setPosition(0, (panelTop + panelBottom) / 2, 0);
         if (this.fixedW <= 0 && this.pages.length > 0) this.fixedW = this.measureTab(this.pages[0].label);
         const tabW = Math.round(this.fixedW > 0 ? this.fixedW : PF_GM_TABS.fontSize * 5 + PF_GM_TABS.padX * 2);
         const count = this.pages.length;
-        const left = -width / 2 + PF_GM_TABS.corner; // 让过左上圆角再排第一颗
+        const left = -width / 2 + PF_GM_TABS.corner; // 让过左上圆角，右边不排满
         for (let i = 0; i < count; i++) {
             const entry = this.pages[i];
             const on = i === this.current;
@@ -393,7 +397,7 @@ export class PfGMTabs extends GMComponent {
             if (frame) entry.plate.spriteFrame = frame;
             tabUt.setAnchorPoint(0.5, 0); // 底边钉在 tabs 底上，也就是 panel 上沿
             tabUt.setContentSize(tabW, tabH); // 贴图之后再写，每帧都写，避免被原图尺寸盖住
-            entry.tab.setPosition(left + (i + 0.5) * tabW, -tabH / 2, 0);
+            entry.tab.setPosition(left + tabW / 2 + i * (tabW - PF_GM_TABS.join), -tabH / 2, 0); // 相邻边线叠 join 像素
             this.dressLabel(entry.label);
             entry.label.string = entry.page.text;
             const lut = entry.label.node.getComponent(UITransform);
@@ -403,8 +407,13 @@ export class PfGMTabs extends GMComponent {
             entry.page.node.active = on;
             if (on) this.fill(entry.page.node, panelUt);
         }
-        const shown = this.current >= 0 ? this.pages[this.current] : null;
-        if (shown) shown.tab.setSiblingIndex(tabs.children.length - 1);
+        let order = 0;
+        for (let i = 0; i < count; i++) {
+            if (i === this.current) continue;
+            this.pages[i].tab.setSiblingIndex(order++);
+        }
+        if (this.current >= 0) this.pages[this.current].tab.setSiblingIndex(order); // 激活的画在最上面，叠住两侧的边线
+        tabs.setSiblingIndex(this.node.children.length - 1); // 画在板子上面，底边不被板子盖住
     }
 
     private fill(node: Node, panelUt: UITransform): void {
