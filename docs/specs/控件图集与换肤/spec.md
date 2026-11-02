@@ -52,7 +52,7 @@ assets/game/bundles/Skin/
   - `skinFrame(name)`、`applySkin(name, apply)` 保持不变。框架控件（`PfGMBtn` 等）不用改调用方式。
   - 槽名先查控件图，再查物品图；都没有时返回白图（和现在一样）。
   - 缺图的日志规则不变：整包缺失打一条 info，缺单张打 warn。没有 plist 的主题目录仍按逐张 png 加载。
-- 版本：对外接口不变，`gmajor` 升修订版本 `0.5.0 → 0.5.1`，`CHANGELOG.md` 写一条。
+- 版本：对外接口不变，`gmajor` 升修订版本 `0.5.0 → 0.5.1`，`CHANGELOG.md` 写一条。（已发布；之后框架到 `0.5.3`。）
 
 ### 4. 预制体引用（游戏侧风险）
 
@@ -78,7 +78,7 @@ assets/game/bundles/Skin/
 - [x] 01 素材仓库整理：建 `FFrame-asset-line/style/ZooV7/` 和 `LegacyV3/` 结构，从 `legacy/FFrame-del/` 迁入历史版本和脚本。
 - [x] 02 控件图集：`draw-zoo-v7-ctrl.mjs` 按 2 倍尺寸出 `ctrl.png` 和 `ctrl.json`。名单是 21 个槽，另加 10 个空槽。依赖 01。
 - [ ] 03 物品图集：出 `item.png` 和 `item.json`。28 格已打进图集，其中 8 格是现成图复制。依赖 01。
-- [ ] 04 GMSkin 图集加载：`gmajor` 支持按主题加载两张图集，升 `0.5.1`。代码已写，预览未跑。无依赖。
+- [ ] 04 GMSkin 图集加载：`gmajor` 支持按主题加载两张图集，升 `0.5.1`（已随周末提交发布，之后框架到 `0.5.3`）。代码已写，预览未跑。无依赖。
 - [ ] 05 游戏侧接入：`bundles/Skin` 已分成 `LegacyV3/` 和 `ZooV7/`，开机读 `config.skinTheme`。预览未跑。依赖 02、03、04。
 - [ ] 06 动物园素材入库：`FFrame-zoo/资源生成/` 进 LFS。无依赖。
 - [x] 07 文档与规则：更新 `docs/界面组件/` 和 README 的皮肤说明，把 `01-naming` 的“界面控件与默认皮”改成主题 plist，运行 `tools/sync-cursor-rules-index.mjs`。依赖 05。
