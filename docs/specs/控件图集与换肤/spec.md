@@ -64,7 +64,7 @@ assets/game/bundles/Skin/
 ### 5. 动物园素材（素材仓库）
 
 - `FFrame-asset-line`：`style/ZooV7/` 和 `style/LegacyV3/`（旧版的 v3 原图和切片数据）。
-- `FFrame-zoo`：`资源生成/` 用 Git LFS 入库，需要先改 `.gitignore`，去掉 `资源生成/` 这一行，再 `git lfs track`。不提交 zoo 现有的 5 个未提交改动。
+- `FFrame-asset-line/scenes/动物园/资源生成/`：从 `FFrame-zoo` 挪过来（2026-11-02），被 `.gitignore` 的 `资源生成/` 忽略，不入 GitHub，换电脑靠 U 盘同步。`FFrame-zoo` 不改，不提交它的未提交改动。
 
 ## 已确认
 
@@ -80,7 +80,7 @@ assets/game/bundles/Skin/
 - [ ] 03 物品图集：出 `item.png` 和 `item.json`。28 格已打进图集，其中 8 格是现成图复制。依赖 01。
 - [ ] 04 GMSkin 图集加载：`gmajor` 支持按主题加载两张图集，升 `0.5.1`（已随周末提交发布，之后框架到 `0.5.3`）。代码已写，预览未跑。无依赖。
 - [ ] 05 游戏侧接入：`bundles/Skin` 已分成 `LegacyV3/` 和 `ZooV7/`，开机读 `config.skinTheme`。预览未跑。依赖 02、03、04。
-- [ ] 06 动物园素材入库：`FFrame-zoo/资源生成/` 进 LFS。无依赖。
+- [x] 06 动物园素材入库（已改为不入库）：`资源生成/` 挪到 `FFrame-asset-line/scenes/动物园/`，被忽略，U 盘同步。无依赖。
 - [x] 07 文档与规则：更新 `docs/界面组件/` 和 README 的皮肤说明，把 `01-naming` 的“界面控件与默认皮”改成主题 plist，运行 `tools/sync-cursor-rules-index.mjs`。依赖 05。
 
 ## 依赖关系
