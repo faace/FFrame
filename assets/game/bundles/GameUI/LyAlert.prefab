@@ -525,7 +525,7 @@
       "icon"
     ],
     "value": {
-      "__uuid__": "c27b0465-d1a7-47b7-97d5-55c004c6f3c0@f9941",
+      "__uuid__": "4b756a97-47ca-464f-b3f7-c780df66202c@9ce49",
       "__expectedType__": "cc.SpriteFrame"
     }
   },
@@ -859,7 +859,7 @@
       "a": 255
     },
     "_spriteFrame": {
-      "__uuid__": "f5cd60bb-b119-4432-a9c4-9a59aa476106@f9941",
+      "__uuid__": "4b756a97-47ca-464f-b3f7-c780df66202c@fab18",
       "__expectedType__": "cc.SpriteFrame"
     },
     "_type": 1,

@@ -4,6 +4,18 @@
 
 app 在 `config.version.gmajor` 写所按的框架版本。开机只打日志，主.次不同时多打一条警告，不拦截。升级后怎么判断：看这里的破坏项，再跑一遍。
 
+## 0.6.0
+
+**破坏性改动**：`loadSkin` 只认主题目录（有 `ctrl.plist` 的 `bundles/Skin/<主题>/`）。不传主题就不加载任何图，只打一条「没有可用的界面图」的 info，控件用内置白图。以前的逐张 png 目录和「按文件名直接取」的路径全部删除，不再回退。
+
+app 要做的：
+
+- `assets/game/config.ts` 的 `skinTheme` 填一个有 plist 的主题（现在是 `ZooV7`）。
+- 预制体、场景里指向旧逐张图的 uuid 要换成图集子图的 uuid。动物园已替换，没有残留。
+- `SkinKit` 里的 `redress` 和旧图 uuid 表已删。调用它的地方同步去掉。
+
+LegacyV3 旧逐张图移出 `assets/game/bundles/Skin/`，归档到素材仓库 `legacy/Skin-LegacyV3-game/`。游戏运行时不再加载。
+
 ## 0.5.3
 
 普通弹窗可以走骨架 `GMFrame`：默认 620×800，能关标题、关闭钮和底框，左上角有回调才出现。确认框只把标题和关闭钮挪到同一条边上。旧弹窗不改基类的话和以前一样。

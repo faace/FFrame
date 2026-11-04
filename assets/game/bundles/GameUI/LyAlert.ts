@@ -1,6 +1,6 @@
 import { _decorator, UITransform } from 'cc';
 import { FRAME_EDGE, GMAlert, PfGMBtn, gu, type GMAlertInit } from 'db://gmajor/index';
-import { loadSkin, redress } from './SkinKit';
+import { loadSkin } from './SkinKit';
 
 const { ccclass } = _decorator;
 
@@ -33,7 +33,6 @@ export class LyAlert extends GMAlert {
         if (parm.showClose && closeBtn) gu.addClick(closeBtn, () => { parm.onCancel?.(); parm.close(); });
         loadSkin((err) => {
             if (err) return console.error('[LyAlert] 皮加载失败', err);
-            if (this.node.isValid) redress(this.node);
         });
     }
 

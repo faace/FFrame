@@ -1,6 +1,6 @@
 import { _decorator, Node } from 'cc';
 import { GMScene, gu } from 'db://gmajor/index';
-import { addPaper, loadSkin, redress } from '../../GameUI/SkinKit';
+import { addPaper, loadSkin } from '../../GameUI/SkinKit';
 
 const { ccclass } = _decorator;
 
@@ -20,7 +20,6 @@ export class ScDemoHome extends GMScene {
         this.click(home, 'btnSetting', () => this.toggleTabs());
         loadSkin((err) => {
             if (err) return console.error('[ScDemoHome] 皮加载失败', err);
-            redress(home);
         });
     }
 

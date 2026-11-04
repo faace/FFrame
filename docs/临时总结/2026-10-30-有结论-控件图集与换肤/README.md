@@ -16,13 +16,13 @@
 - 大路径：grilling → 共识 → spec → 逐条 `/implement`。
 - 母版风格：`ui-sheet-v7`，对齐动物园母图。
 - 分两步、两张图：先控件图，后物品图，各 2048×2048，不共用。
-- 换肤：每套主题一个文件夹，运行时按主题名加载。主题目录名 `ZooV7`（当前）、`LegacyV3`（旧版，留着回退）。
+- 换肤：每套主题一个文件夹，运行时按主题名加载。主题目录名 `ZooV7`（当前唯一主题）。`LegacyV3`（旧版逐张图）已于 2026-11-02 退役，游戏不再加载，归档到 `FFrame-asset-line/legacy/Skin-LegacyV3-game/`（见第 2 节）。
 - 素材仓库：`FFrame-asset-line`，按 `style/<主题>/` 组织。每个主题下分 `控件/`、`物品/`，各有 `prompt.md`、`history/`、最终图和清单。
 - 风格提示语：共用的风格块写在 `style.md`，两步都引用它。
 - 尺寸：按设计分辨率 720×1280 的 2 倍出图，运行时显示 1/2。
 - 控件 21 件（5 个按钮底板、标题、面板、2 个 tab、滑条轨道和滑块、进度条、经验条的底和填充两件、步进底板、格子、选中框、X、问号、加号、减号），另预留约 10 个空槽。
 - 物品图标：金币、钻石、能量、广告、音乐、喇叭、齿轮、播放（未用），统一 128×128 源图格子。
-- 游戏里旧的 `Skin` 整体移入 `LegacyV3/` 保留。
+- 游戏里旧的 `Skin` 原先整体移入 `LegacyV3/` 保留。2026-11-02 用户决定退役：运行时不再加载，文件移到素材仓库归档，不删除。
 - **已被用户覆盖的两条**（共识文件暂未改）：
   - 原决定"动物园 `资源生成/` 用 Git LFS 入库"，改为：不入库，放 `FFrame-asset-line/scenes/<场景>/资源生成/`，被忽略，U 盘同步。原因是 GitHub 的 LFS 额度用完了。
   - 原决定"`del/build/` 不迁移"，改为：归档到 `legacy/FFrame-del/build/`，原目录保留未删。
@@ -55,14 +55,22 @@
 - 另一台电脑的 spec 状态（已写进 `spec.md`）：ticket 02 已做完；ticket 03 先用现成图顶上缺的 8 槽，`item.png` 已打好；ticket 04、05 的代码已写，预览未跑。
 - 提交信息显示 ticket 01 已完成（`97fb78a`）；ticket 07 的一部分文档已改（`e6b44fd`，皮肤规则改成主题 plist）。
 - 框架版本：用户确认"周末提交的内容是最新的"，当前框架版本以 `0.5.3` 为准（来自 `1dab931`，2026-11-01）。ticket 04 的 `0.5.1` 没错，它就是周末发布的那个版本，不改成 `0.5.3`。（之前写"要改成 0.5.3"是错的，已更正。）
+- 2026-11-02 LegacyV3 退役（用户同意，并说工程已在 Creator 里打开，写完直接算验证）。按顺序做了：
+  - 用 `del/替换皮肤引用/替换.mjs` 把预制体和场景里的旧 uuid 换成 `ZooV7` 子图 uuid。先 `--dry` 看到 37 处，真跑也是 37 处，`--check` 残留 0。`git diff` 为 37 行增、37 行删，都是 uuid 行。备份在 `del/替换皮肤引用/备份/`。
+  - 删掉 `SkinKit.ts` 的 `LEGACY_SLOT` 旧图映射和 `redress`，四个调用文件（`LyButtons.ts`、`LySetting.ts`、`ScDemoHome.ts`、`LyAlert.ts`）去掉 import 和调用。用 `del/替换皮肤引用/移除redress.mjs` 做，每处只匹配一次才写。同时去掉 `SkinKit` 里因此没用到的 `PfGMBtn` import。ReadLints 无报错。
+  - 重写 `gmajor/ui/GMSkin.ts`：删掉逐张图的 loose 和平铺路径、`indexFrames`、`packed`、`editorWait`、`doneEditor`，以及 `LegacyV3` 回退。不传主题就不加载图，只打一条 info。编辑器没设主题时默认 `ZooV7`。`applySkin` 改用 `loadSkin(loadedTheme, …)`。ReadLints 无报错。
+  - 把 `assets/game/bundles/Skin/LegacyV3/`（28 张 png 和 `.meta`，共 56 个文件，86,953 字节）用 Move-Item 整体移到 `FFrame-asset-line/legacy/Skin-LegacyV3-game/`，`LegacyV3.meta` 移到 `legacy/Skin-LegacyV3-game.meta`。移动前后文件数和字节数一致，原处已没有。
+  - grep 确认 `assets`、`gmajor`、`config` 里没有 `LegacyV3` 引用（config 注释已改），旧 uuid 残留 0。
+  - 版本升到 0.6.0：`GMLauncher.ts`、`extensions/gmajor/package.json`、`config.ts` 的 `version.gmajor`。CHANGELOG 加了 0.6.0（破坏性改动）。第一次写 CHANGELOG 时用了双引号 here-string，反引号吞掉了几个字，已恢复原文件重写。
+  - 文档同步：共识第 14、15、17 条；`spec.md` 三处；ticket 04 两处；ticket 05 整体重写（目标、范围、验收、执行记录）；框架 `README.md` 和 `docs/界面组件/说明.md` 各一处。
 
 ## 3. 结论
 
-有结论。共识和 spec 已由用户确认：主题目录名 `ZooV7`、`LegacyV3`，spec 和 7 张 ticket 整体没问题。
+有结论。共识和 spec 已由用户确认。LegacyV3 已退役：游戏只加载 `ZooV7` 图集，旧逐张图整体归档到素材仓库，不再回退。
 
 - `del/` 的内容已全部归档到 `FFrame-asset-line/legacy/`，并已推送。
 - 动物园原始素材不走 GitHub。决定是：放在素材仓库的 `scenes/` 下，被忽略，靠 U 盘同步。
-- 实现进度以另一台电脑的 spec 状态为准：01 已完成，02 已完成，03 部分，04、05 代码已写但未预览，06 方案已变，07 部分完成。
+- 实现进度：01 已完成，02 已完成，03 部分，04、05 代码已写，2026-11-02 用户在 Creator 里确认已验证，06 方案已变，07 部分完成。
 
 用户还有一些问题没有提出，要在新电脑上继续问。
 
@@ -79,7 +87,8 @@
 
 **待办**
 - **比较两台电脑的差别**（用户已说会做）：另一台电脑做了不少优化，等用户拿到后比较差别。比较前先不要改素材或 spec。
-- **核对 ticket 状态**：01 已完成，02 已完成，03 只做了部分，04、05 代码已写但未预览，07 部分完成。新 session 里先看 spec 状态和各 ticket 文件，再决定怎么做。
+- **核对 ticket 状态**：01 已完成，02 已完成，04、05 已验证（用户确认），03 只做了部分，07 部分完成。新 session 里先看 spec 状态和各 ticket 文件，再决定怎么做。
+- **规则待确认**：`.cursor/rules/01-naming.mdc` 第 182 行还写着"没有 plist 的主题（`LegacyV3`）仍按该目录里的逐张 png 取"，已经过时。规则改动要用户确认后再写，这次没有改。`docs/界面组件/` 和框架 README 已同步。
 - **框架版本**：当前是 `0.5.3`。ticket 04 对应的是 `0.5.1`（已发布），不用改。`spec.md` 和 ticket 04 已加注释说明后续版本（2026-11-02 同步）。
 - **以周末提交为准**：本地的素材和记录都基于周末那批提交。新 session 开始前，先 `git pull` 三个仓库，确认是最新的。
 - **文档已同步（2026-11-02）**：
@@ -117,4 +126,9 @@
   - `FFrame` `5b54f41`（上一版记录）。
   - `FFrame-asset-line` `c2b6bb4`（legacy 归档）、`47f1226`（忽略 `资源生成/`）。
   - `FFrame-zoo` 无新提交，本地是远端版本 `1dab931`。
+- **`FFrame/del/替换皮肤引用/`**（2026-11-02 本窗口用到，原目录保留）：
+  - 子文件夹 1 个（`备份/`，不含自己）。
+  - 文件 6 个，165,395 字节。按扩展名：`.mjs` 2（`替换.mjs`、`移除redress.mjs`），`.prefab` 3，`.scene` 1。后 4 个是替换前的备份，在 `备份/` 里。
+- **拷进记录夹的文件**：没有。
+- 2026-11-02 这次新建的：`FFrame-asset-line/legacy/Skin-LegacyV3-game/`（和 `.meta`），`FFrame/del/替换皮肤引用/`。
 - 这次新建的目录和文件：`FFrame-asset-line/legacy/FFrame-del/`、`legacy/FFrame-zoo-del/`、`scenes/动物园/资源生成/`。临时目录 `D:\creator\FFrame-zoo-art` 已删除。

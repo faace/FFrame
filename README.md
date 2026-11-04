@@ -94,7 +94,7 @@ Overlay 是框架自己的常驻节点。第一次打开场景、弹层或确认
 
 播放按 `config.skinTheme` 加载游戏的 Bundle `Skin`：`assets/game/bundles/Skin/<主题>/`。`gm.boot` 在绑定常驻包之前加载它。不写进 `config.boot`，不登记入口。
 
-一套主题两份图集：`ctrl.png` + `ctrl.plist`（控件），`item.png` + `item.plist`（物品）。进工程的是实际尺寸。源图按 720×1280 的 2 倍出，留在 `FFrame-asset-line`。没有 plist 的主题仍按逐张 png 取。
+一套主题两份图集：`ctrl.png` + `ctrl.plist`（控件），`item.png` + `item.plist`（物品）。进工程的是实际尺寸。源图按 720×1280 的 2 倍出，留在 `FFrame-asset-line`。没有 plist 的主题不加载，缺图用白图（0.6.0 起逐张 png 路径已删除）。
 
 槽名用小写蛇形，种类在前。编辑器和播放认的是同一个槽名。缺这个包，或缺下面某一张：该槽用 Cocos 内置白图，打一条日志，开机不停。
 

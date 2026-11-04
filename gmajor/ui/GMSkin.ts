@@ -7,18 +7,16 @@ export const SKIN_BUNDLE = 'Skin';
 
 const SKIN_DB = 'db://assets/game/bundles/Skin';
 const BUILTIN_WHITE = '7d8f9b89-4fd1-4c9f-a3ab-38ec7cded7ca@f9941'; // default_sprite_splash
-
+const EDITOR_DEFAULT_THEME = 'ZooV7'; // 编辑器里还没有 setSkinTheme 时用这个主题
 const editing = EDITOR && !PREVIEW;
 
 let frames: Map<string, SpriteFrame> | null = null;
-let loadedTheme = ''; // 空字符串 = 旧的逐张图；有值 = Skin/<主题>/
+let loadedTheme = ''; // 当前主题名；空字符串 = 没有主题，不加载任何图
 let pendingTheme = '';
-let packed = false; // 当前主题是 plist 图集。缺槽不再去找同名 png
 let waiters: Array<GMAsyncComplete> | null = null;
 let missingBundle = false;
 const logged = new Set<string>();
 let white: SpriteFrame | null = null;
-const editorWait = new Map<string, Array<(frame: SpriteFrame) => void>>();
 
 let editorSheets = ''; // 编辑器里已经切好的主题；空表示还没切
 let editorSheetWait: Array<() => void> | null = null;
@@ -35,7 +33,7 @@ type EditorHost = {
     Message?: { request: (module: string, method: string, url: string) => Promise<string> };
 };
 
-/** 开机或使用方调用。不传主题时仍按逐张图加载。传了主题则读 Skin/<主题>/ctrl.plist、item.plist。没有 Skin 包也算完成，缺的槽用白图 */
+/** 开机或使用方调用。不传主题则不加载任何图。传了主题则读 Skin/<主题>/ctrl.plist、item.plist。没有 Skin 包或没有图集也算完成，缺的槽用白图 */
 export function loadSkin(onComplete: GMAsyncComplete): void;
 export function loadSkin(theme: string, onComplete: GMAsyncComplete): void;
 export function loadSkin(a: string | GMAsyncComplete, b?: GMAsyncComplete): void {
@@ -46,8 +44,7 @@ export function loadSkin(a: string | GMAsyncComplete, b?: GMAsyncComplete): void
     if (waiters) {
         if (pendingTheme === theme) return void waiters.push(onComplete);
         return void waiters.push(() => { // 换主题等当前这次结束再载
-            if (theme) loadSkin(theme, onComplete);
-            else loadSkin(onComplete);
+            loadSkin(theme, onComplete);
         });
     }
     waiters = [onComplete];
@@ -55,34 +52,23 @@ export function loadSkin(a: string | GMAsyncComplete, b?: GMAsyncComplete): void
     if (frames) dropCurrent();
     loadedTheme = theme;
     if (editing) return finish(null); // 编辑器里由 applySkin 按主题切，不在这里铺空表
+    if (!theme) return noBundle(); // 没有主题：旧的逐张图已经不再加载
     const known = settings.querySettings<string[]>('assets', 'projectBundles'); // 工程里有哪些 Bundle；没有 Skin 就不去加载，免得打 404 红日志、弹预览错误框
-    if (known && known.length && known.indexOf(SKIN_BUNDLE) < 0) {
-        missingBundle = true;
-        frames = new Map();
-        noteMissing('*');
-        finish(null);
-        return;
-    }
+    if (known && known.length && known.indexOf(SKIN_BUNDLE) < 0) return noBundle();
     assetManager.loadBundle(SKIN_BUNDLE, (err, bundle) => {
         if (err || !bundle) {
             console.warn('[Skin] 加载 Skin 包失败', err);
-            missingBundle = true;
-            frames = new Map();
-            noteMissing('*');
-            finish(null);
-            return;
+            return noBundle();
         }
-        if (theme) return loadTheme(bundle, theme, () => finish(null));
-        loadDeps(bundle, () => bundle.loadDir('', SpriteFrame, (loadErr, assets) => {
-            frames = indexFrames(assets ?? [], bundle);
-            if (!frames.size) {
-                if (loadErr) console.warn('[Skin] 界面图加载失败', loadErr);
-                missingBundle = true;
-                noteMissing('*');
-            }
-            finish(null);
-        }));
+        loadTheme(bundle, theme, () => finish(null));
     });
+}
+
+function noBundle(): void {
+    missingBundle = true;
+    frames = new Map();
+    noteMissing('*');
+    finish(null);
 }
 
 /** Skin 的图和别的 Bundle 共用资源时，Creator 会把共用部分放到高优先级的包里，Skin 就依赖它。先把依赖的包加载好，不然 loadDir 会报 Please load bundle X first */
@@ -96,17 +82,19 @@ function loadDeps(bundle: AssetManager.Bundle, done: () => void): void {
     }));
 }
 
-/** 主题目录有 ctrl.plist 就用引擎导入的图集；没有就按该目录里的逐张图 */
+/** 主题目录里有 ctrl.plist 就用引擎导入的图集；没有就是这个主题缺图 */
 function loadTheme(bundle: AssetManager.Bundle, theme: string, done: () => void): void {
     loadDeps(bundle, () => {
         bundle.load(theme + '/ctrl', SpriteAtlas, (err, ctrl) => {
             if (err || !ctrl) {
-                bundle.loadDir(theme, SpriteFrame, (_loadErr, assets) => loadLoose(assets ?? [], bundle, theme, done));
-                return;
+                console.warn('[Skin] 主题没有 ctrl.plist：', theme);
+                missingBundle = true;
+                frames = new Map();
+                noteMissing('*');
+                return done();
             }
             const map = new Map<string, SpriteFrame>();
             frames = map;
-            packed = true;
             missingBundle = false;
             addAtlas(map, ctrl);
             bundle.load(theme + '/item', SpriteAtlas, (itemErr, item) => {
@@ -128,20 +116,8 @@ function addAtlas(map: Map<string, SpriteFrame>, sheet: SpriteAtlas): void {
     }
 }
 
-function loadLoose(list: SpriteFrame[], bundle: AssetManager.Bundle, theme: string, done: () => void): void {
-    const loose = list.filter((asset): asset is SpriteFrame => asset instanceof SpriteFrame);
-    frames = indexFrames(loose, bundle, theme);
-    packed = false;
-    if (!frames.size) {
-        missingBundle = true;
-        noteMissing('*');
-    } else missingBundle = false;
-    done();
-}
-
 function dropCurrent(): void {
     frames = null;
-    packed = false;
     logged.clear();
 }
 
@@ -155,30 +131,13 @@ export function skinFrame(name: string): SpriteFrame | null {
 export function applySkin(name: string, apply: (frame: SpriteFrame) => void): void {
     if (editing) return applyInEditor(name, apply);
     if (frames) return apply(take(name));
-    loadSkin(() => apply(take(name)));
+    loadSkin(loadedTheme, () => apply(take(name)));
 }
 
 function finish(err: Error | null): void {
     const pending = waiters ?? [];
     waiters = null;
     pending.forEach((fn) => fn(err));
-}
-
-function indexFrames(assets: SpriteFrame[], bundle: AssetManager.Bundle, dir = ''): Map<string, SpriteFrame> {
-    const map = new Map<string, SpriteFrame>();
-    const byUuid = new Map(assets.map((frame) => [frame.uuid, frame]));
-    for (const info of bundle.getDirWithPath(dir, SpriteFrame)) {
-        const parts = info.path.split('/').filter((part) => part && part !== 'spriteFrame');
-        const name = parts[parts.length - 1]; // 主题目录在前，槽名在最后
-        const frame = byUuid.get(info.uuid) ?? (assetManager.assets.get(info.uuid) as SpriteFrame | undefined);
-        if (name && frame) map.set(name, frame);
-    }
-    if (map.size) return map;
-    for (const frame of assets) {
-        const name = frame.name.replace(/\/spriteFrame$/, '').replace(/\.png$/i, '');
-        if (name && name !== 'spriteFrame') map.set(name, frame);
-    }
-    return map;
 }
 
 function take(name: string): SpriteFrame {
@@ -191,7 +150,7 @@ function take(name: string): SpriteFrame {
 function noteMissing(key: string): void {
     if (logged.has(key)) return;
     logged.add(key);
-    if (key === '*') console.info('[Skin] 没有 Skin 包，用内置白图'); // 整包没有是正常状态（新 app 还没出图），不当警告
+    if (key === '*') console.info('[Skin] 没有可用的界面图，用内置白图'); // 整包或整个主题没有是正常状态（新 app 还没出图），不当警告
     else console.warn('[Skin] 缺', key); // 包在但缺这一张，才是要补的
 }
 
@@ -224,13 +183,13 @@ function applyInEditor(name: string, apply: (frame: SpriteFrame) => void): void 
 
 let editorThemeWait: Array<() => void> | null = null;
 
-/** 还没人调用 setSkinTheme 时，有 ZooV7 图集就用它，否则按散图主题 */
+/** 还没人调用 setSkinTheme 时，有默认主题的图集就用它 */
 function ensureEditorTheme(done: () => void): void {
     if (loadedTheme) return done();
     if (editorThemeWait) return void editorThemeWait.push(done);
     editorThemeWait = [done];
-    queryUuid(SKIN_DB + '/ZooV7/ctrl.plist', (uuid) => {
-        if (!loadedTheme) loadedTheme = uuid ? 'ZooV7' : 'LegacyV3';
+    queryUuid(`${SKIN_DB}/${EDITOR_DEFAULT_THEME}/ctrl.plist`, (uuid) => {
+        if (!loadedTheme && uuid) loadedTheme = EDITOR_DEFAULT_THEME;
         const pending = editorThemeWait ?? [];
         editorThemeWait = null;
         pending.forEach((fn) => fn());
@@ -242,19 +201,13 @@ function ensureEditorSheets(done: () => void): void {
     if (editorSheetWait) return void editorSheetWait.push(done);
     editorSheetWait = [done];
     const theme = loadedTheme;
+    if (!theme) return finishEditorSheets(theme);
     queryUuid(`${SKIN_DB}/${theme}/ctrl.plist`, (plistUuid) => {
-        if (!plistUuid) {
-            packed = false;
-            return finishEditorSheets(theme);
-        }
+        if (!plistUuid) return finishEditorSheets(theme);
         loadEditorAtlas(plistUuid, (ctrl) => {
-            if (!ctrl) {
-                packed = false;
-                return finishEditorSheets(theme);
-            }
+            if (!ctrl) return finishEditorSheets(theme);
             const map = new Map<string, SpriteFrame>();
             frames = map;
-            packed = true;
             missingBundle = false;
             addAtlas(map, ctrl);
             queryUuid(`${SKIN_DB}/${theme}/item.plist`, (itemUuid) => {
@@ -287,35 +240,12 @@ function loadEditorAtlas(uuid: string, done: (sheet: SpriteAtlas | null) => void
     });
 }
 
+/** 编辑器里只认图集。图集里没有的槽直接白图，不再去找同名 png */
 function applyInEditorSlot(name: string, apply: (frame: SpriteFrame) => void): void {
     const hit = frames?.get(name);
     if (hit) return apply(hit);
-    if (packed) { // 图集里没有这一槽，不再去找同名 png
-        noteMissing(name);
-        return apply(whiteFrame());
-    }
-    const queue = editorWait.get(name);
-    if (queue) return queue.push(apply);
-    editorWait.set(name, [apply]);
-    const theme = loadedTheme;
-    const url = theme ? `${SKIN_DB}/${theme}/${name}.png/spriteFrame` : `${SKIN_DB}/${name}.png/spriteFrame`;
-    queryUuid(url, (uuid) => {
-        if (!uuid) return doneEditor(name, null);
-        assetManager.loadAny({ uuid }, (err: Error | null, asset: SpriteFrame) => {
-            if (err || !asset) return doneEditor(name, null);
-            if (!frames) frames = new Map();
-            frames.set(name, asset);
-            doneEditor(name, asset);
-        });
-    });
-}
-
-function doneEditor(name: string, frame: SpriteFrame | null): void {
-    if (!frame) noteMissing(name);
-    const list = editorWait.get(name) ?? [];
-    editorWait.delete(name);
-    const use = frame ?? whiteFrame();
-    for (const fn of list) fn(use);
+    noteMissing(name);
+    apply(whiteFrame());
 }
 
 function queryUuid(url: string, done: (uuid: string | null) => void): void {

@@ -1,6 +1,6 @@
 import { _decorator, UITransform } from 'cc';
 import { FRAME_EDGE, GMLayer, gu } from 'db://gmajor/index';
-import { loadSkin, redress } from '../../GameUI/SkinKit';
+import { loadSkin } from '../../GameUI/SkinKit';
 
 const { ccclass } = _decorator;
 
@@ -26,7 +26,6 @@ export class LyButtons extends GMLayer {
         this.click('btnNoClose', () => gu.alert({ content: '无关闭', showClose: false }));
         loadSkin((err) => {
             if (err) return console.error('[LyButtons] 皮加载失败', err);
-            if (panel.isValid) redress(panel);
         });
     }
 
