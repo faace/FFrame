@@ -179,7 +179,7 @@ export class PfX extends GMScene {}
 - 页签是 `PfGMTabs`，不继承 `PfGMBtn`。子节点固定 `tabs`、`panel`。内容必须是 `GMTabPage`（`text` / `setText`，`onShow` / `onHide` 收 `done`）。皮 `tab_normal`、`tab_selected`、`panel`，控件自己切九宫格。高 72，宽按五个中文字不缩放，从左挨着排，第一颗让过 panel 顶边圆角。点击用 `gu.addClick`。
 - 不要 `PfBtn`（太泛），不要 `PfFFBtn`（`FF*` 已废），不要只叫 `GMBtn`（看不出是预制体，也分不清 Ly/Pf）。
 - **本游戏**仍是 `PfShopItem` / `LyAlert`，中间不加 `GM`。纯基类仍是 `GMComponent` / `GMAlert` / `GMLayer` / `GMFrame`（没有对应预制体文件）。`GMFrame` 是普通弹窗骨架。
-- 界面图只在游戏 `assets/game/bundles/Skin/<主题>/`（Bundle `Skin`）。一套主题两份图集：`ctrl.png` + `ctrl.plist`（控件），`item.png` + `item.plist`（物品）。开机按 `config.skinTheme` 加载，不写进 `config.boot`，不绑入口。框架不带这些图。不要在 `GameUI/Skin` 再放一套。没有 plist 的主题（`LegacyV3`）仍按该目录里的逐张 png 取。
+- 界面图只在游戏 `assets/game/bundles/Skin/<主题>/`（Bundle `Skin`）。一套主题两份图集：`ctrl.png` + `ctrl.plist`（控件），`item.png` + `item.plist`（物品）。开机按 `config.skinTheme` 加载，不写进 `config.boot`，不绑入口。框架不带这些图。不要在 `GameUI/Skin` 再放一套。只认有 `ctrl.plist` 的主题。没有 plist 的目录不加载，不回退逐张 png。`LegacyV3` 已在 0.6.0 退役，旧图在 `FFrame-asset-line/legacy/Skin-LegacyV3-game/`。
 - 源图按设计分辨率 720×1280 的 2 倍出，留在 `FFrame-asset-line`。进游戏工程的是一半尺寸。九宫格写在 plist 子图的边上，运行时不再切矩形。
 - 素材和提示语放 `FFrame-asset-line/style/<主题>/`。长期脚本放 `FFrame-asset-line/tools/`。
 - 没有这个包，或少某一张：该槽用 Cocos 内置白图。整包没有打一条 info，缺一张打一条 warn，开机不停。编辑器和播放用同一份已导入的子图。
