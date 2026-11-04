@@ -88,7 +88,7 @@
 **待办**
 - **控件收尾顺序**（用户定：一个个来，每步做完再下一步）：
   1. 已做（待用户在 Creator 里确认）：`progress_fill` 不废弃，改名 `slider_fill`，和滑条一组。`PfGMSlider` 预制体加 `fill` 子节点（在 track 和 thumb 之间）。第一版用九宫格拉伸，填充很短时两端被压扁，已否掉（用户截图指出）。现在改成裁剪：运行时把 `fill` 放进一个 Mask 裁剪节点，整条填充不拉伸，只露出左缘到滑块中心的一段；编辑器里不显示填充。`SkinKit` 名单、README、共识、ticket 02 同步改名。规则 `01-naming.mdc` 里"滑条只有轨道和滑块"三处待用户确认后再改。
-  2. 道具格 `PfGMSlot`（格子底 `slot_item`、物品图标、数量）+ 选中框 `frame_select`。
+  2. 道具格 `PfGMItemCell`（格子底 `slot_item`、物品图标 `icon`、选中框 `frame_select`，`selected` 控制显示）。不做数量字，要加再说。
   3. 语言行。样式待用户定，优先用现有 `PfGMTabs` / `PfGMBtn` 组合，不新建。
   4. 开关和复选框。需要新图，先问用户是否生图。
   5. 红点、Toast。
