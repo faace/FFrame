@@ -697,12 +697,12 @@
       ],
       "subMetas": {}
     },
-    "47e1e": {
+    "fa913": {
       "importer": "sprite-frame",
-      "uuid": "4b756a97-47ca-464f-b3f7-c780df66202c@47e1e",
+      "uuid": "4b756a97-47ca-464f-b3f7-c780df66202c@fa913",
       "displayName": "",
-      "id": "47e1e",
-      "name": "progress_fill",
+      "id": "fa913",
+      "name": "slider_fill",
       "userData": {
         "trimThreshold": 1,
         "rotated": false,
@@ -718,7 +718,7 @@
         "borderBottom": 6,
         "borderLeft": 10,
         "borderRight": 10,
-        "packable": false,
+        "packable": true,
         "pixelsToUnit": 100,
         "pivotX": 0.5,
         "pivotY": 0.5,

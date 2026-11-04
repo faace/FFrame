@@ -131,7 +131,7 @@ Overlay 是框架自己的常驻节点。第一次打开场景、弹层或确认
 
 示例和业务自己 `addSkin` 时会用到。新游戏可以不带。
 
-`progress_fill`、`frame_select`、`slot_item`、`icon_close`、`icon_help`、`icon_settings`、`icon_energy`、`icon_plus`、`icon_minus`、`icon_music`、`icon_gold`、`icon_sfx`、`icon_ad`、`icon_diamond`。
+`slider_fill`、`frame_select`、`slot_item`、`icon_close`、`icon_help`、`icon_settings`、`icon_energy`、`icon_plus`、`icon_minus`、`icon_music`、`icon_gold`、`icon_sfx`、`icon_ad`、`icon_diamond`。
 
 只有一张、种类本身就是名字的，不再加第二段，所以面板底叫 `panel`。
 
@@ -168,6 +168,6 @@ Overlay 是框架自己的常驻节点。第一次打开场景、弹层或确认
 - `gm.boot` 的调用形状
 - 确认框节点名 `body`、`btnOk`、`btnCancel`、`label`
 - 上一节「框架会取的图」
-- `PfGM*` 的子节点名。滑条是 `track`、`thumb`。进度条是 `bg`、`fill`。按钮是 `label`、`icon`。页签是 `tabs`、`panel`
+- `PfGM*` 的子节点名。滑条是 `track`、`fill`、`thumb`。进度条是 `bg`、`fill`。按钮是 `label`、`icon`。页签是 `tabs`、`panel`
 
 只加可选字段，或只加新的皮肤槽，不记破坏。app 里的业务怎么写，不保证别的 app 还能跑。

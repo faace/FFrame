@@ -6,7 +6,7 @@ if (config.skinTheme) setSkinTheme(config.skinTheme); // 编辑器取图早于�
 
 const SLICED = new Set([
     'title_bar', 'panel', 'btn_primary', 'btn_secondary', 'btn_warning', 'btn_neutral', 'btn_info',
-    'tab_normal', 'tab_selected', 'stepper_plate', 'slider_track', 'progress_fill', 'bar_bg', 'bar_fill',
+    'tab_normal', 'tab_selected', 'stepper_plate', 'slider_track', 'slider_fill', 'bar_bg', 'bar_fill',
 ]);
 
 /** 等开机载入的 Skin 包。已经在内存里则立刻回调 */

@@ -214,7 +214,7 @@
 			<key>textureRotated</key>
 			<false/>
 		</dict>
-		<key>progress_fill.png</key>
+		<key>slider_fill.png</key>
 		<dict>
 			<key>aliases</key>
 			<array/>
