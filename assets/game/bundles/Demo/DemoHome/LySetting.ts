@@ -1,5 +1,5 @@
-import { _decorator, Node, UITransform } from 'cc';
-import { FRAME_EDGE, GMLayer, gu, PfGMBar, PfGMStepper } from 'db://gmajor/index';
+import { _decorator, assetManager, Node, Prefab, UITransform } from 'cc';
+import { FRAME_EDGE, GMLayer, gu, PfGMBar, PfGMItemCell, PfGMStepper } from 'db://gmajor/index';
 import { addSkin, addText, dress, loadSkin, skinInk } from '../../GameUI/SkinKit';
 
 const { ccclass } = _decorator;
@@ -74,9 +74,17 @@ export class LySetting extends GMLayer {
     }
 
     private slot(parent: Node, y: number): void {
-        this.put(parent, 'slot_item', -50, y, 96, 96);
-        this.put(parent, 'icon_gold', -50, y, 52, 52);
-        this.put(parent, 'frame_select', 80, y, 108, 108);
-        this.put(parent, 'icon_diamond', 80, y, 52, 52);
+        const bundle = assetManager.getBundle('GMUI');
+        if (!bundle) return console.error('[LySetting] 没有 GMUI');
+        bundle.load('PfGMItemCell', Prefab, (err, prefab) => {
+            if (err || !prefab) return console.error('[LySetting] 道具格加载失败', err);
+            if (!parent.isValid) return;
+            const gold = gu.createTs(prefab, { parent, x: -50, y });
+            const diamond = gu.createTs(prefab, { parent, x: 80, y });
+            if (!(gold instanceof PfGMItemCell) || !(diamond instanceof PfGMItemCell)) return console.error('[LySetting] 道具格没有挂上');
+            gold.setIcon('icon_gold');
+            diamond.setIcon('icon_diamond');
+            diamond.setSelected(true);
+        });
     }
 }
