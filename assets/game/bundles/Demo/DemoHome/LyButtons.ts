@@ -1,10 +1,10 @@
 import { _decorator, UITransform } from 'cc';
-import { FRAME_EDGE, GMLayer, gu } from 'db://gmajor/index';
+import { FRAME_EDGE, GMLayer, gu, PfGMBtn } from 'db://gmajor/index';
 import { loadSkin } from '../../GameUI/SkinKit';
 
 const { ccclass } = _decorator;
 
-/** 按钮和弹窗展示。主题钮弹出主题名；大小钮对应确认框的弹法，含无标题、无关闭 */
+/** 按钮和弹窗展示。主题钮弹出主题名；大小钮对应确认框的弹法。底部五颗小档是五个主题的禁用，醒目和中性带图标 */
 @ccclass('LyButtons')
 export class LyButtons extends GMLayer {
     onInit(): void {
@@ -24,6 +24,11 @@ export class LyButtons extends GMLayer {
         this.click('btnLargeIcon', () => gu.alert({ content: '改确定', ok: { text: '领取' } }));
         this.click('btnSmallIcon', () => gu.alert({ content: '改两边', ok: { text: '领取' }, cancel: { text: '稍后' } }));
         this.click('btnNoClose', () => gu.alert({ content: '无关闭', showClose: false }));
+        this.disable('btnOffPrimary');
+        this.disable('btnOffSecondary');
+        this.disable('btnOffInfo');
+        this.disable('btnOffWarning');
+        this.disable('btnOffNeutral');
         loadSkin((err) => {
             if (err) return console.error('[LyButtons] 皮加载失败', err);
         });
@@ -39,6 +44,13 @@ export class LyButtons extends GMLayer {
         const close = panel.getChildByName('btnClose');
         if (title) title.setPosition(title.position.x, y, title.position.z);
         if (close) close.setPosition(close.position.x, y, close.position.z);
+    }
+
+    private disable(name: string): void {
+        const btn = this.panel?.getChildByName(name)?.getComponent(PfGMBtn);
+        if (!btn) return console.error('[LyButtons] 没有', name);
+        btn.setEnabled(false);
+        this.click(name, () => console.error('[LyButtons] 禁用钮不应进回调', name));
     }
 
     private click(name: string, fn: () => void): void {

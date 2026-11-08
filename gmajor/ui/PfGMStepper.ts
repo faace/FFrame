@@ -105,10 +105,10 @@ export class PfGMStepper extends GMComponent {
         lut?.setContentSize(PF_GM_STEPPER.plateW, PF_GM_STEPPER.plateH);
         label.node.setPosition(0, 0, 0);
         const x = PF_GM_STEPPER.plateW / 2 + PF_GM_STEPPER.gap + PF_GM_STEPPER.btn / 2;
+        this.minusBtn?.setEnabled(this.value > this.min); // 先停抖，再写位置，避免启用时被拉回抖之前的坐标
+        this.plusBtn?.setEnabled(this.value < this.max);
         this.minusBtn?.node.setPosition(-x, 0, 0);
         this.plusBtn?.node.setPosition(x, 0, 0);
-        this.minusBtn?.setEnabled(this.value > this.min);
-        this.plusBtn?.setEnabled(this.value < this.max);
         this.stamp = `${this.value}|${this.min}|${this.max}|${this.step}`;
     }
 

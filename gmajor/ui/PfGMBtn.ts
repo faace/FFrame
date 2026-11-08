@@ -1,4 +1,4 @@
-import { _decorator, Button, Color, Enum, Label, Sprite, SpriteFrame, UITransform } from 'cc';
+import { _decorator, assetManager, Button, Color, EffectAsset, Enum, Label, Material, Node, Sprite, SpriteFrame, tween, Tween, UITransform, Vec3 } from 'cc';
 import { GMComponent } from './GMComponent';
 import { applySkin } from './GMSkin';
 
@@ -10,9 +10,13 @@ const { ccclass, executeInEditMode, property } = _decorator;
  * 大档 380 宽，中档 260 宽，小档 180 宽。确认框一行两颗用中档。
  * 形状另算：标准是宽按钮，正方形边长等于这一档的高。纯图标默认正方形。
  * 底板从 Skin 包取 btn_ 加主题名，例如 btn_primary。不序列化在这个组件上。
+ * 禁用时底板和图标去色，再往白走三分之一。字用 disabledText，同一套提亮。按下的缩小和压暗在 gu.addClick。
  */
 const PF_GM_BTN = {
-    disabledMul: 0.55, // 禁用时底板、图标、字和描边一起乘。按下的缩小和压暗在 gu.addClick
+    disabledText: 220, // 去色后的字。显示时再往白走三分之一，和底板同一套
+    disabledLift: 1 / 3, // 灰度往白走的比例
+    deny: [10, -10, 6, -6, 0], // 禁用被点到：右、左、右、左、回原位
+    denyStep: 0.056, // 五段合计约 0.28 秒
     outlineWidth: 3,
     contentInset: 16, // 九宫格四边。字的缩放框是中心这块，不是按钮外框
     iconScale: 0.8, // 图标相对档位尺寸
@@ -65,8 +69,38 @@ function rgb(c: RGB): Color {
     return new Color(c[0], c[1], c[2], 255);
 }
 
-function mul(c: Color, k: number): Color {
-    return new Color(Math.round(c.r * k), Math.round(c.g * k), Math.round(c.b * k), c.a);
+function lift(y: number): number { // 往白走 disabledLift，和 btn-disabled.effect 里的三分之一同一套
+    return Math.round(y + (255 - y) * PF_GM_BTN.disabledLift);
+}
+
+function grayOf(c: RGB): Color { // 引擎灰度系数 0.2126 / 0.7152 / 0.0722，再提亮
+    const y = 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2];
+    const v = lift(y);
+    return new Color(v, v, v, 255);
+}
+
+let grayMat: Material | null = null;
+let grayWait: Array<(mat: Material | null) => void> | null = null;
+
+function grayMaterial(done: (mat: Material | null) => void): void {
+    if (grayMat) return done(grayMat);
+    const bundle = assetManager.getBundle('GMUI');
+    if (!bundle) return done(null);
+    if (grayWait) { grayWait.push(done); return; }
+    grayWait = [done];
+    bundle.load('btn-disabled', EffectAsset, (err, effect) => {
+        const wait = grayWait;
+        grayWait = null;
+        if (err || !effect) {
+            console.error('[PfGMBtn] 禁用灰度材质加载失败', err);
+            wait?.forEach((fn) => fn(null));
+            return;
+        }
+        const mat = new Material();
+        mat.initialize({ effectAsset: effect, defines: { USE_TEXTURE: true, CC_USE_EMBEDDED_ALPHA: false } });
+        grayMat = mat;
+        wait?.forEach((fn) => fn(mat));
+    });
 }
 
 /** 框架按钮。theme 定底板和描边，style 定版式。点击由外层 gu.addClick 注册 */
@@ -77,6 +111,9 @@ export class PfGMBtn extends GMComponent {
     private iconView: Sprite | null = null;
     private plate: Sprite | null = null;
     private _interactive = true;
+    private denyX: number | null = null; // 抖动开始前的 x；连点重开时用它，避免越抖越偏
+    private denyGen = 0;
+    private denyTween: Tween<Node> | null = null;
     private stamp = '';
     private preferredWidth = PF_GM_BTN.sizes.large.width;
     private appliedSize = -1;
@@ -99,7 +136,7 @@ export class PfGMBtn extends GMComponent {
     @property
     text = '';
 
-    get interactive(): boolean { // addClick 新建 Button 时读这个
+    get interactive(): boolean { // addClick 在点击时读这个
         return this._interactive;
     }
 
@@ -107,6 +144,12 @@ export class PfGMBtn extends GMComponent {
         if (!this.bindNodes()) return console.error('[PfGMBtn] 需要底板 Sprite、子节点 label 和 icon');
         if (this.labelView!.isSystemFontUsed || !this.labelView!.font) console.error('[PfGMBtn] label 未挂 db://gmajor/fonts/main.ttf');
         this.refresh();
+    }
+
+    onRemove(): void {
+        this.denyGen++;
+        this.denyTween?.stop();
+        this.denyTween = null;
     }
 
     update(): void { // 检查器改了属性，编辑态和运行态都重排
@@ -150,12 +193,44 @@ export class PfGMBtn extends GMComponent {
         this.refresh();
     }
 
-    /** 禁用时压暗，并关掉 Button.interactable */
+    /** 禁用时去色。点击仍然收下，由 addClick 改成抖动，不进业务回调 */
     setEnabled(on: boolean): void {
         this._interactive = on;
         const btn = this.node.getComponent(Button);
-        if (btn) btn.interactable = on;
+        if (btn) btn.interactable = true; // 关掉的话 Cocos 不派发点击，抖不出来
+        if (on) this.stopShake();
         this.applyColors();
+    }
+
+    /** 禁用被点到：水平抖一下，回到原位 */
+    shake(): void {
+        if (!this.node.isValid) return;
+        const gen = ++this.denyGen;
+        const y = this.node.position.y;
+        const z = this.node.position.z;
+        if (this.denyX === null) this.denyX = this.node.position.x;
+        const x = this.denyX;
+        this.denyTween?.stop();
+        this.node.setPosition(x, y, z);
+        let motion = tween(this.node);
+        for (const dx of PF_GM_BTN.deny) {
+            motion = motion.to(PF_GM_BTN.denyStep, { position: new Vec3(x + dx, y, z) }, { easing: 'linear' });
+        }
+        this.denyTween = motion.call(() => {
+            if (gen !== this.denyGen || !this.node.isValid) return;
+            this.node.setPosition(x, y, z);
+            this.denyX = null;
+            this.denyTween = null;
+        }).start();
+    }
+
+    private stopShake(): void {
+        if (this.denyX === null && !this.denyTween) return;
+        this.denyGen++;
+        this.denyTween?.stop();
+        this.denyTween = null;
+        if (this.denyX !== null && this.node.isValid) this.node.setPosition(this.denyX, this.node.position.y, this.node.position.z);
+        this.denyX = null;
     }
 
     private mark(): string {
@@ -249,12 +324,29 @@ export class PfGMBtn extends GMComponent {
 
     private applyColors(): void {
         const outline = PF_GM_BTN.outline[PfGMBtnTheme[this.theme] as keyof typeof PF_GM_BTN.outline];
-        const k = this._interactive ? 1 : PF_GM_BTN.disabledMul;
-        const white = mul(Color.WHITE, k);
-        if (this.plate) this.plate.color = white;
-        if (this.iconView) this.iconView.color = white;
+        const off = !this._interactive;
+        const white = new Color(255, 255, 255, 255);
+        if (this.plate) this.paintPlate(this.plate, off, white);
+        if (this.iconView) this.paintPlate(this.iconView, off, white);
         if (!this.labelView || !outline) return;
-        this.labelView.color = white;
-        this.labelView.outlineColor = mul(rgb(outline as RGB), k);
+        const text = lift(PF_GM_BTN.disabledText);
+        this.labelView.color = off ? new Color(text, text, text, 255) : white;
+        this.labelView.outlineColor = off ? grayOf(outline as RGB) : rgb(outline as RGB);
+    }
+
+    private paintPlate(sprite: Sprite, off: boolean, white: Color): void {
+        sprite.color = white;
+        if (!off) {
+            sprite.grayscale = false; // 先关掉灰度标记，再卸材质，避免卸的时候落回引擎那层深灰
+            sprite.customMaterial = null;
+            return;
+        }
+        sprite.grayscale = true;
+        grayMaterial((mat) => {
+            if (!sprite.isValid || this._interactive) return;
+            if (!mat) return;
+            sprite.customMaterial = mat;
+            sprite.grayscale = false;
+        });
     }
 }

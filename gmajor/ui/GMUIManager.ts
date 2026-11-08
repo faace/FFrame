@@ -334,14 +334,12 @@ export class GMUIManager {
         }
     }
 
-    /** 代码里加 Button 并听 click；同一节点再绑会换掉旧回调。编辑器不用拖 Button。按下默认缩小并压暗 */
+    /** 代码里加 Button 并听 click；同一节点再绑会换掉旧回调。编辑器不用拖 Button。按下默认缩小并压暗。PfGMBtn 禁用时不进回调，改为抖动 */
     addClick(target: Node, cb: (ev?: unknown) => void, opts?: GMAddClickOpts): void {
         if (!target?.isValid) return;
         if (!target.getComponent(Button)) {
             const btn = target.addComponent(Button);
             btn.transition = Button.Transition.NONE;
-            const widget = target.getComponent(PfGMBtn);
-            if (widget && !widget.interactive) btn.interactable = false; // 先禁用再注册，不要把按钮重新点亮
         }
         this.bindPress(target, opts?.press ?? 'both');
         target.off(Button.EventType.CLICK);
@@ -349,6 +347,8 @@ export class GMUIManager {
             this.endPress(target); // 先还原外观，再进回调，避免回调里改色被按下状态盖回去
             const underAlert = this.isUnder(target, this.alertsRoot);
             if (!underAlert && this.loadingNames.length > 0) return; // Alert 在 loading 之上，仍可点
+            const widget = target.getComponent(PfGMBtn);
+            if (widget && !widget.interactive) return widget.shake(); // 禁用：不进回调，抖一下
             const lock = opts?.lockTime;
             if (lock && lock > 0) {
                 const now = Date.now();
@@ -398,6 +398,8 @@ export class GMUIManager {
 
     private beginPress(target: Node, mode: GMClickPress): void {
         if (!target.isValid || this.pressHold.has(target)) return;
+        const widget = target.getComponent(PfGMBtn);
+        if (widget && !widget.interactive) return; // 禁用只抖，不缩小不压暗
         const button = target.getComponent(Button);
         if (button && !button.interactable) return;
         const scale = target.scale.clone();

@@ -26,7 +26,7 @@ export type { IGMBundleEntry } from './bind/GMBundleEntryBase';
 
 // —— ui/ ——
 export { GMComponent } from './ui/GMComponent'; // UI 通用基类；业务 onInit/onStart/onRemove；watch 随节点卸
-export { PfGMBtn, PfGMBtnShape, PfGMBtnSize, PfGMBtnStyle, PfGMBtnTheme } from './ui/PfGMBtn'; // 框架按钮；底板 btn_加主题名，style 版式，size 档位，shape 宽或方
+export { PfGMBtn, PfGMBtnShape, PfGMBtnSize, PfGMBtnStyle, PfGMBtnTheme } from './ui/PfGMBtn'; // 框架按钮；底板 btn_加主题名，style 版式，size 档位，shape 宽或方；禁用点按只抖动
 export { PfGMTitle, PfGMTitleSize } from './ui/PfGMTitle'; // 框架标题；三档高跟按钮；setText 按字宽拉条
 export { PfGMSlider } from './ui/PfGMSlider'; // 框架滑条；轨道+填充+滑块；value 0–1；自己听拖动
 export { PfGMBar, PfGMBarText } from './ui/PfGMBar'; // 框架进度条；槽+填充；value 0–1；text 不显示/百分比/当前总值
