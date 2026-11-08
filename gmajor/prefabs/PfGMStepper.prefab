@@ -806,7 +806,7 @@
     "propertyPath": [
       "theme"
     ],
-    "value": 0
+    "value": 1
   },
   {
     "__type__": "cc.TargetInfo",

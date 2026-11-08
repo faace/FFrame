@@ -32,7 +32,7 @@ const PF_GM_BTN = {
 
 export enum PfGMBtnTheme {
     primary = 0, // 主操作：确定、开始
-    secondary = 1, // 次操作：取消、关闭、设置、报警
+    secondary = 1, // 次操作：取消、关闭，以及 + − ×
     warning = 2, // 醒目：看广告
     neutral = 3, // 中性：花金币
     info = 4, // 蓝：花钻石

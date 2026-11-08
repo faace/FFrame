@@ -4,6 +4,13 @@
 
 app 在 `config.version.gmajor` 写所按的框架版本。开机只打日志，主.次不同时多打一条警告，不拦截。升级后怎么判断：看这里的破坏项，再跑一遍。
 
+## 0.6.1
+
+进度条可以在条中间写字。旧调用不改也和以前一样，默认不显示。
+
+- **新增（可选）**：`PfGMBarText`：`off` 不显示，`percent` 按 `value` 取整显示百分比，`ratio` 显示 `current/total`。方法 `setText`、`setRatio`。`setValue` 在 `ratio` 且 `total > 0` 时，分子改成 `value × total` 的四舍五入。
+- **行为**：`PfGMBar` 四周留白从 7 改为 8。`value` 为 0 时仍不画填充。白字描边宽统一为 4：进度条上的字、道具格数量（原来是 3）。标题、步进数字、页签字仍不描边。`+`、`−`、`×` 小图标用 `secondary`。步进的加号从 `primary` 改为 `secondary`。
+
 ## 0.6.0
 
 **破坏性改动**：`loadSkin` 只认主题目录（有 `ctrl.plist` 的 `bundles/Skin/<主题>/`）。不传主题就不加载任何图，只打一条「没有可用的界面图」的 info，控件用内置白图。以前的逐张 png 目录和「按文件名直接取」的路径全部删除，不再回退。
