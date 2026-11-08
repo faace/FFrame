@@ -7,7 +7,7 @@ const { ccclass, executeInEditMode, property } = _decorator;
 /**
  * 道具格可调参数。改数字改这里。
  * 根和底 96。图标 52。选中框 96，和底一样大，绿线贴在深色描边上。
- * 数量锚点在右下，比格子外缘收进 4。超过 999 显示 999+。字号固定 20，不随字数缩小。白字，描边 4。
+ * 数量锚点在右下，比格子外缘收进 4。超过 999 显示 999+。字号固定 20，不随字数缩小。白字，描边 3。
  * 底和框按设置页现在的做法整张拉伸，不切九宫格。
  * 字体：db://gmajor/fonts/main.ttf，挂在子节点 label 上。
  */
@@ -15,12 +15,12 @@ const PF_GM_ITEM_CELL = {
     size: 96,
     icon: 52,
     frame: 96,
-    fontSize: 20, // 999+ 在 22 号里会被收成 20，就固定这个
-    outlineWidth: 4, // 白字描边跟按钮一样
+    fontSize: 20, // 跟现在的 999+ 一样大，不再按字数缩小
+    outlineWidth: 3, // 白字描边跟按钮一样
     outline: [54, 78, 36] as const, // 木格深橄榄绿
     countMax: 999, // 再大显示 999+
     countX: 41, // 贴边后再向左 4
-    countY: -44, // 再向下 3
+    countY: -45, // 再向下 1
     countW: 56,
     countH: 36, // 画布加高，上沿描边才有地方。单行时行高不改变这一圈
 };

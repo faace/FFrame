@@ -16,7 +16,7 @@ const PF_GM_BAR = {
     defaultWidth: 320,
     fillMin: 40, // 胶囊左右圆头各 20
     fontSize: 24,
-    outlineWidth: 4, // 白字描边跟按钮一样
+    outlineWidth: 3, // 白字描边跟按钮一样
     outline: [54, 78, 36] as const, // 深橄榄绿，白字两边都看得清
     font: 'ee40121d-0b21-4bb3-b95c-fa7d2df322b4', // db://gmajor/fonts/main.ttf
     dontSave: CCObjectFlags.DontSave, // 运行时生成的字不写进预制体

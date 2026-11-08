@@ -13,7 +13,7 @@ const { ccclass, executeInEditMode, property } = _decorator;
  */
 const PF_GM_BTN = {
     disabledMul: 0.55, // 禁用时底板、图标、字和描边一起乘。按下的缩小和压暗在 gu.addClick
-    outlineWidth: 4,
+    outlineWidth: 3,
     contentInset: 16, // 九宫格四边。字的缩放框是中心这块，不是按钮外框
     iconScale: 0.8, // 图标相对档位尺寸
     sizes: {

@@ -564,7 +564,7 @@
     "_lpos": {
       "__type__": "cc.Vec3",
       "x": 41,
-      "y": -44,
+      "y": -45,
       "z": 0
     },
     "_lrot": {
@@ -668,7 +668,7 @@
       "b": 36,
       "a": 255
     },
-    "_outlineWidth": 4,
+    "_outlineWidth": 3,
     "_enableShadow": false,
     "_shadowColor": {
       "__type__": "cc.Color",

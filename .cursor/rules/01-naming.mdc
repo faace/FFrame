@@ -174,8 +174,8 @@ export class PfX extends GMScene {}
 - 可复用控件（按钮、标题等）的**脚本和结构**进 `gmajor`，不进本游戏功能包，不另开 Widget 库。
 - **框架自带预制体：`Pf` + `GM` + 名**。按钮 `PfGMBtn`，标题 `PfGMTitle`，滑条 `PfGMSlider`，进度条 `PfGMBar`，步进 `PfGMStepper`，页签 `PfGMTabs`。弹层预制体同样：`Ly` + `GM` + 名（`LyGMXxx`）。先看出是 Pf 还是 Ly，再看出是框架的。
 - 框架控件根锚点在中心。滑条只有轨道和滑块，旁边的图标和字由调用方摆。宽读根节点，高不跟。`value` 为 0–1，`setValue` 和检查器同一份。拖动自己听，loading 开着时这次丢掉。`setOnChange` 只在手指按下或移动时叫，`setValue` 不叫。
-- 进度条只有槽和填充。皮 `bar_bg`、`bar_fill`，自己切九宫格。`value` 为 0–1，不拖、不设 `onChange`。填充的 x 锚点为 0，从左侧往右长。四周留白写在脚本顶部。条上的白字描边宽 4。
-- 白字描边宽统一 4，跟 `PfGMBtn`。道具格数量、进度条上的字也是 4。奶油底上的深色字不描边：标题、步进数字、页签字、说明字。不要再写 2 或 3。
+- 进度条只有槽和填充。皮 `bar_bg`、`bar_fill`，自己切九宫格。`value` 为 0–1，不拖、不设 `onChange`。填充的 x 锚点为 0，从左侧往右长。四周留白写在脚本顶部。条上的白字描边宽 3。
+- 白字描边宽统一 3，跟 `PfGMBtn`。道具格数量、进度条上的字也是 3。奶油底上的深色字不描边：标题、步进数字、页签字、说明字。不要再写 2 或 4。
 - 要一颗按钮就嵌 `PfGMBtn`，只盖节点名、坐标、档位、主题、版式、字、图标。不要在脚本里临时 `createTs` 一颗按钮来试，也不要改它的描边、字号、尺寸。
 - `+`、`−`、`×` 这种小图标用 `secondary`。确定、开始这种主操作用 `primary`。
 - 步进的加减嵌套小档纯图标 `PfGMBtn`，主题都是 `secondary`。点按仍是外层 `gu.addClick`，步进不挂 `Button`。整数 `value` / `min` / `max` / `step` 是同一份属性。到 `min` 禁用减号，到 `max` 禁用加号。
@@ -272,10 +272,10 @@ export class PfX extends GMScene {}
 ✅ 普通弹窗 extends GMFrame（默认 620×800；铆钉压棕色顶边；左上角有回调才出现）
 ✅ 界面图小写蛇形：btn_primary、title_bar、icon_close、panel
 ✅ 嵌套 PfGMBtn / PfGMTitle 只盖差异项（名、坐标、档位、主题、版式、text、图标；标题字在 Label 上）
-✅ 白字描边宽 4（按钮、道具格数量、进度条上的字）。奶油底上的深色字不描边
+✅ 白字描边宽 3（按钮、道具格数量、进度条上的字）。奶油底上的深色字不描边
 ✅ + − × 小图标用 secondary。确定、开始用 primary
 ❌ 父预制体再盖底板 uuid、描边、字色、显隐、contentSize
-❌ 脚本里临时 createTs 一颗按钮来试；白字描边写成 2 或 3
+❌ 脚本里临时 createTs 一颗按钮来试；白字描边写成 2 或 4
 ❌ PfBtn（太泛）/ PfFFBtn（FF 已废）/ GMBtn（看不出 Pf 还是 Ly）
 ❌ LySettingPopup / LyDialog（Ly 已是弹窗）
 ❌ DemoHome/scenes/… 与 DemoHome/scripts/… 分目录存放
