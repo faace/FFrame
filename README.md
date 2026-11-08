@@ -118,6 +118,10 @@ Overlay 是框架自己的常驻节点。第一次打开场景、弹层或确认
 | `bar_fill` | `PfGMBar` 的填充 |
 | `slider_track` | `PfGMSlider` 的轨道 |
 | `slider_thumb` | `PfGMSlider` 的滑块 |
+| `switch_off` | `PfGMSwitch` 关掉。浅橡木轨道，圆钮在左 |
+| `switch_on` | `PfGMSwitch` 打开。草地绿，圆钮在右 |
+| `checkbox` | `PfGMCheck` 的框。浅橡木 |
+| `checkbox_mark` | `PfGMCheck` 的勾。草地绿，勾上才显示 |
 | `stepper_plate` | `PfGMStepper` 的数字板 |
 | `tab_normal` | `PfGMTabs` 未选中的页签 |
 | `tab_selected` | `PfGMTabs` 选中的页签 |
@@ -168,6 +172,6 @@ Overlay 是框架自己的常驻节点。第一次打开场景、弹层或确认
 - `gm.boot` 的调用形状
 - 确认框节点名 `body`、`btnOk`、`btnCancel`、`label`
 - 上一节「框架会取的图」
-- `PfGM*` 的子节点名。滑条是 `track`、`fill`、`thumb`。进度条是 `bg`、`fill`。按钮是 `label`、`icon`。页签是 `tabs`、`panel`
+- `PfGM*` 的子节点名。滑条是 `track`、`fill`、`thumb`。进度条是 `bg`、`fill`。按钮是 `label`、`icon`。页签是 `tabs`、`panel`。开关是 `face`。勾选框是 `box`、`mark`
 
 只加可选字段，或只加新的皮肤槽，不记破坏。app 里的业务怎么写，不保证别的 app 还能跑。

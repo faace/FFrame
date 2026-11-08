@@ -6,6 +6,12 @@
 
 **本窗口补充（2026-11-06）**：控件收尾按顺序一个个做，每做完一步由用户在 Creator 里确认后再做下一步。控件名字由用户定，不由 AI 替定：道具格定为 `PfGMItemCell`；虚拟列表名字待定。道具格先按显示 96×96 做，看设置页效果，不行再改。选中框 108，比木格每边多 6，不占排版。一行 5 个、格间缝 16 是以后背包那一页的排法，不写进控件。
 
+**本窗口补充（2026-11-08）**：做通用开关 `PfGMSwitch`，直接实现。不要多语言，不要复选框，不要下拉框，不要改规则。跟滑条一样是框架控件：脚本、预制体、从 `gmajor/index.ts` 导出。高 48、宽 96。关是浅橡木，开是草地绿，圆钮在左或右。点击不包在控件里，设置页自己 `gu.addClick` 调 `setValue`。演示放在设置页大约 (-180, -230)，旁边用现有深色字写「开关」，不描边。只加这一件和需要的新槽，版本按仓库当前号加一修。勾选框不是这一窗的需求；写总结时它已经在同一工作区里。
+
+**本窗口补充（2026-11-08 勾选框）**：通用勾选框 `PfGMCheck`，直接做。不要多语言、不要开关、不要下拉框、不要改 `.cursor/rules`。48×48。框是浅橡木，勾是草地绿。未勾选只显示框。点击不放进控件，演示页用 `gu.addClick` 调 `setValue`。设置页大约 (80, -230)，旁边用现有深色字写「勾选」，不描边。不要动齿轮旁「语言  中文」、滑条、进度条、步进、道具格。只加新控件和新槽。版本从仓库里当时的版本加一修，不写死。
+
+**本窗口补充（2026-11-08 进度）**：齿轮旁的「语言  中文」不是多语言功能，定成通用下拉框，预留槽 `dropdown`，还没做。不要再把下一步说成语言行。
+
 **当时的情况**：
 - 游戏里 `bundles/Skin/` 是 27 张独立的 48 像素小图，是从 v3（奶油底色）切出来再用脚本重画的版本。
 - 控件母版 `ui-sheet-v7` 的提示词写明"same pixel craft as the zoo map"，和动物园母图风格一致。
@@ -77,76 +83,94 @@
   - 2026-11-06 道具格尺寸和打开报错：用户问背包一行 5 个、中间留缝，格子做多大。普通弹窗默认宽 620，正文左右各让 24，能排的宽度是 572。木格 96、缝 16 时一行 544，左右各剩 14。用户定先做 96，看效果，不行再改。控件根和底 96（皮 `slot_item`），图标 52，选中框 108（皮 `frame_select`，默认隐藏）。底和框整张拉伸，不切九宫格（`SkinKit` 的九宫格名单没有这两张；`slot_item` 图上虽有 16 的边）。设置页金币在 (-50, -290) 不选中，钻石在 (80, -290) 选中。钻石现在有木格底，旧画面那里透出的是面板底色。没有数量字，没有点击。ReadLints 无报错。看图裁在 `del/看道具格现状/`，没有拷进记录夹。用户打开 Creator 看到 `Each script can have at most one Component`，接着 `Cannot set properties of null (setting '_sealed')`。当时堆栈对应本机上的 `GMVirtualList.ts`（一个文件里两个组件），不是道具格。该文件现已不在工作区。不要当成格子的错去改 `PfGMItemCell`。
   - 提交 `.creator/asset-template`（`34681e4`）。`item.png` 的改动不是本窗口提交的，本窗口没碰。
 
+- 2026-11-08 用户确认当天提交都完成：
+  - 滑条填充此前已确认没问题。圆钮描边加到 4 像素，斜向才不会比轨道细。框架 `d7ea53a` 只改了 `ctrl.png`；素材仓库 `a03eb7a`。
+  - 道具格补上数量。选中框从 108 改为 96，浅绿线贴在深色描边上，盖住木格描边；浅橡木圈改成浅草地绿（素材 `008cdff`，框架 `1f606b1`）。数量字号固定 20，不按字数缩小，超过 999 显示 `999+`（`d137102`）。白字描边定为 3，按钮、道具格数量、进度条上的字一起改（`16f002b`，框架 0.6.2）。设置页四格：星星 999、金币 12、钻石选中且数量 3、宝箱 1000。仍不接收点击。
+  - 经验行（设置页红框那一行）补了文字状态。`PfGMBar` 默认不显示字，可切百分比或当前/总值。四周留白改为 8。设置页有加、减和文字状态按钮。`+`、`−`、`×` 小图标用 `secondary`，步进加号也改为 `secondary`。框架 0.6.1（`1f606b1`）、0.6.2（`16f002b`）。
+  - 规则 `01-naming.mdc` 里「滑条只有轨道和滑块」还没改。能搜到两处（正文约第 176 行，文末对照约第 271 行）。公开面子节点名仍只写滑条 `track` / `thumb`。
+  - 晚上补充：设置页齿轮旁的「语言  中文」不再当成多语言，也不用页签或按钮去换语言。这件做成通用下拉框，预留槽 `dropdown`，还没开工。开关和复选框分到别的窗口做，预留槽 `switch`、`checkbox`。这一条是开工前的状态。当天夜里开关已做完，勾选框由另一窗口做完，见下一条。
+
+- 2026-11-08 本窗口做通用开关 `PfGMSwitch`（用户说直接做。不要多语言，不要复选框，不要下拉框，不要改 `.cursor/rules`）：
+  - 一个预留槽 `switch` 放不下两张 192×96 的状态图（显示 96×48，圆钮要画在图里）。改成 `switch_off`、`switch_on`，放在滚动条旁边的空位：图集 (1760,32) 和 (1760,160)，各 192×96。游戏半尺寸是 (880,16) 和 (880,80)，各 96×48。没有占 `checkbox`。已有 21 件的像素没改。对照备份是 `del/开关控件/旧ctrl.png`，新槽以外差分为 0。
+  - 没有跑整份 `export-zoo-v7-plist.mjs`。那份会把游戏里的 `slider_fill` 改回 `progress_fill`，并重写 `item.png` 和旧的子图 uuid。游戏图集是手改的：`ctrl.plist` 加了两帧，`ctrl.plist.meta` 的子图 id 是 `c0ff0`、`c0ff1`，`ctrl.png` 用新 2048 图缩小一半。素材侧改了 `tools/draw-zoo-v7-ctrl.mjs`、`style/ZooV7/控件/prompt.md`、`说明.md`、`ctrl.png`、`ctrl.json` 和 `history/v8`。`prompt.md` 现在写已画 25 个（21 件加开关两张、勾选框两张），预留 8 个。勾选框两张是另一窗口画的。
+  - 第一次写游戏图集的内联脚本，正则里的 `</key>` 把表达式截断了，什么都没写上。改成 `del/开关控件/写入图集和设置页.mjs` 之后写上了。裁图 `switch_off.png`、`switch_on.png` 以及旁边的 `slider_thumb.png`、`slider_track.png` 留在这个目录，用来对硬边和圆钮。设置页的开关关、开关开两张截图已拷进本记录夹。
+  - 控件：`gmajor/ui/PfGMSwitch.ts`，预制体 `gmajor/prefabs/PfGMSwitch.prefab`，从 `gmajor/index.ts` 导出。继承 `GMComponent`，`@executeInEditMode`。取图用 `applySkin`，不 import 游戏 `SkinKit`。根锚点在中心。检查器和 `setValue` 同一份布尔 `value`，默认关。子节点只有 `face`，固定 96×48，不拉伸。点击不在控件里。
+  - 设置页 `LySetting`：在当时最新内容上只加了开关。实例名 `switch`，位置 (-180, -230)。旁边 `addText` 写「开关」，(-76, -230)，字号 24，颜色 `skinInk`（92,64,32），不描边。`gu.addClick` 调 `setValue(!value)`。没动「语言  中文」、滑条、进度条、步进、道具格。
+  - 版本：本窗口按当时仓库版本加一修，写成 0.6.4（`GMLauncher.ts`、`extensions/gmajor/package.json`、`config.ts` 的 `version.gmajor`，`CHANGELOG.md` 的 0.6.4）。写总结时这三处已经是 0.6.5，CHANGELOG 的 0.6.5 是另一窗口的勾选框 `PfGMCheck`。开关不要再升一版。
+  - Creator 在 17:29 导入了开关脚本和开关预制体（预览日志是核心已就绪 0.6.4），之后没有导入改过的 `LySetting.prefab` 和 `ctrl` 图集。改修改时间、整文件重写都没有新的 Import 记录。当时打开设置页没有 `switch` 节点。
+  - 用 `del/开关控件/补预览库.js` 把新 `ctrl.png`、两张子图和设置页里的开关实例写进 `library/`，预览服务读的就是这份库。内存里的 Skin `config.json` 没有 `c0ff0`，重新打开 `http://localhost:7456/` 后图集仍解出 23 帧，含 `switch_off`、`switch_on`。点开关：关是浅橡木、圆钮在左；开是草地绿、圆钮在右；再点回到关。`value` 和 `face` 的图名跟着变。语言行、滑条、进度条、步进、四格道具都还在。开关底边按这个坐标压住星星格上沿大约十来像素，位置没改。
+  - 这次预览跑的脚本仍是 0.6.4，画面上没有勾选框。源码里另一窗口已加上 `PfGMCheck`：设置页运行时在 (80, -230) 创建，旁边「勾选」在 (156, -230)。本窗口没有点过它。
+  - `docs/界面组件/说明.md` 写了勾选框，没有开关那一条。`assets/game/README.md` 的控件名单有 `PfGMSwitch`，没有 `PfGMCheck`。框架 `README.md` 的皮表两对都有。
+
+- 2026-11-08 本窗口做通用勾选框 `PfGMCheck`（用户说直接做。不要多语言，不要开关，不要下拉框，不要改 `.cursor/rules`）：
+  - 开关那一窗已经占了 `switch_off`、`switch_on`，版本写成 0.6.4。本窗口没有改开关的脚本、预制体和那两张图。勾选框不占槽名 `switch`。
+  - 控件按滑条的做法：`gmajor/ui/PfGMCheck.ts`，预制体 `gmajor/prefabs/PfGMCheck.prefab`，从 `gmajor/index.ts` 导出。继承 `GMComponent`，`@executeInEditMode`。取图只用 `applySkin`，没有 import 游戏 `SkinKit`。根锚点在中心。检查器和 `setValue` 同一份布尔 `value`。子节点 `box`、`mark`，边长 48。未勾选时 `mark` 隐藏。点击不在控件里。
+  - 画法跟现有 `tools/draw-zoo-v7-ctrl.mjs`。原先 21 件的画函数没改。框用已有 `frame()`，勾用新的 `paintGlyph`。源图 2048 上：`checkbox` 在 (384, 1394)、96×96；`checkbox_mark` 在 (1728, 1394)、96×96。重画后，当时已画的 23 张（21 件加开关两张）像素对照是齐的。脚本断言是已画 25、预留 8。它按原习惯重写了素材侧 `ctrl.png`、`ctrl.json` 和 `history/v8/`。开关窗口写的「勾选框两张是另一窗口画的」就是这次。
+  - 游戏图集没有跑整份 `export-zoo-v7-plist.mjs`。只把两块贴进 `assets/game/bundles/Skin/ZooV7/ctrl.png`，并在 `ctrl.plist` 末尾加上 `checkbox.png`、`checkbox_mark.png`。游戏坐标：框 `{{192,697},{48,48}}`，勾 `{{864,697},{48,48}}`。贴图脚本在 `FFrame-asset-line/del/勾选框对照/贴图.mjs`。对照图已拷进本记录夹，文件名 `勾选框预览.png`。
+  - `说明.md`、`prompt.md` 写了这两个槽。预留还剩 radio、input、badge、dropdown、toast、count_plate、scrollbar、scrollbar_thumb。
+  - 设置页在开关窗口的最新 `LySetting.ts` 上只追加勾选框。运行时从 GMUI 加载预制体，放在 (80, -230)。「勾选」在 (156, -230)，24 号，`skinInk`，不描边。`gu.addClick` 调 `setValue`。没有改「语言  中文」、滑条、进度条、步进、道具格，也没有改开关节点。48 的框和下面钻石格大约叠 12 像素，坐标按 (80, -230) 留着，等看到画面再决定挪不挪。
+  - 版本从当时已经写上的 0.6.4 再加一修到 0.6.5：`GMLauncher.ts`、`extensions/gmajor/package.json`、`assets/game/config.ts` 的 `version.gmajor`，`CHANGELOG.md` 顶部是 0.6.5，0.6.4 那节留着。动物园 `config.ts` 仍是 `gmajor: '0.6.3'`，extension 仍是 0.5.0，这次没改。
+  - ReadLints 看过 `PfGMCheck.ts`、`LySetting.ts`、`index.ts`，没有报错。没有 commit，没有 push。
+  - 预览：17:46 只拨修改时间时，Creator 只重新查询资源，没有导入，当时预览仍是 0.6.4，设置页没有勾选框。17:56:44 出现 `refresh db`，导入了 `PfGMCheck.ts`、预制体、`LySetting.ts`、`ctrl.png`、`ctrl.plist`，脚本数变成 66。导入后 `checkbox`、`checkbox_mark` 的 `trimType` 仍是 `auto`，`packable` 仍是 true；边是 0，裁切矩形仍是整张 48×48，偏移 0，这一下还没裁掉像素。约定是 `trimType: none`、`packable: false`，还没改。导入之后没有再打开设置页把勾点上、点掉。
+
+- 2026-11-08 换电脑前对过远端：`origin/main` 是 `3ace0e7`，已提交的框架版本是 0.6.3。`git pull` 能拿到下面三笔，拿不到开关和勾选框。
+  - `42fb1b0` 标题补小档和大档，设置页用小档。`PfGMTitleSize`：小 64/28，中 88/36，大 120/48。中档高从 85 改为 88。这就是已提交的 0.6.3。
+  - `0111c70` 按钮禁用改为去色，仍可点，点下去只水平抖一下。展示页底部对照五个主题的灰。
+  - `3ace0e7` 按钮和弹窗展示：确认钮改成左大右叠，次要图标改成两行。
+  - 工作区未提交的版本号是 0.6.5。0.6.4 是开关，0.6.5 是勾选框。
+
 ## 3. 结论
 
-有结论。共识和 spec 已由用户确认。LegacyV3 已退役：游戏只加载 `ZooV7` 图集，旧逐张图整体归档到素材仓库，不再回退。道具格代码已推送，设置页外观还没在 Creator 里确认。打开工程时见过的组件报错不是道具格。
-
-- `del/` 的内容已全部归档到 `FFrame-asset-line/legacy/`，并已推送。
-- 动物园原始素材不走 GitHub。决定是：放在素材仓库的 `scenes/` 下，被忽略，靠 U 盘同步。
-- 实现进度：01 已完成，02 已完成，03 部分，04、05 代码已写，2026-11-02 用户在 Creator 里确认已验证，06 方案已变，07 部分完成。
-
-用户还有一些问题没有提出，要在新电脑上继续问。
+有结论。已推送的框架是 0.6.3（`3ace0e7`）：标题三档、按钮禁用去色抖动、弹窗按钮改排。滑条、道具格、经验行已确认。开关 0.6.4 已在设置页点过关和开。勾选框 0.6.5 已导入，设置页还没点过勾，`checkbox` 和 `checkbox_mark` 的 `trimType` 仍是 `auto`。下拉框还没做。开关和勾选框都还没提交。
 
 ## 4. 接着做
 
-**新电脑上怎么接手**：拖入本文件夹后，直接说"继续"。这里的待办和未决问题都在下面。提问方式按 grilling 规则：纯文字，每次只问一个问题，附推荐答案，用户在输入框里回答。
+**新电脑上怎么接手**：先 `git pull`，再盖上下面两份未提交的工作区，然后打开这份记录说「继续」。只 `git pull` 会停在 `3ace0e7`（框架 0.6.3），没有开关和勾选框。盖上工作区之后版本号才是 0.6.5。
+
+**换电脑前必须带走的工作区**（2026-11-08 写总结时都还没 commit）。带走两份仓库的整个工作目录。只打 `git diff` 补丁会丢掉未跟踪文件，也会丢掉被忽略的 `del/`：`FFrame/del/开关控件/`、`FFrame-asset-line/del/勾选框对照/`。
+- `FFrame`：开关和勾选框混在同一批改动里。已改的有 `CHANGELOG.md`、框架 `README.md`、`assets/game/README.md`、`LySetting.ts`、`LySetting.prefab`、`Skin/ZooV7/ctrl.png`、`ctrl.plist`、`ctrl.plist.meta`、`config.ts`、`docs/界面组件/说明.md`、`extensions/gmajor/package.json`、`gmajor/index.ts`、`GMLauncher.ts`，以及本记录夹。未跟踪的有 `gmajor/ui/PfGMSwitch.ts`、`gmajor/prefabs/PfGMSwitch.prefab`（含各自 `.meta`）和另一窗口的 `PfGMCheck` 脚本与预制体。另外还有未跟踪的 `FFrame.code-workspace`，以及 `assets/game/bundles/Skin/assets/` 里的四份 `.meta`（不像皮肤图），提交前先看，不要随手加进去。
+- `FFrame-asset-line`：`tools/draw-zoo-v7-ctrl.mjs`，`style/ZooV7/控件/` 下的 `prompt.md`、`说明.md`、`ctrl.png`、`ctrl.json`，以及 `history/v8` 的 `ctrl.png`、`ctrl.json`、`结论.md`。
+- `library/` 里为了预览手补的开关和图集不要拷去当源。新电脑用上面的源文件，让 Creator 重新导入 `LySetting.prefab` 和 `ctrl.plist`。导入前若设置页没有开关，就是还在用旧库。
 
 **换电脑前后的准备**
-1. 仓库要 clone：`FFrame`、`FFrame-asset-line`、`FFrame-zoo`（地址：`https://github.com/faace/FFrame.git`，`.../FFrame-asset-line.git`，`.../FFrame-zoo.git`）。`FFrame-asset-line` 里已经有 `legacy/`（两处 `del/` 的全部内容）。
-2. **动物园原始素材要用 U 盘拷贝**：从旧电脑的 `D:\creator\FFrame-asset-line\scenes\动物园\资源生成\` 拷到新电脑 clone 下来的 `FFrame-asset-line/scenes/动物园/` 下面。这个目录不在 GitHub 上，clone 不会带过来。
+1. 仓库要 clone：`FFrame`、`FFrame-asset-line`、`FFrame-zoo`（地址：`https://github.com/faace/FFrame.git`，`.../FFrame-asset-line.git`，`.../FFrame-zoo.git`）。clone 之后再盖上上一段的未提交工作区。`FFrame-asset-line` 里已经有 `legacy/`（两处 `del/` 的归档）。
+2. 动物园原始素材不在 GitHub。上次记的路径是 `D:\creator\FFrame-asset-line\scenes\动物园\资源生成\`。2026-11-08 这台电脑上这个目录已经不在，不要从这台找。换电脑用上次的 U 盘。
 3. Cursor 用户规则：把 `docs/流程/用户规则.md` 里的三段分别粘贴到 Cursor 设置的 User Rules。换电脑时不会自动同步，要重新粘贴一次。
 4. 全局 skill（grilling、spec、implement、review）按 `docs/流程/工程化流程安装包.md` 安装到 `~/.agents/skills/`。
-5. 项目规则（`.cursor/rules/`）随 `FFrame` 仓库走，不用额外装。
+5. 项目规则（`.cursor/rules/`）随 `FFrame` 仓库走，不用额外装。这次没改规则。
 
 **待办**
-- **控件收尾顺序**（用户定：一个个来，每步做完再下一步）：
-  1. 待确认（已推送 `1483937`，只等用户在 Creator 里看效果）：`progress_fill` 不废弃，改名 `slider_fill`，和滑条一组。`PfGMSlider` 预制体加 `fill` 子节点（在 track 和 thumb 之间）。第一版用九宫格拉伸，填充很短时两端被压扁，已否掉（用户截图指出）。现在改成裁剪：运行时把 `fill` 放进一个 Mask 裁剪节点，整条填充不拉伸，只露出左缘到滑块中心的一段；编辑器里不显示填充。`SkinKit` 名单、README、共识、ticket 02 同步改名。规则 `01-naming.mdc` 里"滑条只有轨道和滑块"三处待用户确认后再改。
-  2. 待确认（已推送 `a1bdb0a`，只等用户在 Creator 里看设置页，先不要做第 3 步）：道具格 `PfGMItemCell`。根和底 96（`slot_item`），图标 52，选中框 108（`frame_select`，默认隐藏），底和框整张拉伸。设置页金币在 (-50, -290) 不选中，钻石在 (80, -290) 选中；钻石有木格底。不做数量字，不做点击。一行 5 个、缝 16 先不排。尺寸不行再改。
-  3. 语言行。样式待用户定，优先用现有 `PfGMTabs` / `PfGMBtn` 组合，不新建。
-  4. 开关和复选框。需要新图，先问用户是否生图。
-  5. 红点、Toast。
-  6. 输入框。需要新图，最后做。
-  7. 图集预留的 10 个空槽：在第 4–6 步里按实际用到的填，不预先填。
-  8. 虚拟列表：最后做。名字待定（`GMVirtualList` 已删，不沿用，也没进过 git）。2026-11-06 打开工程的报错当时来自这个未入库脚本（一个文件两个组件），不要为这条报错去改道具格。开工前先用 grilling 讨论范围、名字、demo 入口，不直接写代码。参考是 CashGoSystem 的 4 个文件（Cocos 2.x，只看思路）。
-- **loading 暂时不动**（`GMUIManager` 里的纯文字版，用户确认）。
-- **两台电脑比较：不需要。** 本机已经拉到最新代码，就是另一台电脑提交的全部内容（2026-11-04 确认）。
-- **ticket 03 物品图：在别处处理**，不在本记录里推进。
-- **ticket 状态**：01、02 已完成；04、05 已验证（用户确认）；07 部分完成。
-- **规则草案只剩 1 条**：「动物园这类场景的原始生成素材放 `FFrame-asset-line/scenes/<场景>/资源生成/`，被忽略，不入库，换电脑用 U 盘拷贝」。其余 4 条已写进 `01-naming.mdc`（2026-11-04，`29ac72a`）。这一条等用户确认后再写。
-- **FFrame-zoo 同步：等所有控件做完再做。** zoo 的 `config.ts` 还写着 `gmajor: '0.5.3'`，它的 extension 版本是 0.5.0。框架已经是 0.6.0（`a769e6a`）。
-- **以周末提交为准**：三个仓库都已经拉到最新。新 session 开始前仍先 `git pull` 确认一下。
-- **用户还有一些问题要问**，回答后如果影响到 spec，先更新 spec 再继续。
-**其它未决事项**
-- 给新窗口的拷贝文：先讨论、不直接动工，名字由用户定（用户 2026-11-06 明确要求）。
-- `FFrame-zoo` 的 `settings/v2/packages/information.json` 留在本地，不提交（每个工程的 sid 都不一样）。
-- 用户规则原文写着"临时总结不 commit"，这次是用户指示提交的。如果想长期这样，需要在 Cursor 设置里改那条规则。
-- 原 `FFrame/del/` 和 `FFrame-zoo/del/` 的目录还在本地，没有删。`del/` 已在 `.gitignore` 里，用户决定保留，不清空。新 session 以 `legacy/` 为准，不用再读原目录。
+- 新电脑打开 `http://localhost:7456/`，点「设置」。开关在 (-180, -230)，旁边「开关」。开关窗口已看到关、开、再关。勾选框在 (80, -230)，旁边「勾选」。17:56 已经导入，还没在那次导入之后点过。先把 `checkbox`、`checkbox_mark` 的 `trimType` 改成 `none`、`packable` 改成 false，别动其它帧的边，再点一次：勾要出现，再点要消失。看和下面钻石格叠的大约 12 像素要不要挪。不要改「语言  中文」、滑条、进度条、步进、道具格，也不要改开关。
+- 下拉框还没做。齿轮旁「语言  中文」只是占位，不是多语言。预留槽 `dropdown`。类名未定。不要再把下一步说成语言行。
+- 红点、Toast。预留槽 `badge`、`toast`。
+- 输入框最后做，预留槽 `input`。
+- 图集还空着的 8 个槽：`radio`、`input`、`badge`、`dropdown`、`toast`、`count_plate`、`scrollbar`、`scrollbar_thumb`。按做到的控件再填，不预先画。
+- 文档还没对齐：`01-naming.mdc` 仍有两处写「滑条只有轨道和滑块」，公开面子节点名仍只写 `track` / `thumb`。`docs/界面组件/说明.md` 没有开关。`assets/game/README.md` 没有勾选框。
+- 虚拟列表最后做。名字待定，不沿用已删的 `GMVirtualList`。2026-11-06 的组件报错来自那个未入库脚本，不要为那条报错去改道具格。开工前先讨论范围、名字和 demo 入口。
+- loading 暂时不动。
+- ticket 03 物品图在别处处理。01、02 已完成；04、05 已验证；07 部分完成。
+- 规则草案还剩 1 条没写进规则：「动物园这类场景的原始生成素材放 `FFrame-asset-line/scenes/<场景>/资源生成/`，被忽略，不入库，换电脑用 U 盘拷贝」。等确认后再写。
+- FFrame-zoo 等控件做完再同步。zoo 的 `config.ts` 仍是 `gmajor: '0.6.3'`，和已推送的框架一致。extension 版本仍是 0.5.0。盖上未提交工作区后框架是 0.6.5。
+- 给新窗口的拷贝文先讨论、不直接动工，名字由用户定。
+- `FFrame-zoo` 的 `settings/v2/packages/information.json` 留在本地，不提交。
+- 用户规则写着临时总结不 commit。这次总结也不提交。若要带着走，提交的是上面的代码和素材，不是把「必须提交总结」写成新规则。
 
-**收尾**：本记录夹"做完这件事后删除"，同时删掉 `docs/临时总结/索引.md` 里对应的那一行。
+**收尾**：本记录夹做完这件事后删除，同时删掉 `docs/临时总结/索引.md` 里对应的那一行。
 
 ## 5. 产物
 
-这次用到的 `del/` 目录有两个。`资源生成/` 不是 del，单独写在下面。
-
-- **`FFrame/del/`**（复制到 `legacy/FFrame-del/`，原目录未删。2026-11-06 重数，含后来加的子目录）：
-  - 子文件夹 105 个（递归，不含自己）。
-  - 文件 212 个，19,596,895 字节。按扩展名：`.json` 83，`.png` 67，`.js` 20，`.mjs` 18，`.txt` 10，`.prefab` 3，`.err` 2，`.log` 2，`.bin` 2，`.scene` 1，`.css` 1，`.html` 1，`.wasm` 1，`.ttf` 1。
-- **`FFrame-zoo/del/`**（复制到 `legacy/FFrame-zoo-del/`，原目录未删。2026-11-06 重数）：
-  - 子文件夹 248 个（递归，不含自己）。
-  - 文件 506 个，37,645,708 字节。按扩展名：`.json` 259，`.png` 131，`.mjs` 56，`.py` 26，`.js` 21，`.log` 2，`.wasm` 2，`.bin` 2，`.css` 1，`.ttf` 1，`.txt` 1，`.csv` 1，`.dom` 1，`.html` 1，`.err` 1。
-- **`FFrame-zoo/资源生成/`**（不是 del，已搬走）：现在在 `FFrame-asset-line/scenes/动物园/资源生成/`，523 个文件，202MB（357 个 PNG）。不在 git 里，只在本机，换电脑用 U 盘拷贝。
-- **已推送的提交**：
-  - `FFrame` `5b54f41`（上一版记录）。
-  - `FFrame-asset-line` `c2b6bb4`（legacy 归档）、`47f1226`（忽略 `资源生成/`）。
-  - `FFrame-zoo` 无新提交，本地是远端版本 `1dab931`。
-- **`FFrame/del/替换皮肤引用/`**（2026-11-02 用到，原目录保留。2026-11-06 重数）：
-  - 子文件夹 1 个（`备份/`，不含自己）。
-  - 文件 6 个，165,533 字节。按扩展名：`.prefab` 3，`.mjs` 2，`.scene` 1。后 4 个是替换前的备份，在 `备份/` 里。
-- **这窗口新用到的 `del/` 目录**（原目录保留未删。2026-11-06 重数）：
-  - `FFrame/del/删除首页按钮/`：子文件夹 0 个；文件 1 个，3,746 字节，`.mjs` 1。
-  - `FFrame/del/slider填充/`：子文件夹 0 个；文件 1 个，4,113 字节，`.mjs` 1。
-  - `FFrame/del/slider对比/`：子文件夹 0 个；文件 1 个，1,890 字节，`.png` 1（对照图，已拷进记录夹）。
-  - `FFrame/del/看道具格现状/`：子文件夹 0 个；文件 5 个，13,065 字节，`.png` 4，`.mjs` 1。是格子、选中框、金币、钻石的裁图和预制体检查脚本，没有拷进记录夹。
-- **拷进记录夹的文件**（从 `del/slider对比/`，平放在 README 旁边）：子文件夹 0 个；`.png` 1 个。
-- 2026-11-02 这次新建的：`FFrame-asset-line/legacy/Skin-LegacyV3-game/`（和 `.meta`），`FFrame/del/替换皮肤引用/`。
-- 这次新建的目录和文件：`FFrame-asset-line/legacy/FFrame-del/`、`legacy/FFrame-zoo-del/`、`scenes/动物园/资源生成/`。临时目录 `D:\creator\FFrame-zoo-art` 已删除。
+- **`FFrame/del/`**（2026-11-08 18:51 再数，数字没变。里面包含 `开关控件/`）：
+  - 子文件夹 13 个（递归，不含自己）。
+  - 文件 57 个，5,968,449 字节。按扩展名：`.png` 44，`.mjs` 10，`.json` 2，`.js` 1。
+- **`FFrame-asset-line/del/勾选框对照/`**（勾选框窗口。脚本留在这里，对照图已拷进记录夹）：
+  - 子文件夹 0 个。
+  - 文件 2 个，15,265 字节。按扩展名：`.png` 1，`.mjs` 1。
+- **`FFrame/del/开关控件/`**（开关窗口。脚本和中间图留在这里）：
+  - 子文件夹 0 个。
+  - 文件 8 个，66,417 字节。按扩展名：`.png` 5，`.mjs` 1，`.js` 1，`.json` 1。
+  - `写入图集和设置页.mjs` 把两帧写进游戏图集和设置页。`补预览库.js` 只补预览用的 `library/`。`旧ctrl.png` 是改画前的 2048 备份。`skin-config.json` 是当时预览返回的图集配置。
+- 2026-11-06 清点过、这次路径已经不在，没有文件可数：`FFrame-zoo/del/`、`FFrame/del/替换皮肤引用/`、`FFrame/del/删除首页按钮/`、`FFrame/del/slider填充/`、`FFrame/del/slider对比/`、`FFrame/del/看道具格现状/`。归档仍以已推送的 `FFrame-asset-line/legacy/` 为准。
+- **`FFrame-asset-line/scenes/动物园/资源生成/`**：2026-11-08 这台电脑上这个目录不在。上次记的是 523 个文件、约 202MB，不在 git 里。
+- **拷进记录夹的文件**（平放在 README 旁边）：
+  - 子文件夹 0 个。
+  - 文件 6 个。按扩展名：`.png` 6。分别是原来的 `track对比fill.png`，开关窗口的 `设置页开关关.png`、`设置页开关开.png`、`switch_off.png`、`switch_on.png`，勾选框窗口的 `勾选框预览.png`。

@@ -319,6 +319,66 @@
 			<key>textureRotated</key>
 			<false/>
 		</dict>
+		<key>switch_off.png</key>
+		<dict>
+			<key>aliases</key>
+			<array/>
+			<key>spriteOffset</key>
+			<string>{0,0}</string>
+			<key>spriteSize</key>
+			<string>{96,48}</string>
+			<key>spriteSourceSize</key>
+			<string>{96,48}</string>
+			<key>textureRect</key>
+			<string>{{880,16},{96,48}}</string>
+			<key>textureRotated</key>
+			<false/>
+		</dict>
+		<key>switch_on.png</key>
+		<dict>
+			<key>aliases</key>
+			<array/>
+			<key>spriteOffset</key>
+			<string>{0,0}</string>
+			<key>spriteSize</key>
+			<string>{96,48}</string>
+			<key>spriteSourceSize</key>
+			<string>{96,48}</string>
+			<key>textureRect</key>
+			<string>{{880,80},{96,48}}</string>
+			<key>textureRotated</key>
+			<false/>
+		</dict>
+		<key>checkbox.png</key>
+		<dict>
+			<key>aliases</key>
+			<array/>
+			<key>spriteOffset</key>
+			<string>{0,0}</string>
+			<key>spriteSize</key>
+			<string>{48,48}</string>
+			<key>spriteSourceSize</key>
+			<string>{48,48}</string>
+			<key>textureRect</key>
+			<string>{{192,697},{48,48}}</string>
+			<key>textureRotated</key>
+			<false/>
+		</dict>
+		<key>checkbox_mark.png</key>
+		<dict>
+			<key>aliases</key>
+			<array/>
+			<key>spriteOffset</key>
+			<string>{0,0}</string>
+			<key>spriteSize</key>
+			<string>{48,48}</string>
+			<key>spriteSourceSize</key>
+			<string>{48,48}</string>
+			<key>textureRect</key>
+			<string>{{864,697},{48,48}}</string>
+			<key>textureRotated</key>
+			<false/>
+		</dict>
 	</dict>
 	<key>metadata</key>
 	<dict>

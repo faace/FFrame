@@ -11,7 +11,7 @@
 - `ScMain` 继承 `GMScene`，在 `onStart` 里调用 `gm.boot(config)`。
 - 包入口继承 `GMBundleEntryBase`，用 `registerBundleEntry` 登记。绑定名等于叶子目录名。
 - 界面脚本走 `GMScene` / `GMLayer` / `GMComponent`。确认框皮继承 `GMAlert`。
-- 控件用框架预制体：`PfGMBtn`、`PfGMTitle`、`PfGMSlider`、`PfGMBar`、`PfGMStepper`、`PfGMTabs`。
+- 控件用框架预制体：`PfGMBtn`、`PfGMTitle`、`PfGMSlider`、`PfGMBar`、`PfGMStepper`、`PfGMTabs`、`PfGMSwitch`。
 - 数据用 `gd` / `gl`，事件用 `on` / `emit`，点击用 `gu.addClick`，挡操作用 `gm.ui.loadingShow`。
 - 平台只喊 `gp`。
 

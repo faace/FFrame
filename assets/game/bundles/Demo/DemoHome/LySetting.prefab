@@ -192,6 +192,9 @@
       },
       {
         "__id__": 158
+      },
+      {
+        "__id__": 169
       }
     ],
     "_active": true,
@@ -1982,6 +1985,87 @@
     "fileId": "pfGmBtnRoot",
     "instance": {
       "__id__": 167
+    },
+    "targetOverrides": null
+  },
+  {
+    "__type__": "cc.Node",
+    "_objFlags": 0,
+    "_parent": {
+      "__id__": 7
+    },
+    "_prefab": {
+      "__id__": 175
+    },
+    "__editorExtras__": {}
+  },
+  {
+    "__type__": "cc.TargetInfo",
+    "localID": [
+      "pfGmSwitchRoot"
+    ]
+  },
+  {
+    "__type__": "CCPropertyOverrideInfo",
+    "targetInfo": {
+      "__id__": 170
+    },
+    "propertyPath": [
+      "_name"
+    ],
+    "value": "switch"
+  },
+  {
+    "__type__": "cc.TargetInfo",
+    "localID": [
+      "pfGmSwitchRoot"
+    ]
+  },
+  {
+    "__type__": "CCPropertyOverrideInfo",
+    "targetInfo": {
+      "__id__": 172
+    },
+    "propertyPath": [
+      "_lpos"
+    ],
+    "value": {
+      "__type__": "cc.Vec3",
+      "x": -180,
+      "y": -230,
+      "z": 0
+    }
+  },
+  {
+    "__type__": "cc.PrefabInstance",
+    "fileId": "switchInst",
+    "prefabRootNode": {
+      "__id__": 1
+    },
+    "mountedChildren": [],
+    "mountedComponents": [],
+    "propertyOverrides": [
+      {
+        "__id__": 171
+      },
+      {
+        "__id__": 173
+      }
+    ],
+    "removedComponents": []
+  },
+  {
+    "__type__": "cc.PrefabInfo",
+    "root": {
+      "__id__": 169
+    },
+    "asset": {
+      "__uuid__": "666998f0-8b3b-47e3-8a45-9dff9fd482a6",
+      "__expectedType__": "cc.Prefab"
+    },
+    "fileId": "pfGmSwitchRoot",
+    "instance": {
+      "__id__": 174
     },
     "targetOverrides": null
   }

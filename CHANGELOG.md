@@ -4,6 +4,18 @@
 
 app 在 `config.version.gmajor` 写所按的框架版本。开机只打日志，主.次不同时多打一条警告，不拦截。升级后怎么判断：看这里的破坏项，再跑一遍。
 
+## 0.6.5
+
+加了勾选框。未勾选只显示框，勾选再显示勾。点击仍由调用方 `gu.addClick` 调 `setValue`。
+
+- **新增（可选）**：`PfGMCheck`。子节点 `box`、`mark`。`value` 是布尔，`setValue` 和检查器是同一份。边长 48，锚点在中心。皮是 `checkbox`、`checkbox_mark`。
+
+## 0.6.4
+
+加了开关。关是浅橡木，开是草地绿，圆钮在左或右。点击仍由调用方 `gu.addClick` 调 `setValue`。
+
+- **新增（可选）**：`PfGMSwitch`。子节点 `face`。`value` 是布尔，`setValue` 和检查器是同一份。宽 96，高 48。皮是 `switch_off`、`switch_on`。
+
 ## 0.6.3
 
 标题加了小档和大档，高和字号跟同名按钮档。普通弹窗仍默认中档。
