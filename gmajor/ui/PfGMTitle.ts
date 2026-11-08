@@ -1,24 +1,44 @@
-import { _decorator, Color, Label, Sprite, UITransform } from 'cc';
+import { _decorator, Color, Enum, Label, Sprite, UITransform } from 'cc';
 import { GMComponent } from './GMComponent';
 import { applySkin } from './GMSkin';
 
-const { ccclass, executeInEditMode } = _decorator;
+const { ccclass, executeInEditMode, property } = _decorator;
 
 /**
  * 标题可调参数。改数字改这里。
  * 字体资源：db://gmajor/fonts/main.ttf，挂在子节点 label 上。
- * 九宫格在 title_bar 上：左 48、右 48、上 20、下 20。只拉宽，不拉高。
- * 小档、大档以后在 sizes 里加一行，并把 size 指过去。
+ * 三档的高、字号跟同名按钮档。宽仍随字数，高不跟字数变。
+ * 九宫格在 title_bar 上：左 48、右 48、上 20、下 20。
  */
 const PF_GM_TITLE = {
     outlineWidth: 0, // 0 不描边
     outline: [62, 40, 18] as const, // 仅 outlineWidth > 0 时使用
     fill: [92, 64, 32] as const, // 深墨
-    size: 'medium' as const,
     sizes: {
-        medium: { height: 85, fontSize: 36, padX: 56, minWidth: 320, maxWidth: 680 },
+        small: { height: 64, fontSize: 28, padX: 48, minWidth: 240, maxWidth: 480 }, // 高、字号 = 按钮小档。padX 不低于九宫格左右 48
+        medium: { height: 88, fontSize: 36, padX: 56, minWidth: 320, maxWidth: 680 }, // 高、字号 = 按钮中档
+        large: { height: 120, fontSize: 48, padX: 76, minWidth: 440, maxWidth: 920 }, // 高、字号 = 按钮大档
     },
 };
+
+export enum PfGMTitleSize {
+    medium = 0, // 普通弹窗默认。高 88
+    large = 1, // 高 120
+    small = 2, // 高 64
+}
+Enum(PfGMTitleSize);
+
+type TitleTier = (typeof PF_GM_TITLE.sizes)[keyof typeof PF_GM_TITLE.sizes];
+
+function tierOf(size: PfGMTitleSize): TitleTier {
+    const name = PfGMTitleSize[size] as keyof typeof PF_GM_TITLE.sizes;
+    return PF_GM_TITLE.sizes[name] ?? PF_GM_TITLE.sizes.medium;
+}
+
+/** 这一档的条高。GMFrame 用它给正文让位，不必等标题预制体进来 */
+export function pfGMTitleHeight(size: PfGMTitleSize): number {
+    return tierOf(size).height;
+}
 
 type RGB = readonly [number, number, number];
 
@@ -32,6 +52,16 @@ function rgb(c: RGB): Color {
 export class PfGMTitle extends GMComponent {
     private label: Label | null = null;
     private plate: Sprite | null = null;
+    private laidSize = -1;
+
+    @property({ type: Enum(PfGMTitleSize) })
+    size = PfGMTitleSize.medium;
+
+    /** 换档。高和字号跟同名按钮档 */
+    setSize(size: PfGMTitleSize): void {
+        this.size = size;
+        this.layout();
+    }
 
     onInit(): void {
         this.plate = this.getComponent(Sprite);
@@ -51,6 +81,11 @@ export class PfGMTitle extends GMComponent {
         });
     }
 
+    update(): void { // 检查器改了档位，编辑态和运行态都重排
+        if (this.laidSize === this.size) return;
+        this.layout();
+    }
+
     /** 按字宽重排。短于最小宽停在最小宽，长于最大宽则在两侧留白里缩小 */
     setText(text: string): void {
         if (!this.label) return;
@@ -58,12 +93,8 @@ export class PfGMTitle extends GMComponent {
         this.layout();
     }
 
-    private tier() {
-        return PF_GM_TITLE.sizes[PF_GM_TITLE.size];
-    }
-
     private layout(): void {
-        const tier = this.tier();
+        const tier = tierOf(this.size);
         const label = this.label;
         const uit = this.node.getComponent(UITransform);
         const lut = label?.node.getComponent(UITransform);
@@ -88,6 +119,7 @@ export class PfGMTitle extends GMComponent {
             this.plate.type = Sprite.Type.SLICED;
         }
         uit.setContentSize(width, tier.height);
+        this.laidSize = this.size;
         const shrink = wanted > tier.maxWidth || (label.string.length > 0 && textW <= 0);
         if (!shrink) return;
         label.overflow = Label.Overflow.SHRINK;

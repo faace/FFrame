@@ -1,5 +1,5 @@
 import { _decorator, assetManager, Node, Prefab, UITransform } from 'cc';
-import { FRAME_EDGE, GMLayer, gu, PfGMBar, PfGMBarText, PfGMBtn, PfGMItemCell, PfGMStepper } from 'db://gmajor/index';
+import { FRAME_EDGE, GMLayer, gu, PfGMBar, PfGMBarText, PfGMBtn, PfGMItemCell, PfGMStepper, PfGMTitle, PfGMTitleSize } from 'db://gmajor/index';
 import { addSkin, addText, dress, loadSkin, skinInk } from '../../GameUI/SkinKit';
 
 const { ccclass } = _decorator;
@@ -39,6 +39,7 @@ export class LySetting extends GMLayer {
         const uit = panel?.getComponent(UITransform);
         if (!panel || !uit) return;
         const y = uit.height / 2 - FRAME_EDGE;
+        panel.getChildByName('title')?.getComponent(PfGMTitle)?.setSize(PfGMTitleSize.small);
         for (const name of ['title', 'btnClose', 'btnHelp']) {
             const node = panel.getChildByName(name);
             if (node) node.setPosition(node.position.x, y, node.position.z);

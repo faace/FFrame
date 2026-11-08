@@ -4,7 +4,7 @@ import { GMLayer } from './GMLayer';
 import { gu } from '../launch/GMLauncher';
 import { applySkin } from './GMSkin';
 import { PfGMBtn, PfGMBtnSize, PfGMBtnStyle, PfGMBtnTheme } from './PfGMBtn';
-import { PfGMTitle } from './PfGMTitle';
+import { PfGMTitle, PfGMTitleSize, pfGMTitleHeight } from './PfGMTitle';
 
 const { ccclass } = _decorator;
 
@@ -12,7 +12,6 @@ const editing = EDITOR && !PREVIEW;
 
 /** 铆钉在标题条垂直正中。面板棕色框中线约在外沿往里 7（源图木色带 6–23，显示尺寸减半） */
 export const FRAME_EDGE = 7;
-const TITLE_H = 85; // PfGMTitle 中档高
 const PAD = 24; // 内容距左右、底边，以及标题下沿
 const FRAME_INNER = 20; // panel 九宫格上边（显示尺寸）。没标题时内容从这里起
 const SIDE = 15; // 钮中心距左右边缘
@@ -26,6 +25,7 @@ export class GMFrame extends GMLayer {
     width = 620;
     height = 800;
     showTitle = true; // 显式关掉才没有标题条
+    titleSize = PfGMTitleSize.medium; // 高跟同名按钮档。子类只写和默认不同的
     showClose = true; // 默认点了关自己
     showPlate = true; // 底框。关掉仍留遮罩
     protected body: Node | null = null;
@@ -105,7 +105,7 @@ export class GMFrame extends GMLayer {
             body.layer = panel.layer;
             panel.addChild(body);
         }
-        const topInset = this.showTitle ? FRAME_EDGE + TITLE_H / 2 + PAD : FRAME_INNER;
+        const topInset = this.showTitle ? FRAME_EDGE + pfGMTitleHeight(this.titleSize) / 2 + PAD : FRAME_INNER;
         const top = this.height / 2 - topInset;
         const bottom = -this.height / 2 + PAD;
         const uit = body.getComponent(UITransform) ?? body.addComponent(UITransform);
@@ -174,6 +174,7 @@ export class GMFrame extends GMLayer {
             view.node.setPosition(0, this.edgeY(), 0);
         }
         this.titleView = view;
+        view.setSize(this.titleSize);
         view.setText(this.titleText);
     }
 
