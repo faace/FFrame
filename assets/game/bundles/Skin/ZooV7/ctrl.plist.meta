@@ -74,7 +74,7 @@
         "borderBottom": 0,
         "borderLeft": 0,
         "borderRight": 0,
-        "packable": true,
+        "packable": false,
         "pixelsToUnit": 100,
         "pivotX": 0.5,
         "pivotY": 0.5,
@@ -90,7 +90,7 @@
         "isUuid": true,
         "imageUuidOrDatabaseUri": "aa568272-60fa-4a2c-9332-92819cbeb1d1@6c48a",
         "atlasUuid": "4b756a97-47ca-464f-b3f7-c780df66202c",
-        "trimType": "auto"
+        "trimType": "none"
       },
       "ver": "1.0.12",
       "imported": true,
@@ -856,7 +856,7 @@
         "borderBottom": 6,
         "borderLeft": 10,
         "borderRight": 10,
-        "packable": true,
+        "packable": false,
         "pixelsToUnit": 100,
         "pivotX": 0.5,
         "pivotY": 0.5,
@@ -1224,7 +1224,7 @@
         "borderBottom": 0,
         "borderLeft": 0,
         "borderRight": 0,
-        "packable": true,
+        "packable": false,
         "pixelsToUnit": 100,
         "pivotX": 0.5,
         "pivotY": 0.5,
@@ -1240,7 +1240,7 @@
         "isUuid": true,
         "imageUuidOrDatabaseUri": "aa568272-60fa-4a2c-9332-92819cbeb1d1@6c48a",
         "atlasUuid": "4b756a97-47ca-464f-b3f7-c780df66202c",
-        "trimType": "auto"
+        "trimType": "none"
       },
       "ver": "1.0.12",
       "imported": true,
