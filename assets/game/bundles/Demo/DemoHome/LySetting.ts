@@ -26,7 +26,7 @@ export class LySetting extends GMLayer {
         addText(panel, '语言  中文', 26, skinInk, 220, 48).node.setPosition(20, -80, 0);
         this.bindBar(panel);
         this.bindStepper(panel);
-        this.slot(panel, -290);
+        this.slot(panel, -312);
         this.bindSwitch(panel);
         this.bindCheck(panel);
         loadSkin((err) => {
