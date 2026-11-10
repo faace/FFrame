@@ -2359,7 +2359,7 @@
   },
   {
     "__type__": "cc.Node",
-    "_name": "btnDiamond",
+    "_name": "btnControls",
     "_objFlags": 0,
     "__editorExtras__": {},
     "_parent": {
@@ -2461,7 +2461,7 @@
     "propertyPath": [
       "_name"
     ],
-    "value": "btnDiamond"
+    "value": "btnControls"
   },
   {
     "__type__": "cc.TargetInfo",
@@ -2498,7 +2498,7 @@
     "propertyPath": [
       "_string"
     ],
-    "value": "钻石"
+    "value": "控件展示"
   },
   {
     "__type__": "cc.TargetInfo",
@@ -2749,7 +2749,7 @@
     "propertyPath": [
       "text"
     ],
-    "value": "钻石"
+    "value": "控件展示"
   },
   {
     "__type__": "cc.TargetInfo",

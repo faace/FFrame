@@ -100,6 +100,7 @@ export class PfGMSlider extends GMComponent {
         }
         const idx = fill.getSiblingIndex();
         const clip = new Node('fillClip');
+        clip.layer = this.node.layer; // 跟根同层，否则 Overlay 相机不画裁剪窗口，填充整块消失
         clip.addComponent(UITransform);
         clip.addComponent(Mask).type = Mask.Type.RECT;
         this.node.addChild(clip);

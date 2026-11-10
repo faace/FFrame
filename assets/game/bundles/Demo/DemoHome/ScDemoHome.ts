@@ -16,7 +16,7 @@ export class ScDemoHome extends GMScene {
         this.click(home, 'btnStart', () => this.openSetting());
         this.click(home, 'btnAd', () => gu.alert({ content: '看完可以领一份奖励。', ok: { text: '领取' } }));
         this.click(home, 'btnGold', () => gu.showLayer('LyButtons', { bundle: 'DemoHome' }));
-        this.click(home, 'btnDiamond', () => gu.alert('用钻石买下这一格。'));
+        this.click(home, 'btnControls', () => gu.showLayer('LyControls', { bundle: 'DemoHome' }));
         loadSkin((err) => {
             if (err) return console.error('[ScDemoHome] 皮加载失败', err);
         });
