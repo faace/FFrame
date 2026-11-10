@@ -17,6 +17,8 @@ export class LyControls extends GMFrame {
     width = 640;
     height = 1120;
     private started = false;
+    private pickPage: Node | null = null; // 选择页。insert 后不在 panel 下了，留引用给回调写字
+    private noteView: Label | null = null;
 
     protected onLayerInit(): void {
         this.setTitle('控件展示');
@@ -41,6 +43,8 @@ export class LyControls extends GMFrame {
         this.bindButtons(pages[0]);
         this.bindPicks(pages[1]);
         this.bindShow(pages[2]);
+        this.pickPage = pages[1] ?? null;
+        this.noteView = pages[1]?.getChildByName('pickNote')?.getComponent(Label) ?? null;
         this.bindTabs(panel, pages);
         loadSkin((err) => {
             if (err) return console.error('[LyControls] 皮加载失败', err);
@@ -83,24 +87,30 @@ export class LyControls extends GMFrame {
     private bindPicks(page: Node | undefined): void {
         if (!page) return;
         const slider = page.getChildByName('ctlSlider')?.getComponent(PfGMSlider) ?? null;
-        if (!slider) console.error('[LyControls] 没有滑条');
+        if (slider) slider.setOnChange((v) => this.note(`滑条 → ${v.toFixed(2)}`));
+        else console.error('[LyControls] 没有滑条');
 
         const stepperRoot = page.getChildByName('ctlStepper');
         const stepper = stepperRoot?.getComponent(PfGMStepper) ?? null;
         const minus = stepperRoot?.getChildByName('btnMinus');
         const plus = stepperRoot?.getChildByName('btnPlus');
         if (stepper && minus && plus) {
-            gu.addClick(minus, () => stepper.setValue(stepper.value - stepper.step));
-            gu.addClick(plus, () => stepper.setValue(stepper.value + stepper.step));
+            stepper.setOnChange((v) => this.note(`步进 → ${v}`));
+            gu.addClick(minus, () => stepper.stepBy(-stepper.step));
+            gu.addClick(plus, () => stepper.stepBy(stepper.step));
         } else console.error('[LyControls] 步进缺少节点');
 
         const sw = page.getChildByName('ctlSwitch')?.getComponent(PfGMSwitch) ?? null;
-        if (sw) gu.addClick(sw.node, () => sw.setValue(!sw.value));
-        else console.error('[LyControls] 没有开关');
+        if (sw) {
+            sw.setOnChange((v) => this.note(`开关 → ${v ? '开' : '关'}`));
+            gu.addClick(sw.node, () => sw.toggle());
+        } else console.error('[LyControls] 没有开关');
 
         const check = page.getChildByName('ctlCheck')?.getComponent(PfGMCheck) ?? null;
-        if (check) gu.addClick(check.node, () => check.setValue(!check.value));
-        else console.error('[LyControls] 没有勾选框');
+        if (check) {
+            check.setOnChange((v) => this.note(`勾选 → ${v ? '勾上' : '取消'}`));
+            gu.addClick(check.node, () => check.toggle());
+        } else console.error('[LyControls] 没有勾选框');
     }
 
     /** 进度条加减各 0.25；道具格四格都能点，各自切换选中框 */
@@ -119,5 +129,10 @@ export class LyControls extends GMFrame {
             if (!cell) continue;
             gu.addClick(child, () => cell.setSelected(!cell.selected));
         }
+    }
+
+    /** 选择页的回调结果写到页面底部，不弹窗 */
+    private note(text: string): void {
+        if (this.noteView?.isValid) this.noteView.string = text;
     }
 }

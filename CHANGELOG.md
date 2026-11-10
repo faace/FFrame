@@ -4,6 +4,15 @@
 
 app 在 `config.version.gmajor` 写所按的框架版本。开机只打日志，主.次不同时多打一条警告，不拦截。升级后怎么判断：看这里的破坏项，再跑一遍。
 
+## 0.7.0
+
+开关、勾选框和步进加了变更回调。以前只能由调用方读 `value`，现在控件自己会报。滑条的 `setOnChange` 早就有，这次把另外三个补齐，语义统一。
+
+- **新增（可选）**：`PfGMSwitch.setOnChange(cb)` / `PfGMCheck.setOnChange(cb)` / `PfGMStepper.setOnChange(cb)`。
+- **新增（可选）**：`PfGMSwitch.toggle()` / `PfGMCheck.toggle()`，翻转并回调。`PfGMStepper.stepBy(delta)`，走一步并回调；夹完的值和原值相同时不回调。
+- **行为**：`setValue` 仍不触发回调，和滑条一致。程序设值靠 `setValue`，用户操作走 `toggle` / `stepBy`。
+- **调用方要改**：原来 `gu.addClick(sw.node, () => sw.setValue(!sw.value))` 改成 `() => sw.toggle()`，才能在回调里收到新值。不接回调的话 `setValue` 写法照旧可用。
+
 ## 0.6.6
 
 修了滑条填充不显示。滑条在 Overlay 弹层上时，运行时新建的裁剪节点用了默认层，Overlay 相机不画它，里面的填充被整块裁掉，只剩轨道和滑块。

@@ -14,6 +14,7 @@ export class PfGMCheck extends GMComponent {
     private box: Sprite | null = null;
     private mark: Sprite | null = null;
     private stamp = '';
+    private onChange: ((value: boolean) => void) | null = null; // 只在 toggle 调，setValue 不走这里
 
     @property
     value = false;
@@ -32,10 +33,21 @@ export class PfGMCheck extends GMComponent {
         this.layout();
     }
 
-    /** 改勾选。和检查器同一份 value */
+    /** 改勾选。不调用 onChange。和检查器同一份 value */
     setValue(value: boolean): void {
         this.value = !!value;
         this.layout();
+    }
+
+    /** 翻转。调用方在 gu.addClick 里调它，flip 完再回调 */
+    toggle(): void {
+        this.setValue(!this.value);
+        this.onChange?.(this.value);
+    }
+
+    /** 只在 toggle 时调用。setValue 不走这里 */
+    setOnChange(cb: ((value: boolean) => void) | null): void {
+        this.onChange = cb;
     }
 
     private bindNodes(): boolean {

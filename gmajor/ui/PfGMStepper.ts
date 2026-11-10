@@ -32,6 +32,7 @@ export class PfGMStepper extends GMComponent {
     private minusBtn: PfGMBtn | null = null;
     private plusBtn: PfGMBtn | null = null;
     private stamp = '';
+    private onChange: ((value: number) => void) | null = null; // 只在 stepBy 调，setValue 不走这里
 
     @property
     value = 3;
@@ -62,10 +63,25 @@ export class PfGMStepper extends GMComponent {
         this.layout();
     }
 
-    /** 收成整数再夹进 min–max。改中间的字，并刷新加减的禁用 */
+    /** 收成整数再夹进 min–max。改中间的字，并刷新加减的禁用。不调用 onChange */
     setValue(value: number): void {
         this.value = value;
         this.layout();
+    }
+
+    /**
+     * 走一步。调用方在 gu.addClick 里调它。夹完的值等于原值时不回调
+     * （到 min/max 了，或被夹住没动）
+     */
+    stepBy(delta: number): void {
+        const before = this.value;
+        this.setValue(this.value + delta);
+        if (this.value !== before) this.onChange?.(this.value);
+    }
+
+    /** 只在 stepBy 时调用。setValue 不走这里 */
+    setOnChange(cb: ((value: number) => void) | null): void {
+        this.onChange = cb;
     }
 
     private bindNodes(): boolean {
