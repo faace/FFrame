@@ -1,5 +1,5 @@
 import { _decorator, Label, Node, UITransform } from 'cc';
-import { GMFrame, gu, PfGMBar, PfGMBtn, PfGMCheck, PfGMItemCell, PfGMSlider, PfGMStepper, PfGMSwitch, PfGMTabs } from 'db://gmajor/index';
+import { GMFrame, GMOptionItem, gu, PfGMBar, PfGMBtn, PfGMCheck, PfGMItemCell, PfGMSelect, PfGMSlider, PfGMStepper, PfGMSwitch, PfGMTabs } from 'db://gmajor/index';
 import { loadSkin } from '../../GameUI/SkinKit';
 
 const { ccclass } = _decorator;
@@ -83,7 +83,7 @@ export class LyControls extends GMFrame {
         }
     }
 
-    /** 滑条自己听拖动；步进的加减、开关和勾选都由这里注册 */
+    /** 滑条自己听拖动；步进的加减、开关、勾选和四个下拉都由这里注册 */
     private bindPicks(page: Node | undefined): void {
         if (!page) return;
         const slider = page.getChildByName('ctlSlider')?.getComponent(PfGMSlider) ?? null;
@@ -111,6 +111,37 @@ export class LyControls extends GMFrame {
             check.setOnChange((v) => this.note(`勾选 → ${v ? '勾上' : '取消'}`));
             gu.addClick(check.node, () => check.toggle());
         } else console.error('[LyControls] 没有勾选框');
+
+        this.bindSelect(page.getChildByName('ctlSelectText')?.getComponent(PfGMSelect) ?? null,
+            [this.option('简单'), this.option('普通'), this.option('困难')], 1, '下拉');
+        this.bindSelect(page.getChildByName('ctlSelectIcon')?.getComponent(PfGMSelect) ?? null, [
+            this.option('星星', 'icon_star'),
+            this.option('金币', 'icon_gold'),
+            this.option('钻石', 'icon_diamond'),
+        ], 0, '物品');
+        this.bindSelect(page.getChildByName('ctlSelectUp')?.getComponent(PfGMSelect) ?? null,
+            [this.option('上'), this.option('中'), this.option('下')], 2, '向上');
+
+        const many: GMOptionItem[] = []; // 50 项：验滚动和长列表，放页面顶部必然向下弹
+        for (let i = 1; i <= 50; i++) many.push(this.option(`选项 ${i}`));
+        this.bindSelect(page.getChildByName('ctlSelectMany')?.getComponent(PfGMSelect) ?? null, many, 0, '50 项');
+    }
+
+    /** 造一项。检查器里是 GMOptionItem，代码里也用它，别用裸对象 */
+    private option(text: string, icon = ''): GMOptionItem {
+        const item = new GMOptionItem();
+        item.text = text;
+        item.icon = icon;
+        return item;
+    }
+
+    /** 下拉：选项在代码里给，盒子点击由这里注册，点选结果写进说明行 */
+    private bindSelect(sel: PfGMSelect | null, items: GMOptionItem[], index: number, tag: string): void {
+        if (!sel) return console.error('[LyControls] 没有下拉框', tag);
+        sel.setItems(items);
+        sel.setIndex(index);
+        sel.setOnChange((at) => this.note(`${tag} → ${items[at]?.text ?? at}`));
+        gu.addClick(sel.node, () => sel.toggle());
     }
 
     /** 进度条加减各 0.25；道具格四格都能点，各自切换选中框 */

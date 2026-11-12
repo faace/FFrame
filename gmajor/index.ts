@@ -34,6 +34,8 @@ export { PfGMCheck } from './ui/PfGMCheck'; // 框架勾选框；box+mark；valu
 export { PfGMBar, PfGMBarText } from './ui/PfGMBar'; // 框架进度条；槽+填充；value 0–1；text 不显示/百分比/当前总值
 export { PfGMStepper } from './ui/PfGMStepper'; // 框架步进；嵌套 PfGMBtn；整数 value/min/max/step
 export { PfGMItemCell } from './ui/PfGMItemCell'; // 框架道具格；底+图标+选中框+数量；setIcon / selected / setCount
+export { PfGMSelect, GMOptionItem } from './ui/PfGMSelect'; // 框架下拉；收起态 bg/icon/label/arrow；items；index；setOnChange 只在用户点选时叫
+export { PfGMOption } from './ui/PfGMOption'; // 框架下拉行；底+图标+字；选中换绿底白字；点击由调用方注册
 export { GMTabPage } from './ui/GMTabPage'; // 页签内容基类；onShow/onHide(done)；text/setText
 export { PfGMTabs, GMTabSource } from './ui/PfGMTabs'; // 框架页签；tabs+panel；index；insert/remove
 export { loadSkin, setSkinTheme, applySkin, skinFrame, SKIN_BUNDLE } from './ui/GMSkin'; // 游戏 Skin 包；setSkinTheme 告诉编辑器当前主题；缺槽用内置白图
