@@ -12,6 +12,8 @@
 
 **本窗口补充（2026-11-08 进度）**：齿轮旁的「语言  中文」不是多语言功能，定成通用下拉框，预留槽 `dropdown`，还没做。不要再把下一步说成语言行。
 
+**本窗口补充（2026-11-12 现状）**：控件这一批基本收尾，框架 0.7.0，12 个控件，图集实画 32、预留 4。剩下的大件是虚拟列表，在另一个窗口做。以后开新窗口前先读第 3、4 节，不要读第 2 节的旧状态。用户要求：一份拷贝文只做一件，必须写「禁止 commit / push」，一步一停。
+
 **当时的情况**：
 - 游戏里 `bundles/Skin/` 是 27 张独立的 48 像素小图，是从 v3（奶油底色）切出来再用脚本重画的版本。
 - 控件母版 `ui-sheet-v7` 的提示词写明"same pixel craft as the zoo map"，和动物园母图风格一致。
@@ -119,58 +121,84 @@
   - `3ace0e7` 按钮和弹窗展示：确认钮改成左大右叠，次要图标改成两行。
   - 工作区未提交的版本号是 0.6.5。0.6.4 是开关，0.6.5 是勾选框。
 
+- 2026-11-09 晚，另一个窗口收尾提交（我在控制窗口只核对，没有动代码）：
+  - 开关的嵌套实例原来漏登记。`LySetting.prefab` 的 `panel` 上 `nestedPrefabInstanceRoots` 里没有开关节点，运行时它退化成空节点，报 `[LySetting] 没有开关`。那一窗往数组里补了 `{"__id__": 169}`（`cf2cf0f`）。补完实测关→开→关正常。
+  - 勾选框和开关两帧的导入参数统一成 `trimType: none` + `packable: false`，子 meta 从 27 清到 25，和 `ctrl.plist` 的 25 帧对上（`3ba6c1b`、`193f242`）。
+  - 勾选框的勾描边加到 3 像素，和叉、问号、加减一样粗；后来又左右各偏两像素让内容居中（asset-line `acdcb40`、`761851a`）。
+  - 道具格下移到 `-312`，和勾选框留约 10px，不再叠。
+  - 我犯的错：一开始给的拷贝文把三件事塞进一个窗口，还写了「提交剩下的 4 个文件」，等于替用户授权了 commit。用户反对后，那两笔提交（`4af7fd3`、`b171080`）用 `reset` 撤回，没 push。之后规矩定死：一份拷贝文只做一件，必须写「禁止 commit / push」，一步一停。
+
+- 2026-11-10 控件展示窗 `LyControls`（`7820442`）：
+  - `extends GMFrame`，640×1120，三页页签（按钮 / 选择 / 展示）。按钮页八颗中档，禁用那颗专门验证点击被拦；选择页滑条 + 步进 + 开关 + 勾选；展示页进度条 + 五个道具格。
+  - label 不写进预制体，运行时按控件节点的 y 生成，坐标只有预制体一处来源。
+  - 首页 `btnDiamond` 改成 `btnControls`「控件展示」。
+  - 顺带修了真 bug：`PfGMSlider` 运行时的 `fillClip` 用默认层，Overlay 相机不画，填充整块被裁掉，只剩轨道和滑块。改成跟根同层。框架记到 0.6.6。动物园的滑条也一起吃这个修复。
+
+- 2026-11-12 两个窗口并行做下拉框和 Toast（我给的拷贝文按「图集归下拉框窗口独占、Toast 先走白图」分工）：
+  - 下拉框 `PfGMSelect` / `PfGMOption`（第 10 个控件，`33fa059`）。收起态子节点 `bg`/`icon`/`label`/`arrow`；预制体里带 `list` 骨架（`view`(Mask) → `content` + `scrollBar`），运行时克隆，用引擎 `ScrollView` 滚，不手写滚动。行高 64，一屏最多 8 行。`GMOptionItem` 是 `text` + `icon`。新增 6 个皮：`dropdown`、`dropdown_list`、`dropdown_item_on`、`icon_arrow`、`scrollbar`、`scrollbar_thumb`。
+  - 轻提示 `PfGMToast`（第 11 个控件，`1724c84`）。子节点 `bg`/`label`，皮 `toast`。`show` / `hide` / `setAnchor`，最多叠 3 条、间距 12、新的在最上、同一句去重只续命。不进弹层栈、不挡输入、不可点。新增 `gu.toastRoot()` 和 Overlay 上的 `toasts` 容器。
+  - 开关、勾选、步进补了 `setOnChange` / `toggle` / `stepBy`（`94abdb9`），框架记到 0.7.0。语义统一：`setValue` 不回调，用户操作才回调。
+  - `5a702ac` 把选择页从 4 个下拉精简成 2 个，顺手踩了「并排改纵向只改 y」的坑，控件压进 panel 边框 12px。于是加了规则 `70ee2d5`：控件不许压背景边框；并排改纵向要连 x 和宽一起改。
+  - 图集：asset-line `094369d` 加下拉和滚动条（实画 25 → 31），`fa7e524` 加 toast（480×72，九宫格 20，实画 32 预留 4）。
+
+- 2026-11-12 本窗口（控制窗口）补标记，只改文档和规则，不动代码：
+  - `CHANGELOG.md` 的 0.7.0 原来只记了变更回调，下拉框和 Toast 一个字没写。补成三节：下拉、轻提示、变更回调。
+  - 框架 `README.md` 皮肤槽表停在 18 个槽到 `panel` 为止，补 7 个新槽。另外发现 `slot_item` / `frame_select` 被错列在「框架不会按名字来取」里，但 `PfGMItemCell` 是按名字取的（`PfGMItemCell.ts` 第 61、62 行），挪回正表。
+  - `assets/game/README.md` 控件名单补 `PfGMSelect`、`PfGMOption`、`PfGMToast`。
+  - `docs/界面组件/进度.md`：「当前焦点」改成虚拟列表；补回漏掉的清单 9（`PfGMItemCell`）；补清单 11（`PfGMToast`）；「先不做」按现状重写。
+  - `01-naming.mdc` 三处对齐：177 行框架预制体名单补 6 个控件；206 行公开面子节点名补全（原来只写滑条 `track`/`thumb`、进度条 `bg`/`fill`）；178 行「滑条只有轨道和滑块」改成「轨道、填充、滑块和运行时建的裁剪层」；文末对照表补两行。跑过 `tools/sync-cursor-rules-index.mjs`，5 条已更新。
+  - 版本号没有补修号。下拉框和 Toast 都挤在 0.7.0 里，这是当初为并行定的「两个窗口都不碰版本文件」。要不要拆成 0.7.1 / 0.7.2 还没定。
+
 ## 3. 结论
 
-有结论。已推送的框架是 0.6.3（`3ace0e7`）：标题三档、按钮禁用去色抖动、弹窗按钮改排。滑条、道具格、经验行已确认。开关 0.6.4 已在设置页点过关和开。勾选框 0.6.5 已导入，设置页还没点过勾，`checkbox` 和 `checkbox_mark` 的 `trimType` 仍是 `auto`。下拉框还没做。开关和勾选框都还没提交。
+有结论。框架已到 0.7.0（已推送，HEAD `70ee2d5`），12 个控件做完：按钮、标题、页签、滑条、进度条、步进、开关、勾选框、道具格、下拉、下拉行、轻提示。图集实画 32、预留 4（`radio`、`input`、`badge`、`count_plate`）。展示窗 `LyControls` 三页，首页「控件展示」进入。剩下的大件是虚拟列表，2026-11-12 起在另一个窗口做。
 
 ## 4. 接着做
 
-**新电脑上怎么接手**：先 `git pull`，再盖上下面两份未提交的工作区，然后打开这份记录说「继续」。只 `git pull` 会停在 `3ace0e7`（框架 0.6.3），没有开关和勾选框。盖上工作区之后版本号才是 0.6.5。
-
-**换电脑前必须带走的工作区**（2026-11-08 写总结时都还没 commit）。带走两份仓库的整个工作目录。只打 `git diff` 补丁会丢掉未跟踪文件，也会丢掉被忽略的 `del/`：`FFrame/del/开关控件/`、`FFrame-asset-line/del/勾选框对照/`。
-- `FFrame`：开关和勾选框混在同一批改动里。已改的有 `CHANGELOG.md`、框架 `README.md`、`assets/game/README.md`、`LySetting.ts`、`LySetting.prefab`、`Skin/ZooV7/ctrl.png`、`ctrl.plist`、`ctrl.plist.meta`、`config.ts`、`docs/界面组件/说明.md`、`extensions/gmajor/package.json`、`gmajor/index.ts`、`GMLauncher.ts`，以及本记录夹。未跟踪的有 `gmajor/ui/PfGMSwitch.ts`、`gmajor/prefabs/PfGMSwitch.prefab`（含各自 `.meta`）和另一窗口的 `PfGMCheck` 脚本与预制体。另外还有未跟踪的 `FFrame.code-workspace`，以及 `assets/game/bundles/Skin/assets/` 里的四份 `.meta`（不像皮肤图），提交前先看，不要随手加进去。
-- `FFrame-asset-line`：`tools/draw-zoo-v7-ctrl.mjs`，`style/ZooV7/控件/` 下的 `prompt.md`、`说明.md`、`ctrl.png`、`ctrl.json`，以及 `history/v8` 的 `ctrl.png`、`ctrl.json`、`结论.md`。
-- `library/` 里为了预览手补的开关和图集不要拷去当源。新电脑用上面的源文件，让 Creator 重新导入 `LySetting.prefab` 和 `ctrl.plist`。导入前若设置页没有开关，就是还在用旧库。
-
-**换电脑前后的准备**
-1. 仓库要 clone：`FFrame`、`FFrame-asset-line`、`FFrame-zoo`（地址：`https://github.com/faace/FFrame.git`，`.../FFrame-asset-line.git`，`.../FFrame-zoo.git`）。clone 之后再盖上上一段的未提交工作区。`FFrame-asset-line` 里已经有 `legacy/`（两处 `del/` 的归档）。
-2. 动物园原始素材不在 GitHub。上次记的路径是 `D:\creator\FFrame-asset-line\scenes\动物园\资源生成\`。2026-11-08 这台电脑上这个目录已经不在，不要从这台找。换电脑用上次的 U 盘。
-3. Cursor 用户规则：把 `docs/流程/用户规则.md` 里的三段分别粘贴到 Cursor 设置的 User Rules。换电脑时不会自动同步，要重新粘贴一次。
-4. 全局 skill（grilling、spec、implement、review）按 `docs/流程/工程化流程安装包.md` 安装到 `~/.agents/skills/`。
-5. 项目规则（`.cursor/rules/`）随 `FFrame` 仓库走，不用额外装。这次没改规则。
+**接手方式**：`git pull` 三个仓库即可，本轮都干净、与远端同步（FFrame `70ee2d5`、asset-line `fa7e524`、zoo `15a8a37`）。上一节「换电脑前必须带走的工作区」已经过时，不要再照着做——那些改动早就提交了。
 
 **待办**
-- 新电脑打开 `http://localhost:7456/`，点「设置」。开关在 (-180, -230)，旁边「开关」。开关窗口已看到关、开、再关。勾选框在 (80, -230)，旁边「勾选」。17:56 已经导入，还没在那次导入之后点过。先把 `checkbox`、`checkbox_mark` 的 `trimType` 改成 `none`、`packable` 改成 false，别动其它帧的边，再点一次：勾要出现，再点要消失。看和下面钻石格叠的大约 12 像素要不要挪。不要改「语言  中文」、滑条、进度条、步进、道具格，也不要改开关。
-- 下拉框还没做。齿轮旁「语言  中文」只是占位，不是多语言。预留槽 `dropdown`。类名未定。不要再把下一步说成语言行。
-- 红点、Toast。预留槽 `badge`、`toast`。
-- 输入框最后做，预留槽 `input`。
-- 图集还空着的 8 个槽：`radio`、`input`、`badge`、`dropdown`、`toast`、`count_plate`、`scrollbar`、`scrollbar_thumb`。按做到的控件再填，不预先画。
-- 文档还没对齐：`01-naming.mdc` 仍有两处写「滑条只有轨道和滑块」，公开面子节点名仍只写 `track` / `thumb`。`docs/界面组件/说明.md` 没有开关。`assets/game/README.md` 没有勾选框。
-- 虚拟列表最后做。名字待定，不沿用已删的 `GMVirtualList`。2026-11-06 的组件报错来自那个未入库脚本，不要为那条报错去改道具格。开工前先讨论范围、名字和 demo 入口。
+- 虚拟列表（另一个窗口在做）。大任务，先 grilling 定范围：A 普通滚动列表封装（N 项一次铺进 `ScrollView`，100 项以内够用，`PfGMSelect` 里已有一套可抽）还是 B 真正的回收复用（几百上千项才有意义）。动物园里最高的列表项数：背包上限 16、商店约 24、任务卡 3、待领奖励无上限。名字待定，不沿用已删的 `GMVirtualList`。
+- 红点 `badge`。首页签到、广告累计两个入口要它（`02-首页.md` 第 64 行的待实现表）。图集槽是 64×64，但红点通常 16–20，做之前要定：真做 64 的红点，还是改成小圆点 + 数字两形态。
+- 输入框 `input`。目前没有直接需求（改名、搜索都没有），可以做也可以搁置。
+- `radio`、`count_plate` 按需再填，不预先画。
+- 版本号要不要拆：下拉框和 Toast 都记在 0.7.0 里。按「只加可选字段、只加新槽升修号」严格算，应该是 0.7.1 和 0.7.2。没定。
+- 设置页齿轮旁那行「语言  中文」还是死文字。动物园策划 `13-设置.md` 写明「仅中文，不做语言选择」，所以那行在正式项目里不该存在；下拉框已经做完了，现在只是 demo 里没换成真控件。
+- `FFrame-zoo` 版本落后：`config.ts` 写 `gmajor: '0.6.3'`，框架已经 0.7.0，extension 仍是 0.5.0。等控件全部做完一起同步。
+- 规则草案还剩 1 条没落盘：「动物园这类场景的原始生成素材放 `FFrame-asset-line/scenes/<场景>/资源生成/`，被忽略，不入库，换电脑用 U 盘拷贝」。等确认后再写。
 - loading 暂时不动。
 - ticket 03 物品图在别处处理。01、02 已完成；04、05 已验证；07 部分完成。
-- 规则草案还剩 1 条没写进规则：「动物园这类场景的原始生成素材放 `FFrame-asset-line/scenes/<场景>/资源生成/`，被忽略，不入库，换电脑用 U 盘拷贝」。等确认后再写。
-- FFrame-zoo 等控件做完再同步。zoo 的 `config.ts` 仍是 `gmajor: '0.6.3'`，和已推送的框架一致。extension 版本仍是 0.5.0。盖上未提交工作区后框架是 0.6.5。
-- 给新窗口的拷贝文先讨论、不直接动工，名字由用户定。
 - `FFrame-zoo` 的 `settings/v2/packages/information.json` 留在本地，不提交。
-- 用户规则写着临时总结不 commit。这次总结也不提交。若要带着走，提交的是上面的代码和素材，不是把「必须提交总结」写成新规则。
+- 用户规则写着临时总结不 commit。这次总结也不提交。
 
 **收尾**：本记录夹做完这件事后删除，同时删掉 `docs/临时总结/索引.md` 里对应的那一行。
 
 ## 5. 产物
 
-- **`FFrame/del/`**（2026-11-08 18:51 再数，数字没变。里面包含 `开关控件/`）：
-  - 子文件夹 13 个（递归，不含自己）。
-  - 文件 57 个，5,968,449 字节。按扩展名：`.png` 44，`.mjs` 10，`.json` 2，`.js` 1。
-- **`FFrame-asset-line/del/勾选框对照/`**（勾选框窗口。脚本留在这里，对照图已拷进记录夹）：
+2026-11-12 重数。`FFrame/del/` 整体：子文件夹 119 个（递归，不含自己），文件 317 个，23,640,103 字节。按扩展名：`.png` 123、`.json` 87、`.mjs` 51、`.js` 22、`.txt` 10、`.prefab` 6、`.ts` 4、`.bin` 2、`.err` 2、`.log` 2、`.bak` 1、`.scene` 1、`.md` 1、`.css` 1、`.html` 1、`.ttf` 1、`.diff` 1、`.wasm` 1。
+
+这件事用到的子目录分开写（`del/` 根上其它旧目录不在这次范围里）：
+
+- **`FFrame/del/下拉框/`**（下拉框窗口）
+  - 子文件夹 4 个。
+  - 文件 53 个，2,394,995 字节。按扩展名：`.mjs` 14、`.png` 32、`.prefab` 3、`.ts` 4。
+- **`FFrame/del/toast/`**（轻提示窗口）
+  - 子文件夹 2 个。
+  - 文件 11 个，319,026 字节。按扩展名：`.mjs` 4、`.png` 4、`.js` 2、`.diff` 1。
+- **`FFrame/del/控件展示窗/`**（展示窗窗口）
   - 子文件夹 0 个。
-  - 文件 2 个，15,265 字节。按扩展名：`.png` 1，`.mjs` 1。
-- **`FFrame/del/开关控件/`**（开关窗口。脚本和中间图留在这里）：
+  - 文件 7 个，40,365 字节。按扩展名：`.mjs` 7。
+- **`FFrame/del/勾选框验证/`**（勾选框验证窗口）
   - 子文件夹 0 个。
-  - 文件 8 个，66,417 字节。按扩展名：`.png` 5，`.mjs` 1，`.js` 1，`.json` 1。
-  - `写入图集和设置页.mjs` 把两帧写进游戏图集和设置页。`补预览库.js` 只补预览用的 `library/`。`旧ctrl.png` 是改画前的 2048 备份。`skin-config.json` 是当时预览返回的图集配置。
-- 2026-11-06 清点过、这次路径已经不在，没有文件可数：`FFrame-zoo/del/`、`FFrame/del/替换皮肤引用/`、`FFrame/del/删除首页按钮/`、`FFrame/del/slider填充/`、`FFrame/del/slider对比/`、`FFrame/del/看道具格现状/`。归档仍以已推送的 `FFrame-asset-line/legacy/` 为准。
-- **`FFrame-asset-line/scenes/动物园/资源生成/`**：2026-11-08 这台电脑上这个目录不在。上次记的是 523 个文件、约 202MB，不在 git 里。
-- **拷进记录夹的文件**（平放在 README 旁边）：
+  - 文件 12 个，785,070 字节。按扩展名：`.png` 10、`.json` 2。
+- **`FFrame/del/勾的描边/`**（勾的居中微调）
   - 子文件夹 0 个。
-  - 文件 6 个。按扩展名：`.png` 6。分别是原来的 `track对比fill.png`，开关窗口的 `设置页开关关.png`、`设置页开关开.png`、`switch_off.png`、`switch_on.png`，勾选框窗口的 `勾选框预览.png`。
+  - 文件 15 个，290,701 字节。按扩展名：`.png` 9、`.mjs` 6。
+- **`FFrame/del/ZooV7九宫格/`**（九宫格核对）
+  - 子文件夹 0 个。
+  - 文件 1 个，18,592 字节。按扩展名：`.json` 1。
+- 已经不在的：`FFrame/del/开关控件/`、`FFrame-zoo/del/`、`FFrame/del/替换皮肤引用/`、`FFrame/del/删除首页按钮/`、`FFrame/del/slider填充/`、`FFrame/del/slider对比/`、`FFrame/del/看道具格现状/`、`FFrame-asset-line/del/勾选框对照/`。归档仍以已推送的 `FFrame-asset-line/legacy/` 为准。
+- **`FFrame-asset-line/scenes/动物园/资源生成/`**：这台电脑上这个目录不在。上次记的是 523 个文件、约 202MB，不在 git 里。
+- **记录夹里的文件**（平放在 README 旁边）
+  - 子文件夹 0 个。
+  - 文件 6 个。按扩展名：`.png` 6。`track对比fill.png`、`设置页开关关.png`、`设置页开关开.png`、`switch_off.png`、`switch_on.png`、`勾选框预览.png`。

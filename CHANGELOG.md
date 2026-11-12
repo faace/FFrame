@@ -6,7 +6,25 @@ app 在 `config.version.gmajor` 写所按的框架版本。开机只打日志，
 
 ## 0.7.0
 
-开关、勾选框和步进加了变更回调。以前只能由调用方读 `value`，现在控件自己会报。滑条的 `setOnChange` 早就有，这次把另外三个补齐，语义统一。
+加了两个控件（下拉、轻提示），另外把开关、勾选框和步进的变更回调补齐。前者是新皮新节点，后者是行为统一。
+
+### 下拉：`PfGMSelect` / `PfGMOption`
+
+- **新增（可选）**：`PfGMSelect`。子节点 `bg`、`icon`、`label`、`arrow`。预制体里带一套 `list` 骨架（`list` → `view`(Mask) → `content`，另有 `scrollBar` → `bar`），运行时克隆，用引擎 `ScrollView` 滚。
+- **新增（可选）**：`PfGMOption`，展开列表的一行。子节点 `bg`、`icon`、`label`。
+- **新增（可选）**：`GMOptionItem`（`text` + `icon`）。`setItems` / `setIndex` 不回调；`setOnChange` 只在用户点选且值真的变了时调。`index` 为 `-1` 表示不选。
+- **新增槽**：`dropdown`（收起态盒子，320×72）、`dropdown_list`（列表底板，上边直角贴住盒子）、`dropdown_item_on`（选中行）、`icon_arrow`（44×44，展开时控件自己转 180°）、`scrollbar`、`scrollbar_thumb`。行高 64，一屏最多 8 行，再多交给 `ScrollView`。
+- **行为**：点外面收起且不改值；展开方向按页面上下余量自动选。收起态的点击由调用方 `gu.addClick(node, () => sel.toggle())` 注册。
+
+### 轻提示：`PfGMToast`
+
+- **新增（可选）**：`PfGMToast`。子节点 `bg`、`label`。皮 `toast`，显示 480×72。
+- **新增（可选）**：`PfGMToast.show(text)` / `hide()` / `setAnchor('top'|'center'|'bottom')`。位置只能定一次。
+- **新增（可选）**：`gu.toastRoot()`，Overlay 上不挡输入的 `toasts` 容器。
+- **行为**：不进弹层栈、不挡输入、不可点。最多叠 3 条、间距 12，新的在最上，第 4 条挤掉最老的；同一句去重只续命。
+- **注意**：这个槽在 0.7.0 里先当可选皮。动物园当前的 `toast` 已画好（480×72，九宫格 20），没有也能跑（白图 + 一条 warn）。
+
+### 变更回调补齐
 
 - **新增（可选）**：`PfGMSwitch.setOnChange(cb)` / `PfGMCheck.setOnChange(cb)` / `PfGMStepper.setOnChange(cb)`。
 - **新增（可选）**：`PfGMSwitch.toggle()` / `PfGMCheck.toggle()`，翻转并回调。`PfGMStepper.stepBy(delta)`，走一步并回调；夹完的值和原值相同时不回调。

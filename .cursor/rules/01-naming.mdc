@@ -174,8 +174,8 @@ export class PfX extends GMScene {}
 - 可复用控件（按钮、标题等）的**脚本和结构**进 `gmajor`，不进本游戏功能包，不另开 Widget 库。
 - **控件不许压背景边框**。控件、说明字、展开层（下拉列表、页签 panel 等）一律落在所在弹窗 / 页面背景的九宫格内沿以里，不许压在背景那圈 `panel` 边框上（两块木框叠在一起会像被裁掉一块）。校验：`背景内沿 = 页面半宽 − panel 的 border`，`左边 = x − 宽/2`、`右边 = x + 宽/2` 都要落在内沿内并留余量；展开层比收起态宽时同样算。
 - **并排改纵向排时，`x` 和宽度一起改**。只改 `y` 会留下并排时的横向偏移和窄宽度，控件照样压边框。改成居中全宽再核对一遍左右边缘。
-- **框架自带预制体：`Pf` + `GM` + 名**。按钮 `PfGMBtn`，标题 `PfGMTitle`，滑条 `PfGMSlider`，进度条 `PfGMBar`，步进 `PfGMStepper`，页签 `PfGMTabs`。弹层预制体同样：`Ly` + `GM` + 名（`LyGMXxx`）。先看出是 Pf 还是 Ly，再看出是框架的。
-- 框架控件根锚点在中心。滑条只有轨道和滑块，旁边的图标和字由调用方摆。宽读根节点，高不跟。`value` 为 0–1，`setValue` 和检查器同一份。拖动自己听，loading 开着时这次丢掉。`setOnChange` 只在手指按下或移动时叫，`setValue` 不叫。
+- **框架自带预制体：`Pf` + `GM` + 名**。按钮 `PfGMBtn`，标题 `PfGMTitle`，滑条 `PfGMSlider`，进度条 `PfGMBar`，步进 `PfGMStepper`，页签 `PfGMTabs`，开关 `PfGMSwitch`，勾选框 `PfGMCheck`，道具格 `PfGMItemCell`，下拉 `PfGMSelect` / `PfGMOption`，轻提示 `PfGMToast`。弹层预制体同样：`Ly` + `GM` + 名（`LyGMXxx`）。先看出是 Pf 还是 Ly，再看出是框架的。
+- 框架控件根锚点在中心。滑条只含轨道、填充、滑块和运行时建的裁剪层，旁边的图标和字由调用方摆。宽读根节点，高不跟。`value` 为 0–1，`setValue` 和检查器同一份。拖动自己听，loading 开着时这次丢掉。`setOnChange` 只在手指按下或移动时叫，`setValue` 不叫。
 - 进度条只有槽和填充。皮 `bar_bg`、`bar_fill`，自己切九宫格。`value` 为 0–1，不拖、不设 `onChange`。填充的 x 锚点为 0，从左侧往右长。四周留白写在脚本顶部。条上的白字描边宽 3。
 - 白字描边宽统一 3，跟 `PfGMBtn`。道具格数量、进度条上的字也是 3。奶油底上的深色字不描边：标题、步进数字、页签字、说明字。不要再写 2 或 4。
 - 要一颗按钮就嵌 `PfGMBtn`，只盖节点名、坐标、档位、主题、版式、字、图标。不要在脚本里临时 `createTs` 一颗按钮来试，也不要改它的描边、字号、尺寸。
@@ -203,7 +203,7 @@ export class PfX extends GMScene {}
 
 ## 兼容
 
-- 公开面：`config` 的 `boot` / `entry` / `alert`、`gm.boot`、确认框节点名（`body` / `btnOk` / `btnCancel` / `label`）、框架写死的皮肤槽、`PfGM*` 子节点名（滑条 `track` / `thumb`，进度条 `bg` / `fill`）。
+- 公开面：`config` 的 `boot` / `entry` / `alert`、`gm.boot`、`gu.toastRoot`、确认框节点名（`body` / `btnOk` / `btnCancel` / `label`）、框架写死的皮肤槽、`PfGM*` 子节点名（滑条 `track` / `thumb` / `fillClip` / `fill`，进度条 `bg` / `fill` / `label`，页签 `tabs` / `panel`，开关 `face`，勾选框 `box` / `mark`，道具格 `bg` / `icon` / `frame` / `label`，下拉 `bg` / `icon` / `label` / `arrow`，下拉行 `bg` / `icon` / `label`，轻提示 `bg` / `label`）。
 - 这些改名、删字段、改节点名：升 `gm.version`（`GMLauncher`），并在仓库根 `CHANGELOG.md` 写破坏项和改法。
 - 版本号 `主.次.修`：0.x 阶段破坏性改动升「次」；只加可选字段、只加新槽升「修」。app 在 `config.version.gmajor` 写所按的框架版本；开机只打印日志，不一致只警告，不拦截，由人判断。
 - 各 app 不锁框架版本：app 的 `extensions/gmajor` 用相对路径指向兄弟目录 `FFrame/gmajor`（只读）。尽量保持兼容，实在不兼容再同步各 app。
@@ -270,7 +270,9 @@ export class PfX extends GMScene {}
 ✅ DemoHome/ScDemoHome.scene + DemoHome/ScDemoHome.ts（同目录；Canvas 下空节点；extends GMScene）
 ✅ DemoHome/PfRewardPopup.prefab + DemoHome/PfRewardPopup.ts（同目录，挂根节点；extends GMComponent）
 ✅ gmajor/…/PfGMBtn.prefab + PfGMBtn.ts（框架预制体；extends GMComponent）
-✅ gmajor/…/PfGMSlider、PfGMBar、PfGMStepper（滑条只含轨道和滑块；进度条 bar_bg/bar_fill；步进加减嵌套 PfGMBtn）
+✅ gmajor/…/PfGMSlider、PfGMBar、PfGMStepper（滑条含轨道、填充、滑块和裁剪层；进度条 bar_bg/bar_fill；步进加减嵌套 PfGMBtn）
+✅ gmajor/…/PfGMSwitch（face）、PfGMCheck（box/mark）、PfGMItemCell（bg/icon/frame/label）
+✅ gmajor/…/PfGMSelect（bg/icon/label/arrow + 内嵌 list 骨架）、PfGMOption（bg/icon/label）、PfGMToast（bg/label）
 ✅ 普通弹窗 extends GMFrame（默认 620×800；铆钉压棕色顶边；左上角有回调才出现）
 ✅ 界面图小写蛇形：btn_primary、title_bar、icon_close、panel
 ✅ 嵌套 PfGMBtn / PfGMTitle 只盖差异项（名、坐标、档位、主题、版式、text、图标；标题字在 Label 上）

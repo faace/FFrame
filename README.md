@@ -126,16 +126,25 @@ Overlay 是框架自己的常驻节点。第一次打开场景、弹层或确认
 | `tab_normal` | `PfGMTabs` 未选中的页签 |
 | `tab_selected` | `PfGMTabs` 选中的页签 |
 | `panel` | `PfGMTabs` 下面的板 |
+| `dropdown` | `PfGMSelect` 收起态的盒子。320×72 |
+| `dropdown_list` | `PfGMSelect` 展开列表的底板，上边直角贴住盒子 |
+| `dropdown_item_on` | `PfGMOption` 选中那一行。草地绿 |
+| `icon_arrow` | `PfGMSelect` 右侧箭头，展开时控件转 180° |
+| `scrollbar` | `PfGMSelect` 展开列表的滚动条槽 |
+| `scrollbar_thumb` | 滚动条滑块，九宫格纵向拉伸 |
+| `slot_item` | `PfGMItemCell` 的木格底 |
+| `frame_select` | `PfGMItemCell` 的选中框，默认隐藏 |
+| `toast` | `PfGMToast` 的底板。480×72 |
 
 主题枚举仍然叫 `primary` 这些。取图时拼成 `btn_` 加主题名，所以文件名能看出是按钮底板。
 
-按钮、标题、滑条轨道、进度条的槽和填充、步进板、页签和 `panel` 按子图上的九宫格拉伸。图标和文字拖进控件才显示，没设就空着。关闭钮用的图标槽是 `icon_close`，由预制体引用，不是 `PfGMBtn` 按名字去取。
+按钮、标题、滑条轨道、进度条的槽和填充、步进板、页签、下拉盒子和列表底板、轻提示板、`panel` 按子图上的九宫格拉伸。图标和文字拖进控件才显示，没设就空着。关闭钮用的图标槽是 `icon_close`，由预制体引用，不是 `PfGMBtn` 按名字去取。
 
 ### 框架不会按名字来取
 
 示例和业务自己 `addSkin` 时会用到。新游戏可以不带。
 
-`slider_fill`、`frame_select`、`slot_item`、`icon_close`、`icon_help`、`icon_settings`、`icon_energy`、`icon_plus`、`icon_minus`、`icon_music`、`icon_gold`、`icon_sfx`、`icon_ad`、`icon_diamond`。
+`slider_fill`、`icon_close`、`icon_help`、`icon_settings`、`icon_energy`、`icon_plus`、`icon_minus`、`icon_music`、`icon_gold`、`icon_sfx`、`icon_ad`、`icon_diamond`。
 
 只有一张、种类本身就是名字的，不再加第二段，所以面板底叫 `panel`。
 
