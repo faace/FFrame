@@ -1,8 +1,14 @@
-import { _decorator, Label, Node, UITransform } from 'cc';
-import { GMFrame, GMOptionItem, gu, PfGMBar, PfGMBtn, PfGMCheck, PfGMItemCell, PfGMSelect, PfGMSlider, PfGMStepper, PfGMSwitch, PfGMTabs } from 'db://gmajor/index';
+import { _decorator, assetManager, Color, Label, Node, Prefab, TTFFont, UITransform } from 'cc';
+import { GMFrame, GMOptionItem, gu, PfGMBar, PfGMBtn, PfGMBtnSize, PfGMBtnStyle, PfGMBtnTheme, PfGMCheck, PfGMItemCell, PfGMSelect, PfGMSlider, PfGMStepper, PfGMSwitch, PfGMTabs, PfGMToast } from 'db://gmajor/index';
 import { loadSkin } from '../../GameUI/SkinKit';
 
 const { ccclass } = _decorator;
+
+/** 轻提示那三颗按钮和结果行在展示页的 y。放在道具格那排下面 */
+const TOAST_ROW_Y = -280;
+const TOAST_NOTE_Y = -360;
+const TOAST_BTN_W = 160; // 中档高 88，宽压到 160 才三颗排得下（160×3 + 缝）
+const TOAST_BTN_H = 88;
 
 /** 页节点名与页签标题。节点在预制体里是 panel 的子节点，运行时收进页签 */
 const PAGES: Array<[string, string]> = [
@@ -112,19 +118,29 @@ export class LyControls extends GMFrame {
             gu.addClick(check.node, () => check.toggle());
         } else console.error('[LyControls] 没有勾选框');
 
-        this.bindSelect(page.getChildByName('ctlSelectText')?.getComponent(PfGMSelect) ?? null,
-            [this.option('简单'), this.option('普通'), this.option('困难')], 1, '下拉');
-        this.bindSelect(page.getChildByName('ctlSelectIcon')?.getComponent(PfGMSelect) ?? null, [
+        this.bindSelect(page.getChildByName('ctlSelectDown')?.getComponent(PfGMSelect) ?? null, [
             this.option('星星', 'icon_star'),
             this.option('金币', 'icon_gold'),
             this.option('钻石', 'icon_diamond'),
-        ], 0, '物品');
+            this.option('宝箱', 'icon_chest'),
+            this.option('礼物', 'icon_gift'),
+            this.option('钥匙', 'icon_key'),
+            this.option('船票', 'icon_ticket'),
+            this.option('奖杯', 'icon_trophy'),
+            this.option('皇冠', 'icon_crown'),
+            this.option('锁', 'icon_lock'),
+            this.option('商店', 'icon_shop'),
+            this.option('邮件', 'icon_mail'),
+            this.option('背包', 'icon_bag'),
+            this.option('地图', 'icon_map'),
+            this.option('木头', 'icon_wood'),
+            this.option('叶子', 'icon_leaf'),
+            this.option('肉', 'icon_meat'),
+            ...Array.from({ length: 33 }, (_, i) => this.option(`选项 ${i + 18}`)),
+        ], 0, '向下');
+
         this.bindSelect(page.getChildByName('ctlSelectUp')?.getComponent(PfGMSelect) ?? null,
             [this.option('上'), this.option('中'), this.option('下')], 2, '向上');
-
-        const many: GMOptionItem[] = []; // 50 项：验滚动和长列表，放页面顶部必然向下弹
-        for (let i = 1; i <= 50; i++) many.push(this.option(`选项 ${i}`));
-        this.bindSelect(page.getChildByName('ctlSelectMany')?.getComponent(PfGMSelect) ?? null, many, 0, '50 项');
     }
 
     /** 造一项。检查器里是 GMOptionItem，代码里也用它，别用裸对象 */
@@ -160,6 +176,73 @@ export class LyControls extends GMFrame {
             if (!cell) continue;
             gu.addClick(child, () => cell.setSelected(!cell.selected));
         }
+        this.bindToast(page);
+    }
+
+    /** 轻提示三颗：一条、三条、长句。节点运行时建（预制体里手写嵌套实例会被 Creator 丢掉） */
+    private bindToast(page: Node): void {
+        const bundle = assetManager.getBundle('GMUI');
+        if (!bundle) return console.error('[LyControls] 没有 GMUI，轻提示按钮建不出来');
+        bundle.load('PfGMBtn', Prefab, (err, prefab) => {
+            if (err || !prefab) return console.error('[LyControls] 按钮预制体加载失败', err);
+            if (!page.isValid) return;
+            const note = this.makeNote(page);
+            const say = (msg: string): void => {
+                if (note?.isValid) note.string = msg;
+            };
+            const items: Array<[number, string, () => void]> = [
+                [-186, '一条', () => {
+                    PfGMToast.show('棋盘已满，请先整理');
+                    say('发了一条。看顶部，2 秒后自己消失');
+                }],
+                [0, '三条', () => {
+                    PfGMToast.show('第一条　完成合成任务获得园景素材');
+                    PfGMToast.show('第二条　提示不适用');
+                    PfGMToast.show('第三条　棋盘已满，请先整理');
+                    say('发了三条。新的在最上，间距 12；再发一条会挤掉最老的');
+                }],
+                [186, '长句', () => {
+                    PfGMToast.show('这句很长，超过十二个字以后每字加五十毫秒，最后封顶在三秒半，用来验缩字号不换行');
+                    say('发了一条长的。字号自动缩，不换行，时长封顶 3.5 秒');
+                }],
+            ]; // 左 / 中 / 右三颗，中档宽 160
+            items.forEach(([x, text, cb], i) => {
+                const ts = gu.createTs(prefab, { parent: page, x, y: TOAST_ROW_Y });
+                if (!(ts instanceof PfGMBtn)) return console.error('[LyControls] 轻提示按钮没挂上', text);
+                ts.setSize(PfGMBtnSize.medium);
+                ts.setTheme(PfGMBtnTheme.secondary);
+                ts.setStyle(PfGMBtnStyle.text);
+                ts.setText(text);
+                ts.node.getComponent(UITransform)?.setContentSize(TOAST_BTN_W, TOAST_BTN_H); // 档位定完再改宽，顺序不能反
+                ts.node.name = 'btnToast' + i;
+                gu.addClick(ts.node, cb);
+            });
+        });
+    }
+
+    /** 展示页底部那行说明。运行时建，跟着轻提示按钮一起出现 */
+    private makeNote(page: Node): Label | null {
+        const node = new Node('toastNote');
+        node.layer = page.layer;
+        page.addChild(node);
+        node.setPosition(0, TOAST_NOTE_Y, 0);
+        node.getComponent(UITransform) ?? node.addComponent(UITransform);
+        node.getComponent(UITransform)!.setContentSize(560, 40);
+        const label = node.addComponent(Label);
+        label.string = '轻提示 PfGMToast：点上面三颗试试';
+        label.fontSize = 20;
+        label.lineHeight = 24;
+        label.color = new Color(132, 112, 88, 255);
+        label.horizontalAlign = Label.HorizontalAlign.CENTER;
+        label.verticalAlign = Label.VerticalAlign.CENTER;
+        label.overflow = Label.Overflow.SHRINK;
+        label.enableWrapText = false;
+        const font = assetManager.assets.get('ee40121d-0b21-4bb3-b95c-fa7d2df322b4') as TTFFont | undefined;
+        if (font) {
+            label.font = font;
+            label.isSystemFontUsed = false;
+        }
+        return label;
     }
 
     /** 选择页的回调结果写到页面底部，不弹窗 */
