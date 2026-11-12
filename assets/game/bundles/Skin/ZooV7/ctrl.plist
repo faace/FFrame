@@ -469,6 +469,21 @@
 			<key>textureRotated</key>
 			<false/>
 		</dict>
+		<key>toast.png</key>
+		<dict>
+			<key>aliases</key>
+			<array/>
+			<key>spriteOffset</key>
+			<string>{0,0}</string>
+			<key>spriteSize</key>
+			<string>{480,72}</string>
+			<key>spriteSourceSize</key>
+			<string>{480,72}</string>
+			<key>textureRect</key>
+			<string>{{352,785},{480,72}}</string>
+			<key>textureRotated</key>
+			<false/>
+		</dict>
 	</dict>
 	<key>metadata</key>
 	<dict>

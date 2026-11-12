@@ -91,6 +91,7 @@ export class GMUIManager {
     private layersRoot: Node | null = null;
     private loadingRoot: Node | null = null;
     private alertsRoot: Node | null = null;
+    private toastsRoot: Node | null = null; // 轻提示；满屏但不挡输入
     private loadingVisual: Node | null = null;
     private readonly layers: LayerItem[] = [];
     private readonly alerts: AlertItem[] = [];
@@ -173,6 +174,7 @@ export class GMUIManager {
         this.layersRoot = this.makeFullNode('layers', root);
         this.loadingRoot = this.makeFullNode('loading', root);
         this.alertsRoot = this.makeFullNode('alerts', root); // 最上：等待中也能点确认
+        this.toastsRoot = this.makeFullNode('toasts', root); // 轻提示：画在确认框之上，不吃事件
         this.makeLayerMaskTpl(root);
         this.loadingRoot.addComponent(BlockInputEvents);
         this.loadingRoot.active = false;
@@ -194,6 +196,12 @@ export class GMUIManager {
         this.overlay = root;
         this.syncOverlayToView();
         console.info('[gm.ui] Overlay 已创建');
+    }
+
+    /** 轻提示容器。PfGMToast 挂这下面；满屏、透明、不挡输入 */
+    toastRoot(): Node | null {
+        this.ensureOverlay();
+        return this.toastsRoot;
     }
 
     openScene(sceneName: string, options: GMOpenSceneOptions, onComplete?: GMAsyncComplete, onProgress?: GMAsyncProgress): void {

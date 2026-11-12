@@ -36,6 +36,7 @@ export { PfGMStepper } from './ui/PfGMStepper'; // 框架步进；嵌套 PfGMBtn
 export { PfGMItemCell } from './ui/PfGMItemCell'; // 框架道具格；底+图标+选中框+数量；setIcon / selected / setCount
 export { PfGMSelect, GMOptionItem } from './ui/PfGMSelect'; // 框架下拉；收起态 bg/icon/label/arrow；items；index；setOnChange 只在用户点选时叫
 export { PfGMOption } from './ui/PfGMOption'; // 框架下拉行；底+图标+字；选中换绿底白字；点击由调用方注册
+export { PfGMToast, GMToastAnchor } from './ui/PfGMToast'; // 轻提示；show 一句、自动消失、不挡操作；最多叠 3 条
 export { GMTabPage } from './ui/GMTabPage'; // 页签内容基类；onShow/onHide(done)；text/setText
 export { PfGMTabs, GMTabSource } from './ui/PfGMTabs'; // 框架页签；tabs+panel；index；insert/remove
 export { loadSkin, setSkinTheme, applySkin, skinFrame, SKIN_BUNDLE } from './ui/GMSkin'; // 游戏 Skin 包；setSkinTheme 告诉编辑器当前主题；缺槽用内置白图

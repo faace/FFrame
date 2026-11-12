@@ -1432,6 +1432,52 @@
         ".json"
       ],
       "subMetas": {}
+    },
+    "4f72f": {
+      "importer": "sprite-frame",
+      "uuid": "4b756a97-47ca-464f-b3f7-c780df66202c@4f72f",
+      "displayName": "",
+      "id": "4f72f",
+      "name": "toast",
+      "userData": {
+        "trimThreshold": 1,
+        "rotated": false,
+        "offsetX": 0,
+        "offsetY": 0,
+        "trimX": 352,
+        "trimY": 785,
+        "width": 480,
+        "height": 72,
+        "rawWidth": 480,
+        "rawHeight": 72,
+        "borderTop": 20,
+        "borderBottom": 20,
+        "borderLeft": 20,
+        "borderRight": 20,
+        "packable": false,
+        "pixelsToUnit": 100,
+        "pivotX": 0.5,
+        "pivotY": 0.5,
+        "meshType": 0,
+        "vertices": {
+          "rawPosition": [],
+          "indexes": [],
+          "uv": [],
+          "nuv": [],
+          "minPos": [],
+          "maxPos": []
+        },
+        "isUuid": true,
+        "imageUuidOrDatabaseUri": "aa568272-60fa-4a2c-9332-92819cbeb1d1@6c48a",
+        "atlasUuid": "4b756a97-47ca-464f-b3f7-c780df66202c",
+        "trimType": "none"
+      },
+      "ver": "1.0.12",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {}
     }
   },
   "userData": {

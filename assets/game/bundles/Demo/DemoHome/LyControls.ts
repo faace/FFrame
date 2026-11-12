@@ -4,11 +4,11 @@ import { loadSkin } from '../../GameUI/SkinKit';
 
 const { ccclass } = _decorator;
 
-/** 轻提示那三颗按钮和结果行在展示页的 y。放在道具格那排下面 */
+/** 轻提示那三颗按钮、标题和结果行在展示页的 y。放在道具格那排下面 */
+const TOAST_HEAD_Y = -212; // 标题「轻提示　PfGMToast」
 const TOAST_ROW_Y = -280;
-const TOAST_NOTE_Y = -360;
-const TOAST_BTN_W = 160; // 中档高 88，宽压到 160 才三颗排得下（160×3 + 缝）
-const TOAST_BTN_H = 88;
+const TOAST_NOTE_Y = -352;
+const TOAST_BTN_X = 200; // 小档宽 180，三颗中心在 -200 / 0 / 200，相邻边距 20
 
 /** 页节点名与页签标题。节点在预制体里是 panel 的子节点，运行时收进页签 */
 const PAGES: Array<[string, string]> = [
@@ -179,7 +179,7 @@ export class LyControls extends GMFrame {
         this.bindToast(page);
     }
 
-    /** 轻提示三颗：一条、三条、长句。节点运行时建（预制体里手写嵌套实例会被 Creator 丢掉） */
+    /** 轻提示三颗：弹一条、连点同一句、弹三条。节点运行时建（预制体里手写嵌套实例会被 Creator 丢掉） */
     private bindToast(page: Node): void {
         const bundle = assetManager.getBundle('GMUI');
         if (!bundle) return console.error('[LyControls] 没有 GMUI，轻提示按钮建不出来');
@@ -190,30 +190,53 @@ export class LyControls extends GMFrame {
             const say = (msg: string): void => {
                 if (note?.isValid) note.string = msg;
             };
-            const items: Array<[number, string, () => void]> = [
-                [-186, '一条', () => {
+            // 标题：说清这三颗在测什么（和上面「进度条 / 道具格」那两行同一个位置风格）
+            const head = new Node('toastHead');
+            head.layer = page.layer;
+            page.addChild(head);
+            head.setPosition(0, TOAST_HEAD_Y, 0);
+            head.addComponent(UITransform).setContentSize(480, 30);
+            const headLabel = head.addComponent(Label);
+            headLabel.string = '轻提示　PfGMToast';
+            headLabel.fontSize = 22;
+            headLabel.lineHeight = 30;
+            headLabel.color = new Color(92, 64, 32, 255);
+            headLabel.horizontalAlign = Label.HorizontalAlign.CENTER;
+            headLabel.verticalAlign = Label.VerticalAlign.CENTER;
+            headLabel.overflow = Label.Overflow.SHRINK;
+            headLabel.enableWrapText = false;
+            const headFont = assetManager.assets.get('ee40121d-0b21-4bb3-b95c-fa7d2df322b4') as TTFFont | undefined;
+            if (headFont) {
+                headLabel.font = headFont;
+                headLabel.isSystemFontUsed = false;
+            }
+            const items: Array<[number, string, PfGMBtnTheme, () => void]> = [
+                [-TOAST_BTN_X, '提示一次', PfGMBtnTheme.primary, () => {
                     PfGMToast.show('棋盘已满，请先整理');
-                    say('发了一条。看顶部，2 秒后自己消失');
+                    say('弹了一条。再点几次会一条条往下加');
                 }],
-                [0, '三条', () => {
+                [0, '连点同句', PfGMBtnTheme.info, () => {
+                    PfGMToast.show('连点同一句');
+                    PfGMToast.show('连点同一句');
+                    PfGMToast.show('连点同一句');
+                    say('同一句连发三次就是三条，各走各的计时');
+                }],
+                [TOAST_BTN_X, '三条一起', PfGMBtnTheme.warning, () => {
                     PfGMToast.show('第一条　完成合成任务获得园景素材');
                     PfGMToast.show('第二条　提示不适用');
                     PfGMToast.show('第三条　棋盘已满，请先整理');
-                    say('发了三条。新的在最上，间距 12；再发一条会挤掉最老的');
+                    say('三条叠成一列，新的从下面升上来');
                 }],
-                [186, '长句', () => {
-                    PfGMToast.show('这句很长，超过十二个字以后每字加五十毫秒，最后封顶在三秒半，用来验缩字号不换行');
-                    say('发了一条长的。字号自动缩，不换行，时长封顶 3.5 秒');
-                }],
-            ]; // 左 / 中 / 右三颗，中档宽 160
-            items.forEach(([x, text, cb], i) => {
+            ]; // 左 / 中 / 右三颗，小档 180×64
+            items.forEach(([x, text, theme, cb], i) => {
+                // 尺寸只交给 setSize，绝不再改 contentSize：PfGMBtn 里 width = Math.max(档位宽, 当前宽)，
+                // 改了会被它拉回去，三颗就会撞在一起。
                 const ts = gu.createTs(prefab, { parent: page, x, y: TOAST_ROW_Y });
                 if (!(ts instanceof PfGMBtn)) return console.error('[LyControls] 轻提示按钮没挂上', text);
-                ts.setSize(PfGMBtnSize.medium);
-                ts.setTheme(PfGMBtnTheme.secondary);
                 ts.setStyle(PfGMBtnStyle.text);
+                ts.setSize(PfGMBtnSize.small);
+                ts.setTheme(theme);
                 ts.setText(text);
-                ts.node.getComponent(UITransform)?.setContentSize(TOAST_BTN_W, TOAST_BTN_H); // 档位定完再改宽，顺序不能反
                 ts.node.name = 'btnToast' + i;
                 gu.addClick(ts.node, cb);
             });
@@ -229,7 +252,7 @@ export class LyControls extends GMFrame {
         node.getComponent(UITransform) ?? node.addComponent(UITransform);
         node.getComponent(UITransform)!.setContentSize(560, 40);
         const label = node.addComponent(Label);
-        label.string = '轻提示 PfGMToast：点上面三颗试试';
+        label.string = '点上面三颗，看屏幕上方';
         label.fontSize = 20;
         label.lineHeight = 24;
         label.color = new Color(132, 112, 88, 255);
