@@ -1,5 +1,5 @@
 ---
-description: Bundle/功能目录/绑定名、Sc/Ly/Pf、双基类、layer 结构（根+panel、mask 克隆）、界面控件进 gmajor、默认皮、换皮、数据 watch、业务事件 on、事件大类前缀（Gp/Bind）、平台 gp.call/send、loading、addClick、createTs、动态 UI 挂 Canvas、双窗数据权。新建或改 Bundle、场景、预制体、gmajor/game 脚本时引用。用户说数据变了刷新 UI、金币/字段变化、监听事件、事件前缀、Gp、gp.call、平台通道、原生回包、新建功能包、异步等待、挡住操作、loading、注册点击、addClick、列表项、createTs、按钮看不见、动态创建节点、新建 Ly、layer 结构、mask、panel、生成 Ly 预制体、弹窗标题、关闭钮、GMFrame、不要标题、不要底框、左上角、铆钉、Ly 后不加 Popup、按钮组件、PfGMBtn、描边、白字、次要、加减、关闭、PfGMSlider、PfGMBar、PfGMStepper、PfGMTabs、滑条、进度条、步进、页签、默认皮、换皮、Skin、plist、主题图集、界面图蛇形、btn_、按钮底板、九宫格、圆角、AI 风格稿、改 gmajor 还是游戏、兼容、升 gm.version、嵌套覆盖、只留差异项、双窗、第二窗、指令回矿、UI 不落盘、Bundle 内 res/spine/font/anim/prefab、目录小驼峰或大驼峰、实例节点、图片蛇形、文件名英文时也引用。
+description: Bundle/功能目录/绑定名、Sc/Ly/Pf、双基类、layer 结构（根+panel、mask 克隆）、界面控件进 gmajor、默认皮、换皮、控件不压背景边框、并排改纵向要连 x 和宽一起改、数据 watch、业务事件 on、事件大类前缀（Gp/Bind）、平台 gp.call/send、loading、addClick、createTs、动态 UI 挂 Canvas、双窗数据权。新建或改 Bundle、场景、预制体、gmajor/game 脚本时引用。用户说数据变了刷新 UI、金币/字段变化、监听事件、事件前缀、Gp、gp.call、平台通道、原生回包、新建功能包、异步等待、挡住操作、loading、注册点击、addClick、列表项、createTs、按钮看不见、动态创建节点、新建 Ly、layer 结构、mask、panel、生成 Ly 预制体、弹窗标题、关闭钮、GMFrame、不要标题、不要底框、左上角、铆钉、Ly 后不加 Popup、按钮组件、PfGMBtn、描边、白字、次要、加减、关闭、PfGMSlider、PfGMBar、PfGMStepper、PfGMTabs、滑条、进度条、步进、页签、默认皮、换皮、Skin、plist、主题图集、界面图蛇形、btn_、按钮底板、九宫格、圆角、压边框、贴边、超出弹窗、控件太宽、并排改竖向、AI 风格稿、改 gmajor 还是游戏、兼容、升 gm.version、嵌套覆盖、只留差异项、双窗、第二窗、指令回矿、UI 不落盘、Bundle 内 res/spine/font/anim/prefab、目录小驼峰或大驼峰、实例节点、图片蛇形、文件名英文时也引用。
 globs: assets/game/**,gmajor/**,**/*.{scene,prefab}
 alwaysApply: false
 ---
@@ -172,6 +172,8 @@ export class PfX extends GMScene {}
 ## 界面控件与默认皮
 
 - 可复用控件（按钮、标题等）的**脚本和结构**进 `gmajor`，不进本游戏功能包，不另开 Widget 库。
+- **控件不许压背景边框**。控件、说明字、展开层（下拉列表、页签 panel 等）一律落在所在弹窗 / 页面背景的九宫格内沿以里，不许压在背景那圈 `panel` 边框上（两块木框叠在一起会像被裁掉一块）。校验：`背景内沿 = 页面半宽 − panel 的 border`，`左边 = x − 宽/2`、`右边 = x + 宽/2` 都要落在内沿内并留余量；展开层比收起态宽时同样算。
+- **并排改纵向排时，`x` 和宽度一起改**。只改 `y` 会留下并排时的横向偏移和窄宽度，控件照样压边框。改成居中全宽再核对一遍左右边缘。
 - **框架自带预制体：`Pf` + `GM` + 名**。按钮 `PfGMBtn`，标题 `PfGMTitle`，滑条 `PfGMSlider`，进度条 `PfGMBar`，步进 `PfGMStepper`，页签 `PfGMTabs`。弹层预制体同样：`Ly` + `GM` + 名（`LyGMXxx`）。先看出是 Pf 还是 Ly，再看出是框架的。
 - 框架控件根锚点在中心。滑条只有轨道和滑块，旁边的图标和字由调用方摆。宽读根节点，高不跟。`value` 为 0–1，`setValue` 和检查器同一份。拖动自己听，loading 开着时这次丢掉。`setOnChange` 只在手指按下或移动时叫，`setValue` 不叫。
 - 进度条只有槽和填充。皮 `bar_bg`、`bar_fill`，自己切九宫格。`value` 为 0–1，不拖、不设 `onChange`。填充的 x 锚点为 0，从左侧往右长。四周留白写在脚本顶部。条上的白字描边宽 3。
