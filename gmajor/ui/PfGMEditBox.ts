@@ -40,7 +40,6 @@ export class PfGMEditBox extends GMComponent {
     private onChange: ((text: string) => void) | null = null; // 每改一个字叫，setText 不走这里
     private onDone: ((text: string) => void) | null = null; // 失焦或回车离开时叫
 
-    @property
     // 字段本体。检查器改属性走 setter，改了就当场重派
     private _maxLength = PF_GM_EDIT_BOX.maxLength;
     private _numeric = false;
