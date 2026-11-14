@@ -4,6 +4,33 @@
 
 app 在 `config.version.gmajor` 写所按的框架版本。开机只打日志，主.次不同时多打一条警告，不拦截。升级后怎么判断：看这里的破坏项，再跑一遍。
 
+## 0.8.0
+
+步进中间改成输入框，可以直接打字。另外去掉 `PfGMStepper` / `PfGMEditBox` 的 `update()`，改成跟引擎一样的属性 setter。
+
+### 步进：`PfGMStepper` 中间换成 `PfGMEditBox`
+
+- **破坏（需改预制体）**：`plate` 从「Sprite + 同层 label」变成 `PfGMEditBox` 实例。新结构 `plate` → `bg`、`text` → `label`、`placeholder`。
+- **新增（可选）**：中间可以点进去手打数字。打完失焦或回车，按 `min` / `max` 夹紧并回写。
+- **新增（可选）**：只收数字（`InputMode.NUMERIC`，移动端弹数字键盘），最多 3 位（`PF_GM_STEPPER.maxDigits`）。
+- **行为**：点 `+` / `−` 前会先把中间输入框里没提交的字收进来，再加减。夹完等于原值时不回调。
+- **行为**：中间数字默认居中（`PfGMEditBoxAlign.center`），跟两边加减对称。
+- **改法**：预制体里那个空的 `plate`（旧 Sprite）删掉，把 `PfGMEditBox` 拖进来改名 `plate`，尺寸 140×72、位置 (0,0)。
+
+### 输入框：加对齐、数字模式
+
+- **新增（可选）**：`PfGMEditBoxAlign`（`left` / `center` / `right`），属性 `align`。`setAlign()` 等价写法。默认靠左。
+- **新增（可选）**：`numeric` 属性，换成数字键盘并滤掉非数字（粘贴也滤）。
+- **新增（可选）**：`maxLength` 变成可写属性，调用方可以改小。
+- **新增（可选）**：`configure(numeric, maxLength)` 一次写完这两项。
+
+### 去掉 `update()`
+
+- **改动**：`PfGMStepper` 的 `value` / `min` / `max` / `step`、`PfGMEditBox` 的 `align` / `numeric` / `maxLength` 都改成 getter + setter。setter 里 `===` 相等早退，不等才重排，跟引擎 `Label.string`、`Sprite.spriteFrame` 一个路子。
+- **行为**：检查器改这些属性仍会当场重派，不再靠每帧比对。
+- **注意**：反序列化时 setter 会先于 `onInit` 跑，两个控件都做了「节点还没绑就跳过」的保护。
+- **未改**：其余 10 个控件仍用 `update()` + `stamp`。留到统一优化时一起换。
+
 ## 0.7.1
 
 加了输入框。引擎 `cc.EditBox` 换皮，单行、32 字上限。点击聚焦、光标、输入法都是引擎自己做的。

@@ -1,8 +1,16 @@
-import { _decorator, Color, EditBox, Label, Node, Sprite, UITransform } from 'cc';
+import { _decorator, Color, EditBox, Enum, Label, Node, Sprite, UITransform } from 'cc';
 import { GMComponent } from './GMComponent';
 import { applySkin } from './GMSkin';
 
-const { ccclass, executeInEditMode } = _decorator;
+const { ccclass, executeInEditMode, property } = _decorator;
+
+/** 字在输入区里的水平位置。默认靠左，跟文本框一致 */
+export enum PfGMEditBoxAlign {
+    left = 0,
+    center = 1,
+    right = 2,
+}
+Enum(PfGMEditBoxAlign);
 
 /** 输入框。高固定 72 跟皮槽一致，宽可以改。字号和两个颜色是这一层唯一要管的事 */
 const PF_GM_EDIT_BOX = {
@@ -32,16 +40,52 @@ export class PfGMEditBox extends GMComponent {
     private onChange: ((text: string) => void) | null = null; // 每改一个字叫，setText 不走这里
     private onDone: ((text: string) => void) | null = null; // 失焦或回车离开时叫
 
+    @property
+    // 字段本体。检查器改属性走 setter，改了就当场重派
+    private _maxLength = PF_GM_EDIT_BOX.maxLength;
+    private _numeric = false;
+    private _align = PfGMEditBoxAlign.left;
+
+    @property
+    get maxLength(): number {
+        return this._maxLength;
+    }
+    set maxLength(v: number) {
+        if (this._maxLength === v) return;
+        this._maxLength = v;
+        if (this.box) this.box.maxLength = v;
+    }
+
+    @property
+    get numeric(): boolean {
+        return this._numeric;
+    }
+    set numeric(v: boolean) {
+        if (this._numeric === v) return;
+        this._numeric = v;
+        if (this.box) this.box.inputMode = v ? EditBox.InputMode.NUMERIC : EditBox.InputMode.SINGLE_LINE;
+    }
+
+    @property({ type: Enum(PfGMEditBoxAlign) })
+    get align(): PfGMEditBoxAlign {
+        return this._align;
+    }
+    set align(v: PfGMEditBoxAlign) {
+        if (this._align === v) return;
+        this._align = v;
+        this.repaint(); // 反序列化时 setter 先于 onInit 跑，那时 box 还是空的
+    }
+
     onInit(): void {
         if (!this.bindNodes()) return console.error('[PfGMEditBox] 需要子节点 bg、text（挂 EditBox）');
         const box = this.box!;
         if (!box.textLabel || !box.placeholderLabel) return console.error('[PfGMEditBox] EditBox 的 Text Label / Placeholder Label 没指');
         this.checkFont(box.textLabel);
         this.checkFont(box.placeholderLabel);
-        box.inputMode = EditBox.InputMode.SINGLE_LINE; // 单行，不要多行
+        box.inputMode = this.numeric ? EditBox.InputMode.NUMERIC : EditBox.InputMode.SINGLE_LINE; // 数字用数字键盘
         box.inputFlag = EditBox.InputFlag.DEFAULT; // 不要密码
         box.returnType = EditBox.KeyboardReturnType.DONE;
-        box.maxLength = PF_GM_EDIT_BOX.maxLength;
+        box.maxLength = this.maxLength;
         this.paint(box.textLabel, PF_GM_EDIT_BOX.ink);
         this.paint(box.placeholderLabel, PF_GM_EDIT_BOX.hintInk);
         this.dress();
@@ -50,7 +94,18 @@ export class PfGMEditBox extends GMComponent {
         box.node.on(EditBox.EventType.TEXT_CHANGED, this.onTyped, this);
         // 只挂失焦：回车会先发 EDITING_RETURN 再 blur，两处都挂就调两次
         box.node.on(EditBox.EventType.EDITING_DID_ENDED, this.onLeft, this);
+        this.syncLabels(); // 引擎靠自己的 _isLabelVisible 控制显隐，初始状态先摆正
     }
+
+    /** 有字露 label、没字露 placeholder。引擎会在编辑期间把两行都藏掉，失焦后自己恢复 */
+    private syncLabels(): void {
+        const box = this.box;
+        if (!box) return;
+        const empty = box.string === '';
+        if (box.textLabel && box.textLabel.node.active === empty) box.textLabel.node.active = !empty;
+        if (box.placeholderLabel && box.placeholderLabel.node.active !== empty) box.placeholderLabel.node.active = empty;
+    }
+
 
     onRemove(): void {
         this.node.off(Node.EventType.SIZE_CHANGED, this.fit, this);
@@ -64,11 +119,31 @@ export class PfGMEditBox extends GMComponent {
     setText(text: string): void {
         if (!this.box) return;
         this.box.string = String(text ?? '');
+        this.syncLabels();
     }
 
     /** 当前文字。和检查器、setText 同一份，没初始化时给空串 */
     getText(): string {
         return this.box?.string ?? '';
+    }
+
+    /** 改输入模式。跟直接赋 numeric / maxLength 等价，一次写完 */
+    configure(numeric: boolean, maxLength: number): void {
+        this.numeric = numeric;
+        this.maxLength = maxLength;
+    }
+
+    /** 改对齐。跟直接赋 align 等价 */
+    setAlign(align: PfGMEditBoxAlign): void {
+        this.align = align;
+    }
+
+    /** 只重派两行字的颜色和对齐，不动尺寸。box 还没绑时直接跳过 */
+    private repaint(): void {
+        const box = this.box;
+        if (!box || !box.textLabel || !box.placeholderLabel) return;
+        this.paint(box.textLabel, PF_GM_EDIT_BOX.ink);
+        this.paint(box.placeholderLabel, PF_GM_EDIT_BOX.hintInk);
     }
 
     /** 每改一个字调一次（输入法在选词完成后触发）。setText 不走这里 */
@@ -84,7 +159,14 @@ export class PfGMEditBox extends GMComponent {
     private onTyped(): void {
         const box = this.box;
         if (!box) return;
+        if (this.numeric) this.keepDigits(box); // 数字键盘挡不住粘贴，这里再滤一遍
         this.onChange?.(box.string);
+    }
+
+    /** 只留数字和开头的负号。改了就回写，引擎看值不同会重画 */
+    private keepDigits(box: EditBox): void {
+        const clean = box.string.replace(/(?!^)-/g, '').replace(/[^\d-]/g, '');
+        if (clean !== box.string) box.string = clean;
     }
 
     private onLeft(): void {
@@ -140,9 +222,15 @@ export class PfGMEditBox extends GMComponent {
 
     private paint(label: Label, ink: readonly [number, number, number]): void {
         label.color = new Color(ink[0], ink[1], ink[2], 255);
-        label.horizontalAlign = Label.HorizontalAlign.LEFT;
+        label.horizontalAlign = alignOf(this.align);
         label.verticalAlign = Label.VerticalAlign.CENTER;
         label.overflow = Label.Overflow.CLAMP; // 单行超长截掉，不换行
         label.enableWrapText = false;
     }
+}
+
+function alignOf(align: PfGMEditBoxAlign): number {
+    if (align === PfGMEditBoxAlign.center) return Label.HorizontalAlign.CENTER;
+    if (align === PfGMEditBoxAlign.right) return Label.HorizontalAlign.RIGHT;
+    return Label.HorizontalAlign.LEFT;
 }
