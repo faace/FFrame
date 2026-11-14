@@ -1,5 +1,5 @@
 import { _decorator, assetManager, Color, Label, Node, Prefab, TTFFont, UITransform } from 'cc';
-import { GMFrame, GMOptionItem, gu, PfGMBar, PfGMBtn, PfGMBtnSize, PfGMBtnStyle, PfGMBtnTheme, PfGMCheck, PfGMItemCell, PfGMSelect, PfGMSlider, PfGMStepper, PfGMSwitch, PfGMTabs, PfGMToast } from 'db://gmajor/index';
+import { GMFrame, GMOptionItem, gu, PfGMBar, PfGMBtn, PfGMBtnSize, PfGMBtnStyle, PfGMBtnTheme, PfGMCheck, PfGMEditBox, PfGMItemCell, PfGMSelect, PfGMSlider, PfGMStepper, PfGMSwitch, PfGMTabs, PfGMToast } from 'db://gmajor/index';
 import { loadSkin } from '../../GameUI/SkinKit';
 
 const { ccclass } = _decorator;
@@ -141,6 +141,16 @@ export class LyControls extends GMFrame {
 
         this.bindSelect(page.getChildByName('ctlSelectUp')?.getComponent(PfGMSelect) ?? null,
             [this.option('上'), this.option('中'), this.option('下')], 2, '向上');
+
+        this.bindEditBox(page);
+    }
+
+    /** 输入框：打字时写一条，离开时写最终值。和上面几个控件共用页面底部那行说明 */
+    private bindEditBox(page: Node): void {
+        const edit = page.getChildByName('ctlInput')?.getComponent(PfGMEditBox) ?? null;
+        if (!edit) return console.error('[LyControls] 没有输入框');
+        edit.setOnChange((text) => this.note(text ? `输入中 → ${text}` : '输入中 → 空'));
+        edit.setOnDone((text) => this.note(text ? `输入完 → ${text}` : '输入完 → 空'));
     }
 
     /** 造一项。检查器里是 GMOptionItem，代码里也用它，别用裸对象 */

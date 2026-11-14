@@ -4,6 +4,18 @@
 
 app 在 `config.version.gmajor` 写所按的框架版本。开机只打日志，主.次不同时多打一条警告，不拦截。升级后怎么判断：看这里的破坏项，再跑一遍。
 
+## 0.7.1
+
+加了输入框。引擎 `cc.EditBox` 换皮，单行、32 字上限。点击聚焦、光标、输入法都是引擎自己做的。
+
+### 输入框：`PfGMEditBox`
+
+- **新增（可选）**：`PfGMEditBox`。根节点挂脚本，子节点 `bg`、`text`（`text` 上挂 `cc.EditBox`，`text` 里再放 `label`、`placeholder`）。预制体 `gmajor/prefabs/PfGMEditBox.prefab`。
+- **新增（可选）**：`setText` / `getText` / `setOnChange` / `setOnDone`。`setText` 两个回调都不触发；`setOnChange` 每改一个字调一次（输入法在选词完成后调）；`setOnDone` 失焦或回车离开时调一次。
+- **行为**：高固定 72，宽随调用方（默认 400）。`EditBox` 挂在左右各内缩 19 的 `text` 上——引擎把 Label 和编辑态的 DOM 输入框都摆在「所在节点」左边缘 +2 处，挂根上会压到皮的边框。
+- **注意**：检查器里填初始文字去点 `text` 上 `EditBox` 组件的 `String`，控件不另存一份 `text`。
+- **还没画槽**：`input` 槽仍在 `ctrl.json` 里预留，暂无图。这一步先借 `stepper_plate` 顶一下（`PF_GM_EDIT_BOX.skin`），图画好后把 `skin` 改回 `'input'`。
+
 ## 0.7.0
 
 加了两个控件（下拉、轻提示），另外把开关、勾选框和步进的变更回调补齐。前者是新皮新节点，后者是行为统一。

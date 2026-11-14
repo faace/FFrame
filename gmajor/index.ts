@@ -31,6 +31,7 @@ export { PfGMTitle, PfGMTitleSize } from './ui/PfGMTitle'; // 框架标题；三
 export { PfGMSlider } from './ui/PfGMSlider'; // 框架滑条；轨道+填充+滑块；value 0–1；自己听拖动
 export { PfGMSwitch } from './ui/PfGMSwitch'; // 框架开关；face；value 布尔；setValue 与检查器同一份；点击由调用方注册
 export { PfGMCheck } from './ui/PfGMCheck'; // 框架勾选框；box+mark；value 布尔；setValue 与检查器同一份；点击由调用方注册
+export { PfGMEditBox } from './ui/PfGMEditBox'; // 框架输入框；根上引擎 EditBox；bg+label+placeholder；检查器填字走 EditBox.string；用户打字才走 setOnChange
 export { PfGMBar, PfGMBarText } from './ui/PfGMBar'; // 框架进度条；槽+填充；value 0–1；text 不显示/百分比/当前总值
 export { PfGMStepper } from './ui/PfGMStepper'; // 框架步进；嵌套 PfGMBtn；整数 value/min/max/step
 export { PfGMItemCell } from './ui/PfGMItemCell'; // 框架道具格；底+图标+选中框+数量；setIcon / selected / setCount
