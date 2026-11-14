@@ -1,5 +1,5 @@
 import { _decorator, assetManager, Color, Label, Node, Prefab, TTFFont, UITransform } from 'cc';
-import { GMFrame, GMOptionItem, gu, PfGMBar, PfGMBtn, PfGMBtnSize, PfGMBtnStyle, PfGMBtnTheme, PfGMCheck, PfGMEditBox, PfGMItemCell, PfGMSelect, PfGMSlider, PfGMStepper, PfGMSwitch, PfGMTabs, PfGMToast } from 'db://gmajor/index';
+import { GMFrame, GMOptionItem, gu, PfGMBadge, PfGMBar, PfGMBtn, PfGMBtnSize, PfGMBtnStyle, PfGMBtnTheme, PfGMCheck, PfGMEditBox, PfGMItemCell, PfGMSelect, PfGMSlider, PfGMStepper, PfGMSwitch, PfGMTabs, PfGMToast } from 'db://gmajor/index';
 import { loadSkin } from '../../GameUI/SkinKit';
 
 const { ccclass } = _decorator;
@@ -7,14 +7,21 @@ const { ccclass } = _decorator;
 /** 轻提示那三颗按钮、标题和结果行在展示页的 y。放在道具格那排下面 */
 const TOAST_HEAD_Y = -212; // 标题「轻提示　PfGMToast」
 const TOAST_ROW_Y = -280;
-const TOAST_NOTE_Y = -352;
+const TOAST_NOTE_Y = -330; // 比原来 -352 上提 22，给角标那行腾地方
 const TOAST_BTN_X = 200; // 小档宽 180，三颗中心在 -200 / 0 / 200，相邻边距 20
+
+/** 角标那两行在展示页的 y。挤在轻提示说明行和页底边之间 */
+const BADGE_HEAD_Y = -376; // 标题「角标　PfGMBadge」
+const BADGE_ROW_Y = -416; // 五颗示例
+
+/** 角标五颗示例的 x。根固定 40×24 居中，按最大宽再留间隙 */
+const BADGE_X = [-190, -100, -10, 80, 185];
 
 /** 页节点名与页签标题。节点在预制体里是 panel 的子节点，运行时收进页签 */
 const PAGES: Array<[string, string]> = [
     ['pageBtn', '按钮'],
     ['pagePick', '选择'],
-    ['pageShow', '展示'],
+    ['pageShow', '显示'],
 ];
 
 /** 控件展示：三页平铺已完成的控件。尺寸与默认 620×800 不同 */
@@ -187,6 +194,60 @@ export class LyControls extends GMFrame {
             gu.addClick(child, () => cell.setSelected(!cell.selected));
         }
         this.bindToast(page);
+        this.bindBadge(page);
+    }
+
+    /**
+     * 角标五颗，全部静态不接收点击。第 2 颗开着动效，运行时一直在呼吸，
+     * 是为了在网页上能直接看出 setAnim(true) 生效了。其余四颗：点、5、12、99+。
+     * 节点运行时建：预制体里手写嵌套实例容易被 Creator 丢掉（轻提示那颗已踩过）。
+     */
+    private bindBadge(page: Node): void {
+        const bundle = assetManager.getBundle('GMUI');
+        if (!bundle) return console.error('[LyControls] 没有 GMUI，角标建不出来');
+        bundle.load('PfGMBadge', Prefab, (err, prefab) => {
+            if (err || !prefab) return console.error('[LyControls] 角标预制体加载失败', err);
+            if (!page.isValid) return;
+            this.makeHead(page, BADGE_HEAD_Y, '角标　PfGMBadge');
+            // 五种模式：点、点+动效、一位、两位、超上限
+            const plan: Array<[(b: PfGMBadge) => void, string]> = [
+                [(b) => b.setDot(), 'dot'],
+                [(b) => { b.setDot(); b.setAnim(true); }, 'dotAnim'],
+                [(b) => b.setCount(5), 'n5'],
+                [(b) => b.setCount(12), 'n12'],
+                [(b) => b.setCount(128), 'n99'],
+            ];
+            plan.forEach(([apply, name], i) => {
+                const ts = gu.createTs(prefab, { parent: page, x: BADGE_X[i], y: BADGE_ROW_Y });
+                if (!(ts instanceof PfGMBadge)) return console.error('[LyControls] 角标没挂上', name);
+                ts.node.name = 'badge_' + name;
+                apply(ts);
+            });
+        });
+    }
+
+    /** 建一行说明字。轻提示和角标各一行，同一套写法 */
+    private makeHead(page: Node, y: number, text: string): Label | null {
+        const node = new Node('head');
+        node.layer = page.layer;
+        page.addChild(node);
+        node.setPosition(0, y, 0);
+        node.addComponent(UITransform).setContentSize(480, 30);
+        const label = node.addComponent(Label);
+        label.string = text;
+        label.fontSize = 22;
+        label.lineHeight = 30;
+        label.color = new Color(92, 64, 32, 255);
+        label.horizontalAlign = Label.HorizontalAlign.CENTER;
+        label.verticalAlign = Label.VerticalAlign.CENTER;
+        label.overflow = Label.Overflow.SHRINK;
+        label.enableWrapText = false;
+        const font = assetManager.assets.get('ee40121d-0b21-4bb3-b95c-fa7d2df322b4') as TTFFont | undefined;
+        if (font) {
+            label.font = font;
+            label.isSystemFontUsed = false;
+        }
+        return label;
     }
 
     /** 轻提示三颗：弹一条、连点同一句、弹三条。节点运行时建（预制体里手写嵌套实例会被 Creator 丢掉） */
@@ -200,26 +261,8 @@ export class LyControls extends GMFrame {
             const say = (msg: string): void => {
                 if (note?.isValid) note.string = msg;
             };
-            // 标题：说清这三颗在测什么（和上面「进度条 / 道具格」那两行同一个位置风格）
-            const head = new Node('toastHead');
-            head.layer = page.layer;
-            page.addChild(head);
-            head.setPosition(0, TOAST_HEAD_Y, 0);
-            head.addComponent(UITransform).setContentSize(480, 30);
-            const headLabel = head.addComponent(Label);
-            headLabel.string = '轻提示　PfGMToast';
-            headLabel.fontSize = 22;
-            headLabel.lineHeight = 30;
-            headLabel.color = new Color(92, 64, 32, 255);
-            headLabel.horizontalAlign = Label.HorizontalAlign.CENTER;
-            headLabel.verticalAlign = Label.VerticalAlign.CENTER;
-            headLabel.overflow = Label.Overflow.SHRINK;
-            headLabel.enableWrapText = false;
-            const headFont = assetManager.assets.get('ee40121d-0b21-4bb3-b95c-fa7d2df322b4') as TTFFont | undefined;
-            if (headFont) {
-                headLabel.font = headFont;
-                headLabel.isSystemFontUsed = false;
-            }
+            // 标题：说清这三颗在测什么（和下面「角标」那行同一个位置风格）
+            this.makeHead(page, TOAST_HEAD_Y, '轻提示　PfGMToast');
             const items: Array<[number, string, PfGMBtnTheme, () => void]> = [
                 [-TOAST_BTN_X, '提示一次', PfGMBtnTheme.primary, () => {
                     PfGMToast.show('棋盘已满，请先整理');

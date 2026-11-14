@@ -379,6 +379,36 @@
 			<key>textureRotated</key>
 			<false/>
 		</dict>
+		<key>badge.png</key>
+		<dict>
+			<key>aliases</key>
+			<array/>
+			<key>spriteOffset</key>
+			<string>{0,0}</string>
+			<key>spriteSize</key>
+			<string>{12,12}</string>
+			<key>spriteSourceSize</key>
+			<string>{12,12}</string>
+			<key>textureRect</key>
+			<string>{{784,697},{12,12}}</string>
+			<key>textureRotated</key>
+			<false/>
+		</dict>
+		<key>badge_num.png</key>
+		<dict>
+			<key>aliases</key>
+			<array/>
+			<key>spriteOffset</key>
+			<string>{0,0}</string>
+			<key>spriteSize</key>
+			<string>{20,20}</string>
+			<key>spriteSourceSize</key>
+			<string>{20,20}</string>
+			<key>textureRect</key>
+			<string>{{810,697},{20,20}}</string>
+			<key>textureRotated</key>
+			<false/>
+		</dict>
 		<key>dropdown.png</key>
 		<dict>
 			<key>aliases</key>

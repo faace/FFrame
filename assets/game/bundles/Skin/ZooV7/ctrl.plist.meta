@@ -1157,6 +1157,98 @@
       ],
       "subMetas": {}
     },
+    "d758c": {
+      "importer": "sprite-frame",
+      "uuid": "4b756a97-47ca-464f-b3f7-c780df66202c@d758c",
+      "displayName": "",
+      "id": "d758c",
+      "name": "badge",
+      "userData": {
+        "trimThreshold": 1,
+        "rotated": false,
+        "offsetX": 0,
+        "offsetY": 0,
+        "trimX": 784,
+        "trimY": 697,
+        "width": 12,
+        "height": 12,
+        "rawWidth": 12,
+        "rawHeight": 12,
+        "borderTop": 0,
+        "borderBottom": 0,
+        "borderLeft": 0,
+        "borderRight": 0,
+        "packable": false,
+        "pixelsToUnit": 100,
+        "pivotX": 0.5,
+        "pivotY": 0.5,
+        "meshType": 0,
+        "vertices": {
+          "rawPosition": [],
+          "indexes": [],
+          "uv": [],
+          "nuv": [],
+          "minPos": [],
+          "maxPos": []
+        },
+        "isUuid": true,
+        "imageUuidOrDatabaseUri": "aa568272-60fa-4a2c-9332-92819cbeb1d1@6c48a",
+        "atlasUuid": "4b756a97-47ca-464f-b3f7-c780df66202c",
+        "trimType": "none"
+      },
+      "ver": "1.0.12",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {}
+    },
+    "d8b52": {
+      "importer": "sprite-frame",
+      "uuid": "4b756a97-47ca-464f-b3f7-c780df66202c@d8b52",
+      "displayName": "",
+      "id": "d8b52",
+      "name": "badge_num",
+      "userData": {
+        "trimThreshold": 1,
+        "rotated": false,
+        "offsetX": 0,
+        "offsetY": 0,
+        "trimX": 810,
+        "trimY": 697,
+        "width": 20,
+        "height": 20,
+        "rawWidth": 20,
+        "rawHeight": 20,
+        "borderTop": 0,
+        "borderBottom": 0,
+        "borderLeft": 9,
+        "borderRight": 9,
+        "packable": false,
+        "pixelsToUnit": 100,
+        "pivotX": 0.5,
+        "pivotY": 0.5,
+        "meshType": 0,
+        "vertices": {
+          "rawPosition": [],
+          "indexes": [],
+          "uv": [],
+          "nuv": [],
+          "minPos": [],
+          "maxPos": []
+        },
+        "isUuid": true,
+        "imageUuidOrDatabaseUri": "aa568272-60fa-4a2c-9332-92819cbeb1d1@6c48a",
+        "atlasUuid": "4b756a97-47ca-464f-b3f7-c780df66202c",
+        "trimType": "none"
+      },
+      "ver": "1.0.12",
+      "imported": true,
+      "files": [
+        ".json"
+      ],
+      "subMetas": {}
+    },
     "a24fb": {
       "importer": "sprite-frame",
       "uuid": "4b756a97-47ca-464f-b3f7-c780df66202c@a24fb",
