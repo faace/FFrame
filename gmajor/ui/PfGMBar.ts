@@ -42,57 +42,87 @@ export class PfGMBar extends GMComponent {
     private bg: Sprite | null = null;
     private fill: Sprite | null = null;
     private label: Label | null = null;
-    private stamp = '';
+
+    // 字段本体。检查器改属性走 setter，改了就当场重派
+    private _value = 0.5;
+    private _text = PfGMBarText.off;
+    private _current = 0; // 当前/总值的分子
+    private _total = 0; // 当前/总值的分母。0 表示还没设
 
     @property({ min: 0, max: 1, step: 0.01 })
-    value = 0.5;
+    get value(): number {
+        return this._value;
+    }
+    set value(v: number) {
+        const next = clamp01(v);
+        if (this._value === next) return; // 跟引擎 Label.string 一样，值没变就不重排
+        this._value = next;
+        this.layout();
+    }
 
     @property({ type: Enum(PfGMBarText) })
-    text = PfGMBarText.off;
+    get text(): PfGMBarText {
+        return this._text;
+    }
+    set text(v: PfGMBarText) {
+        if (this._text === v) return;
+        this._text = v;
+        this.layout();
+    }
 
     @property
-    current = 0; // 当前/总值的分子
+    get current(): number {
+        return this._current;
+    }
+    set current(v: number) {
+        if (this._current === v) return;
+        this._current = v;
+        this.layout();
+    }
 
     @property
-    total = 0; // 当前/总值的分母。0 表示还没设
+    get total(): number {
+        return this._total;
+    }
+    set total(v: number) {
+        if (this._total === v) return;
+        this._total = v;
+        this.layout();
+    }
 
     onInit(): void {
         if (!this.bindNodes()) return console.error('[PfGMBar] 需要子节点 bg 和 fill');
         this.dress(this.bg, 'bar_bg');
         this.dress(this.fill, 'bar_fill');
         this.layout();
+        this.node.on(Node.EventType.SIZE_CHANGED, this.layout, this); // 宽被改时跟着重排
     }
 
-    update(): void { // 检查器或拉宽后重排。编辑态和运行态同一条
-        const uit = this.node.getComponent(UITransform);
-        if (!uit || !this.bg) return;
-        const mark = `${this.value}|${this.text}|${this.current}|${this.total}|${uit.width}|${uit.height}`;
-        if (mark === this.stamp) return;
-        this.value = clamp01(this.value);
-        this.layout();
+    onRemove(): void {
+        this.node.off(Node.EventType.SIZE_CHANGED, this.layout, this);
     }
 
     /** 改比例。当前/总值模式里分子跟着变。不发通知 */
     setValue(value: number): void {
-        this.value = clamp01(value);
-        if (this.text === PfGMBarText.ratio && this.total > 0) this.current = Math.round(this.value * this.total);
-        this.layout();
+        const next = clamp01(value);
+        this._value = next;
+        if (this._text === PfGMBarText.ratio && this._total > 0) this._current = Math.round(next * this._total);
+        this.layout(); // 三个值一次写字段，只重排一次
     }
 
     /** 换字。不改比例 */
     setText(text: PfGMBarText): void {
         this.text = text;
-        this.layout();
     }
 
     /** 设定当前和总值，条长改为当前除以总值 */
     setRatio(current: number, total: number): void {
         const cap = Number.isFinite(total) ? total : 0;
         const cur = Number.isFinite(current) ? current : 0;
-        this.total = cap;
-        this.current = cap > 0 ? Math.min(cap, Math.max(0, cur)) : 0;
-        this.value = cap > 0 ? clamp01(this.current / cap) : 0;
-        this.layout();
+        this._total = cap;
+        this._current = cap > 0 ? Math.min(cap, Math.max(0, cur)) : 0;
+        this._value = cap > 0 ? clamp01(this._current / cap) : 0;
+        this.layout(); // 三个值一次写字段，只重排一次
     }
 
     private bindNodes(): boolean {
@@ -105,17 +135,17 @@ export class PfGMBar extends GMComponent {
         const uit = this.node.getComponent(UITransform);
         const bg = this.bg;
         const fill = this.fill;
-        if (!uit || !bg || !fill) return;
-        this.value = clamp01(this.value);
+        if (!uit || !bg || !fill) return; // 反序列化时 setter 先跑，那会儿还没绑节点
+        this._value = clamp01(this._value);
         const width = uit.width > 0 ? uit.width : PF_GM_BAR.defaultWidth;
         uit.setContentSize(width, PF_GM_BAR.height);
         bg.node.getComponent(UITransform)?.setContentSize(width, PF_GM_BAR.height);
         bg.node.setPosition(0, 0, 0);
         const pad = PF_GM_BAR.pad;
         const inner = Math.max(0, width - pad * 2);
-        const fillW = inner * this.value;
+        const fillW = inner * this._value;
         const node = fill.node;
-        const show = this.value > 0 && fillW >= PF_GM_BAR.fillMin;
+        const show = this._value > 0 && fillW >= PF_GM_BAR.fillMin;
         node.active = show;
         if (show) {
             const fut = node.getComponent(UITransform);
@@ -124,17 +154,16 @@ export class PfGMBar extends GMComponent {
             node.setPosition(-width / 2 + pad, 0, 0);
         }
         this.paintText(width);
-        this.stamp = `${this.value}|${this.text}|${this.current}|${this.total}|${uit.width}|${uit.height}`;
     }
 
     private paintText(width: number): void {
         const label = this.ensureLabel();
         if (!label) return;
         const node = label.node;
-        const show = this.text !== PfGMBarText.off;
+        const show = this._text !== PfGMBarText.off;
         node.active = show;
         if (!show) return;
-        label.string = this.text === PfGMBarText.percent ? `${Math.round(this.value * 100)}%` : `${Math.round(this.current)}/${Math.round(this.total)}`;
+        label.string = this._text === PfGMBarText.percent ? `${Math.round(this._value * 100)}%` : `${Math.round(this._current)}/${Math.round(this._total)}`;
         label.fontSize = PF_GM_BAR.fontSize;
         label.lineHeight = PF_GM_BAR.fontSize;
         label.color = Color.WHITE;
