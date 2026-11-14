@@ -181,9 +181,10 @@ export class PfX extends GMScene {}
 - 要一颗按钮就嵌 `PfGMBtn`，只盖节点名、坐标、档位、主题、版式、字、图标。不要在脚本里临时 `createTs` 一颗按钮来试，也不要改它的描边、字号、尺寸。
 - `+`、`−`、`×` 这种小图标用 `secondary`。确定、开始这种主操作用 `primary`。
 - 步进的加减嵌套小档纯图标 `PfGMBtn`，主题都是 `secondary`。点按仍是外层 `gu.addClick`，步进不挂 `Button`。整数 `value` / `min` / `max` / `step` 是同一份属性。到 `min` 禁用减号，到 `max` 禁用加号。
-- **控件不要用 `update()` 轮询属性变化**。检查器里改属性要重派的，用 `getter` + `setter`：setter 里 `===` 相等早退，不等才重排。跟引擎 `Label.string`、`Sprite.spriteFrame` 同一个路子。节点宽高变了用 `node.on(Node.EventType.SIZE_CHANGED, ...)`，不要靠 `update()` 里比对宽高。数组属性（如 `items`）由公开方法（`setItems()`）显式重排，检查器直接改数组成员不保证实时。
-- **确实需要 `update()` 时，要人工确认**。写之前说明为什么 setter / `SIZE_CHANGED` / 公开方法都覆盖不到，经人点头才加。不许图省事直接抄一段 `update()` + `stamp`。
-- 历史遗留的 `update()`（`PfGMBtn`）待统一优化，改到哪个就顺手换掉，不要新增同类写法。
+- **控件不要用 `update()` 轮询属性变化**（首选做法见下条）。
+- **属性用普通字段 + `setXxx()` 方法，不要用 getter/setter**。Cocos 3.8 里 `@property` 挂在 getter 上的访问器是 `serializable: false`，预制体的属性覆盖**不会应用**（引擎自己绕开了：`Label._string` 是 `@serializable` 字段，`string` 只是转发）。所以：`@property size = ...` 存普通字段，改值要走 `setSize()` 并由它重排；直接赋 `btn.size` 不会重排。尺寸变化用 `node.on(Node.EventType.SIZE_CHANGED, ...)`。
+- **确实需要 `update()` 时，要人工确认**。写之前说明为什么 `SIZE_CHANGED` / `setXxx()` 覆盖不到（典型理由：检查器里改这个字段要当场看到效果，而字段本身不经过我们的代码）。经人点头才加，并加 `stamp` 字符串早退，值没变就 `return`。
+- 历史遗留的 `update()`（`PfGMBtn`、`PfGMTitle`、`PfGMSlider`、`PfGMBar`、`PfGMSwitch`、`PfGMCheck`、`PfGMItemCell`、`PfGMSelect`、`PfGMOption`、`PfGMTabs`、`PfGMEditBox`、`PfGMStepper`）已全部保留为「检查器改字段当场刷新」，各有 `stamp` 早退。不要再新增同类写法；真要加先按上一条说明理由。`PfGMSlider` / `PfGMBar` 的宽度变化已改用 `SIZE_CHANGED`。
 - **`PfGMToast` 待重做（未做）**：队列、锚点、prefab 缓存、`seq` 现在都是 `PfGMToast.ts` 的模块级变量，控件既管一条又管一列，`relayout()` 还直接改别人的坐标。要按 `alert` 的样子把队列挪到管理器（`GMUIManager` 或挂在 `toasts` 节点上的 `GMToastHost`），`PfGMToast` 只留「一条」的宽高、字号、颜色、`text`、`bg`。改完再顺便去掉它的 `update()`。动它之前先确认分层方案。
 - 页签是 `PfGMTabs`，不继承 `PfGMBtn`。子节点固定 `tabs`、`panel`。内容必须是 `GMTabPage`（`text` / `setText`，`onShow` / `onHide` 收 `done`）。皮 `tab_normal`、`tab_selected`、`panel`，控件自己切九宫格。高 72，宽按五个中文字不缩放，从左挨着排，第一颗让过 panel 顶边圆角。点击用 `gu.addClick`。
 - 不要 `PfBtn`（太泛），不要 `PfFFBtn`（`FF*` 已废），不要只叫 `GMBtn`（看不出是预制体，也分不清 Ly/Pf）。
@@ -198,6 +199,18 @@ export class PfX extends GMScene {}
 - 嵌套 `PfGMBtn` / `PfGMTitle` 时，实例只覆盖和默认不同的项：节点名、坐标、档位、主题、版式、`text`、图标。底板、描边、字色、显隐、`contentSize` 留给控件预制体和脚本。`PfGMTitle` 没有 `text`，字覆盖在 Label 字符串上。
 - 取图只给 `SpriteFrame`。按钮、标题、滑条轨道、进度条的槽和填充按子图上的九宫格拉伸。其它节点由使用方设 `SLICED`。控件不要 import 游戏 `SkinKit`。点击仍用 `gu.addClick`，控件不包一层点击。滑条的拖动不是点击，不走 `addClick`。
 - 正文仍是 `panel` 下 `body`；`GMAlert` 认 `body` / `btnOk` / `btnCancel`，按钮字节点叫 `label`。分层说明：`docs/界面组件/说明.md`。
+
+## 改预制体（踩过的坑）
+
+手工改 `.prefab` / `.scene` 的 JSON 或调组件属性前先看这几条，都是真踩过的。
+
+- **`@property` 不能挂在 getter 上**。Cocos 3.8 里这样做出来的属性 `serializable: false`，**预制体里的属性覆盖不会应用**——外观全错、还不报错。引擎自己也是绕开的：`Label._string` 是 `@serializable` 普通字段，`string` 只是 getter/setter 转发。所以控件属性一律**普通字段 + `setXxx()` 方法**（重排写在方法里）。
+- **覆盖项 `propertyPath` 的 key 就是字段名**。字段改名（`size` → `_size`）就要把**所有**预制体和场景里该字段的覆盖项一起改。改之前先按 `targetInfo.localID` 分类——同一个 key 名（`text`、`size`、`icon`）在不同控件里都有，一刀切会改坏别的控件。
+- **嵌套实例的覆盖项存在 `cc.PrefabInstance.propertyOverrides` 里，不是节点自己的字段**。节点的 `_name`、`_lpos`、组件属性都由 `CCPropertyOverrideInfo` 描述，`TargetInfo.localID` 指向源预制体的 `CompPrefabInfo.fileId`（如 `pfGmBtnTs`、`pfGmEditBoxLb`）。写错 localID 或 fileId，实例化出来就是空壳。
+- **根节点的 `PrefabInfo.nestedPrefabInstanceRoots` 必须登记每个嵌套实例的节点 id**。漏登记，那个实例在场景里就是个空节点，子节点和组件全不展开，Creator 不报错。
+- **不要在有真实改动时用备份 `Copy-Item` 覆盖**。改之前先 `git status` 看清楚，手工拼的 JSON 备份容易把编辑器里的改动冲掉。要试错就另存一份到 `del/`。
+- **改完预览前先确认 Creator 重新编译了**。`temp/programming/packer-driver/targets/preview/*.json` 的时间戳要晚于源码。预览的脚本编译经常卡住，改文件时间不触发，只能重启 Creator。
+- **验证覆盖值是否生效，要看运行时实例的属性**，不要只看预制体 JSON。取 `node.getComponent(X).某属性`，对照预制体里写的覆盖值。截图看不出「值错了但恰好默认值一样」这种问题。
 
 ## 改 gmajor 还是改游戏
 

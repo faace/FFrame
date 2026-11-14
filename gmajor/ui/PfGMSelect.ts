@@ -89,35 +89,14 @@ export class PfGMSelect extends GMComponent {
     private content: Node | null = null;
     private rows: PfGMOption[] = [];
     private dressed = '';
+    private stamp = '';
     private onChange: ((index: number) => void) | null = null; // 只在用户点选时调
 
-    // 字段本体。检查器改属性走 setter，改了就当场重派
-    private _items: GMOptionItem[] = [];
-    private _index = -1; // -1 = 没选中，盒子显示空
-
-    /** 整份换选项才重排。数组元素内部改动不通知，运行时也不该改 */
     @property({ type: [GMOptionItem] })
-    get items(): GMOptionItem[] {
-        return this._items;
-    }
-    set items(v: GMOptionItem[]) {
-        this._items = v ?? [];
-        this._index = clampIndex(this._index, this._items.length);
-        this.layout();
-    }
+    items: GMOptionItem[] = [];
 
-    /** 改下标。夹到合法范围，-1 表示不选 */
     @property
-    get index(): number {
-        return this._index;
-    }
-    set index(v: number) {
-        const next = clampIndex(v, this._items.length);
-        if (this._index === next) return; // 跟引擎 Label.string 一样，值没变就不重排
-        this._index = next;
-        this.layout();
-        if (this.list) this.reopen();
-    }
+    index = -1; // -1 = 没选中，盒子显示空
 
     onInit(): void {
         if (!this.bindNodes()) return console.error('[PfGMSelect] 需要子节点 bg、icon、label、arrow');
@@ -126,7 +105,7 @@ export class PfGMSelect extends GMComponent {
         this.dress(this.arrowView, 'icon_arrow', false);
         this.dressSkeleton(); // 列表骨架也先贴上皮肤，编辑器里就是真样子，不用等展开
         this.hideTemplate(); // 播放时模板本身不能露出来，展开是克隆它
-        this._index = clampIndex(this._index, this._items.length); // 直接写字段，layout 由下面这行统一走
+        this.index = clampIndex(this.index, this.items.length);
         this.layout();
     }
 
@@ -156,15 +135,31 @@ export class PfGMSelect extends GMComponent {
         this.destroyOpen();
     }
 
-    /** 换整份选项。原有下标夹进新范围，不回调。列表内容只在整份替换时变 */
+    update(): void { // 检查器改了项或下标后重画。编辑态和运行态同一条
+        if (!this.bg) return;
+        if (this.mark() === this.stamp) return;
+        this.index = clampIndex(this.index, this.items.length);
+        this.layout();
+    }
+
+    /** 换整份选项。原有下标夹进新范围，不回调 */
     setItems(items: GMOptionItem[]): void {
         this.items = items ?? [];
+        this.index = clampIndex(this.index, this.items.length);
+        this.layout();
         if (this.list) this.reopen();
     }
 
     /** 改下标。夹到合法范围，-1 表示不选。不回调 */
     setIndex(index: number): void {
-        this.index = index; // 夹紧和重排都由 setter 走
+        const next = clampIndex(index, this.items.length);
+        if (next === this.index) {
+            this.layout();
+            return;
+        }
+        this.index = next;
+        this.layout();
+        if (this.list) this.reopen();
     }
 
     /** 只在用户点选并且下标真的变了时调用。setIndex 不走这里 */
@@ -197,6 +192,11 @@ export class PfGMSelect extends GMComponent {
         if (!this.list && !this.shield) return;
         this.destroyOpen();
         this.setArrow(false);
+    }
+
+    private mark(): string {
+        const one = this.items.map((item) => `${item.text}/${item.icon}`).join(',');
+        return `${this.index}|${one}`;
     }
 
     private bindNodes(): boolean {
@@ -245,6 +245,7 @@ export class PfGMSelect extends GMComponent {
         const textLeft = hasIcon ? left + PF_GM_SELECT.iconSize + PF_GM_SELECT.gap : left;
         const textRight = width / 2 - PF_GM_SELECT.arrow - PF_GM_SELECT.padX / 2;
         this.placeLabel(label, item?.text ?? '', textLeft, textRight, height);
+        this.stamp = this.mark();
     }
 
     private placeLabel(label: Label, text: string, left: number, right: number, height: number): void {

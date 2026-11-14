@@ -39,41 +39,17 @@ export class PfGMEditBox extends GMComponent {
     private box: EditBox | null = null;
     private onChange: ((text: string) => void) | null = null; // 每改一个字叫，setText 不走这里
     private onDone: ((text: string) => void) | null = null; // 失焦或回车离开时叫
+    private stamp = ''; // 上次应用的 align|numeric|maxLength
 
-    // 字段本体。检查器改属性走 setter，改了就当场重派
-    private _maxLength = PF_GM_EDIT_BOX.maxLength;
-    private _numeric = false;
-    private _align = PfGMEditBoxAlign.left;
+    // 普通字段（@property 直接挂字段才能被预制体覆盖）。改值后要重排的走下面的 setXxx
+    @property
+    maxLength = PF_GM_EDIT_BOX.maxLength; // 字数上限，调用方可以改小（步进用 3）
 
     @property
-    get maxLength(): number {
-        return this._maxLength;
-    }
-    set maxLength(v: number) {
-        if (this._maxLength === v) return;
-        this._maxLength = v;
-        if (this.box) this.box.maxLength = v;
-    }
-
-    @property
-    get numeric(): boolean {
-        return this._numeric;
-    }
-    set numeric(v: boolean) {
-        if (this._numeric === v) return;
-        this._numeric = v;
-        if (this.box) this.box.inputMode = v ? EditBox.InputMode.NUMERIC : EditBox.InputMode.SINGLE_LINE;
-    }
+    numeric = false; // 只收数字：换数字键盘，非数字字符拒掉
 
     @property({ type: Enum(PfGMEditBoxAlign) })
-    get align(): PfGMEditBoxAlign {
-        return this._align;
-    }
-    set align(v: PfGMEditBoxAlign) {
-        if (this._align === v) return;
-        this._align = v;
-        this.repaint(); // 反序列化时 setter 先于 onInit 跑，那时 box 还是空的
-    }
+    align = PfGMEditBoxAlign.left; // 字在输入区里的水平位置
 
     onInit(): void {
         if (!this.bindNodes()) return console.error('[PfGMEditBox] 需要子节点 bg、text（挂 EditBox）');
@@ -94,6 +70,7 @@ export class PfGMEditBox extends GMComponent {
         // 只挂失焦：回车会先发 EDITING_RETURN 再 blur，两处都挂就调两次
         box.node.on(EditBox.EventType.EDITING_DID_ENDED, this.onLeft, this);
         this.syncLabels(); // 引擎靠自己的 _isLabelVisible 控制显隐，初始状态先摆正
+        this.stamp = `${this.align}|${this.numeric}|${this.maxLength}`; // 别让 update 第一帧又跑一遍
     }
 
     /** 有字露 label、没字露 placeholder。引擎会在编辑期间把两行都藏掉，失焦后自己恢复 */
@@ -103,6 +80,17 @@ export class PfGMEditBox extends GMComponent {
         const empty = box.string === '';
         if (box.textLabel && box.textLabel.node.active === empty) box.textLabel.node.active = !empty;
         if (box.placeholderLabel && box.placeholderLabel.node.active !== empty) box.placeholderLabel.node.active = empty;
+    }
+
+    update(): void { // 检查器改了对齐、数字模式或字数上限就补一次。值没变就早退
+        const box = this.box;
+        if (!box) return;
+        const mark = `${this.align}|${this.numeric}|${this.maxLength}`;
+        if (mark === this.stamp) return;
+        this.stamp = mark;
+        box.maxLength = this.maxLength;
+        box.inputMode = this.numeric ? EditBox.InputMode.NUMERIC : EditBox.InputMode.SINGLE_LINE;
+        this.repaint();
     }
 
 
@@ -126,15 +114,20 @@ export class PfGMEditBox extends GMComponent {
         return this.box?.string ?? '';
     }
 
-    /** 改输入模式。跟直接赋 numeric / maxLength 等价，一次写完 */
+    /** 改输入模式。数字键盘 + 字数上限。改完当场生效 */
     configure(numeric: boolean, maxLength: number): void {
-        this.numeric = numeric;
+        this.numeric = !!numeric;
         this.maxLength = maxLength;
+        const box = this.box;
+        if (!box) return;
+        box.maxLength = maxLength;
+        box.inputMode = this.numeric ? EditBox.InputMode.NUMERIC : EditBox.InputMode.SINGLE_LINE;
     }
 
-    /** 改对齐。跟直接赋 align 等价 */
+    /** 改对齐。三档：靠左、居中、靠右 */
     setAlign(align: PfGMEditBoxAlign): void {
         this.align = align;
+        this.repaint();
     }
 
     /** 只重派两行字的颜色和对齐，不动尺寸。box 还没绑时直接跳过 */

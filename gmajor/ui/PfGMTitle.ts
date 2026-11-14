@@ -52,26 +52,15 @@ function rgb(c: RGB): Color {
 export class PfGMTitle extends GMComponent {
     private label: Label | null = null;
     private plate: Sprite | null = null;
-
-    // 档位。检查器改它走 setter，当场重排
-    private _size = PfGMTitleSize.medium;
+    private laidSize = -1;
 
     @property({ type: Enum(PfGMTitleSize) })
-    get size(): PfGMTitleSize {
-        return this._size;
-    }
-    set size(v: PfGMTitleSize) {
-        if (this._size === v) return; // 跟引擎 Label.string 一样，值没变就不重排
-        this._size = v;
-        this.layout();
-    }
+    size = PfGMTitleSize.medium;
 
-    /**
-     * 换档。高和字号跟同名按钮档。
-     * 名字带 set 是为了和 setText 配对；内部就是赋 size，重排由 setter 走。
-     */
+    /** 换档。高和字号跟同名按钮档 */
     setSize(size: PfGMTitleSize): void {
         this.size = size;
+        this.layout();
     }
 
     onInit(): void {
@@ -92,6 +81,11 @@ export class PfGMTitle extends GMComponent {
         });
     }
 
+    update(): void { // 检查器改了档位，编辑态和运行态都重排
+        if (this.laidSize === this.size) return;
+        this.layout();
+    }
+
     /** 按字宽重排。短于最小宽停在最小宽，长于最大宽则在两侧留白里缩小 */
     setText(text: string): void {
         if (!this.label) return;
@@ -100,11 +94,11 @@ export class PfGMTitle extends GMComponent {
     }
 
     private layout(): void {
-        const tier = tierOf(this._size);
+        const tier = tierOf(this.size);
         const label = this.label;
         const uit = this.node.getComponent(UITransform);
         const lut = label?.node.getComponent(UITransform);
-        if (!label || !uit || !lut) return; // 反序列化时 setter 先跑，那会儿还没绑节点
+        if (!label || !uit || !lut) return;
         uit.setAnchorPoint(0.5, 0.5);
         lut.setAnchorPoint(0.5, 0.5);
         label.node.setPosition(0, 0, 0);
@@ -125,6 +119,7 @@ export class PfGMTitle extends GMComponent {
             this.plate.type = Sprite.Type.SLICED;
         }
         uit.setContentSize(width, tier.height);
+        this.laidSize = this.size;
         const shrink = wanted > tier.maxWidth || (label.string.length > 0 && textW <= 0);
         if (!shrink) return;
         label.overflow = Label.Overflow.SHRINK;

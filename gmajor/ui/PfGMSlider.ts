@@ -37,23 +37,13 @@ export class PfGMSlider extends GMComponent {
     private thumb: Sprite | null = null;
     private fill: Sprite | null = null; // 可选：没有 fill 子节点时不画
     private clip: Node | null = null; // 运行时建的裁剪节点，填充在它里面
+    private stamp = '';
     private drag = false;
     private touched = false;
     private onChange: ((value: number) => void) | null = null;
 
-    // 0–1。检查器改它走 setter，当场重派
-    private _value = 0.5;
-
     @property({ min: 0, max: 1, step: 0.01 })
-    get value(): number {
-        return this._value;
-    }
-    set value(v: number) {
-        const next = clamp01(v);
-        if (this._value === next) return; // 跟引擎 Label.string 一样，值没变就不重排
-        this._value = next;
-        this.layout();
-    }
+    value = 0.5;
 
     onInit(): void {
         if (!this.bindNodes()) return console.error('[PfGMSlider] 需要子节点 track 和 thumb');
@@ -63,13 +53,11 @@ export class PfGMSlider extends GMComponent {
         this.dress(this.fill, 'slider_fill', true);
         this.dress(this.thumb, 'slider_thumb', false);
         this.layout();
-        this.node.on(Node.EventType.SIZE_CHANGED, this.layout, this); // 宽被改时跟着重排
         if (editing) return;
         this.bindTouch();
     }
 
     onRemove(): void {
-        this.node.off(Node.EventType.SIZE_CHANGED, this.layout, this);
         if (!this.touched) return;
         const node = this.node;
         node.off(Node.EventType.TOUCH_START, this.onPointerDown, this);
@@ -78,9 +66,19 @@ export class PfGMSlider extends GMComponent {
         node.off(Node.EventType.TOUCH_CANCEL, this.onPointerUp, this);
     }
 
+    update(): void { // 检查器或拉宽后重排。编辑态和运行态同一条
+        const uit = this.node.getComponent(UITransform);
+        if (!uit || !this.track) return;
+        const mark = `${this.value}|${uit.width}|${uit.height}`;
+        if (mark === this.stamp) return;
+        this.value = clamp01(this.value);
+        this.layout();
+    }
+
     /** 改值。不调用 onChange */
     setValue(value: number): void {
         this.value = clamp01(value);
+        this.layout();
     }
 
     /** 只在手指按下或移动时调用。setValue 不走这里 */
@@ -155,31 +153,31 @@ export class PfGMSlider extends GMComponent {
         const p = ev.getUILocation();
         const local = uit.convertToNodeSpaceAR(new Vec3(p.x, p.y, 0));
         const next = this.valueAt(local.x, this.width());
-        if (next === this._value) return;
-        const before = this._value;
+        if (next === this.value) return;
         this.value = next;
-        if (this._value !== before) this.onChange?.(this._value);
+        this.layout();
+        this.onChange?.(this.value);
     }
 
     private layout(): void {
         const uit = this.node.getComponent(UITransform);
         const track = this.track;
         const thumb = this.thumb;
-        if (!uit || !track || !thumb) return; // 反序列化时 setter 先跑，那会儿还没绑节点
-        this._value = clamp01(this._value);
+        if (!uit || !track || !thumb) return;
+        this.value = clamp01(this.value);
         const width = this.width();
         const thumbSize = PF_GM_SLIDER.thumb;
         track.node.getComponent(UITransform)?.setContentSize(width, PF_GM_SLIDER.trackHeight);
         track.node.setPosition(0, 0, 0);
         thumb.node.getComponent(UITransform)?.setContentSize(thumbSize, thumbSize);
         const span = width - PF_GM_SLIDER.inset * 2;
-        const x = -span / 2 + this._value * span; // 滑块中心在两端各收 inset，半颗伸出轨道
+        const x = -span / 2 + this.value * span; // 滑块中心在两端各收 inset，半颗伸出轨道
         thumb.node.setPosition(x, 0, 0);
         const fill = this.fill;
         const clip = this.clip;
         if (fill && clip) { // 裁剪窗口：左缘到滑块中心。填充图本身保持整条宽度，不拉伸
             const fillW = x + width / 2;
-            const show = this._value > 0 && fillW >= PF_GM_SLIDER.fillMin;
+            const show = this.value > 0 && fillW >= PF_GM_SLIDER.fillMin;
             clip.active = show;
             if (show) {
                 const cut = clip.getComponent(UITransform);
@@ -192,6 +190,7 @@ export class PfGMSlider extends GMComponent {
                 fill.node.setPosition(0, 0, 0);
             }
         }
+        this.stamp = `${this.value}|${uit.width}|${uit.height}`;
     }
 
     /** 根宽。窄于滑块则夹到滑块宽，高始终是触摸根 */
@@ -205,7 +204,7 @@ export class PfGMSlider extends GMComponent {
     /** 0 左缘对齐，1 右缘对齐。可走长度为 0 时不改值 */
     private valueAt(localX: number, width: number): number {
         const span = width - PF_GM_SLIDER.inset * 2;
-        if (span <= 0) return this._value;
+        if (span <= 0) return clamp01(this.value);
         return clamp01((localX + span / 2) / span); // 滑块中心：左端 0，右端 1
     }
 

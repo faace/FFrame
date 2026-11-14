@@ -30,53 +30,20 @@ export class PfGMStepper extends GMComponent {
     private plate: PfGMEditBox | null = null;
     private minusBtn: PfGMBtn | null = null;
     private plusBtn: PfGMBtn | null = null;
+    private stamp = '';
     private onChange: ((value: number) => void) | null = null; // 只在用户操作时调，setValue 不走这里
 
-    // 字段本体。外部只通过上面的 setter 改，改了就重排
-    private _value = 3;
-    private _min = 0;
-    private _max = 10;
-    private _step = 1;
+    @property
+    value = 3;
 
     @property
-    get value(): number {
-        return this._value;
-    }
-    set value(v: number) {
-        if (this._value === v) return; // 跟引擎 Label.string 一样，值没变就不重排
-        this._value = v;
-        this.layout();
-    }
+    min = 0;
 
     @property
-    get min(): number {
-        return this._min;
-    }
-    set min(v: number) {
-        if (this._min === v) return;
-        this._min = v;
-        this.layout();
-    }
+    max = 10;
 
     @property
-    get max(): number {
-        return this._max;
-    }
-    set max(v: number) {
-        if (this._max === v) return;
-        this._max = v;
-        this.layout();
-    }
-
-    @property
-    get step(): number {
-        return this._step;
-    }
-    set step(v: number) {
-        if (this._step === v) return;
-        this._step = v;
-        this.layout();
-    }
+    step = 1;
 
     onInit(): void {
         if (!this.bindNodes()) return console.error('[PfGMStepper] 需要 plate、btnMinus、btnPlus');
@@ -96,9 +63,15 @@ export class PfGMStepper extends GMComponent {
         this.layout();
     }
 
+    update(): void { // 检查器改了属性就夹紧并刷新两边的禁用。值没变就早退
+        const mark = `${this.value}|${this.min}|${this.max}|${this.step}`;
+        if (mark === this.stamp) return;
+        this.layout();
+    }
+
     /** 收成整数再夹进 min–max。改中间的字，并刷新加减的禁用。不调用 onChange */
     setValue(value: number): void {
-        this.clampIn(whole(value, this._value));
+        this.clampIn(whole(value, this.value));
         this.layout();
     }
 
@@ -108,11 +81,11 @@ export class PfGMStepper extends GMComponent {
      */
     stepBy(delta: number): void {
         const typed = Number(this.plate?.getText() ?? '');
-        const before = this._value;
+        const before = this.value;
         const base = Number.isFinite(typed) ? whole(typed, before) : before;
         this.clampIn(base + whole(delta, 0));
         this.layout();
-        if (this._value !== before) this.onChange?.(this._value);
+        if (this.value !== before) this.onChange?.(this.value);
     }
 
     /** 只在用户操作时调用。setValue 不走这里 */
@@ -130,36 +103,37 @@ export class PfGMStepper extends GMComponent {
     /** 中间打完字离开：夹紧后回写，值真的变了才回调 */
     private commit(text: string): void {
         const typed = Number(text);
-        const before = this._value;
+        const before = this.value;
         this.clampIn(Number.isFinite(typed) ? whole(typed, before) : before);
         this.layout();
-        if (this._value !== before) this.onChange?.(this._value);
+        if (this.value !== before) this.onChange?.(this.value);
     }
 
-    /** 把四个值收成合法整数并夹进范围。直接写字段，不走 setter，避免 layout 递归 */
+    /** 把四个值收成合法整数并夹进范围。写完再统一 layout */
     private clampIn(value: number): void {
-        this._step = whole(this._step, 1);
-        if (this._step < 1) this._step = 1;
-        this._min = whole(this._min, 0);
-        this._max = whole(this._max, this._min);
-        if (this._max < this._min) this._max = this._min;
-        this._value = Number.isFinite(value) ? whole(value, this._min) : this._min;
-        if (this._value < this._min) this._value = this._min;
-        if (this._value > this._max) this._value = this._max;
+        this.step = whole(this.step, 1);
+        if (this.step < 1) this.step = 1;
+        this.min = whole(this.min, 0);
+        this.max = whole(this.max, this.min);
+        if (this.max < this.min) this.max = this.min;
+        this.value = Number.isFinite(value) ? whole(value, this.min) : this.min;
+        if (this.value < this.min) this.value = this.min;
+        if (this.value > this.max) this.value = this.max;
     }
 
     private layout(): void {
         const plate = this.plate;
-        if (!plate) return; // 反序列化时 setter 会先跑，那会儿还没绑节点
-        this.clampIn(this._value);
+        if (!plate) return; // 嵌套实例的 onInit 可能晚于外层
+        this.clampIn(this.value);
         const put = plate.node.getComponent(UITransform);
         put?.setContentSize(PF_GM_STEPPER.plateW, PF_GM_STEPPER.plateH);
         plate.node.setPosition(0, 0, 0);
-        plate.setText(String(this._value)); // setText 不触发任何回调
+        plate.setText(String(this.value)); // setText 不触发任何回调
         const x = PF_GM_STEPPER.plateW / 2 + PF_GM_STEPPER.gap + PF_GM_STEPPER.btn / 2;
-        this.minusBtn?.setEnabled(this._value > this._min); // 先停抖，再写位置，避免启用时被拉回抖之前的坐标
-        this.plusBtn?.setEnabled(this._value < this._max);
+        this.minusBtn?.setEnabled(this.value > this.min); // 先停抖，再写位置，避免启用时被拉回抖之前的坐标
+        this.plusBtn?.setEnabled(this.value < this.max);
         this.minusBtn?.node.setPosition(-x, 0, 0);
         this.plusBtn?.node.setPosition(x, 0, 0);
+        this.stamp = `${this.value}|${this.min}|${this.max}|${this.step}`;
     }
 }

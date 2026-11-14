@@ -87,22 +87,10 @@ export class PfGMTabs extends GMComponent {
     private fixedW = 0; // 五个字量出来的页签宽。字库晚到就重测
 
     @property
-    get index(): number {
-        return this._index;
-    }
-    set index(v: number) {
-        const next = this.clamp(Math.round(v));
-        if (this._index === next) return; // 跟引擎 Label.string 一样，值没变就不重排
-        this._index = next;
-        if (editing) return; // 编辑器里只记值，不切页
-        this.request(next, false); // 走完整的切换流程
-    }
+    index = 0; // 和 setIndex 同一份。越界会夹紧
 
     @property({ type: [GMTabSlot] })
     slots: GMTabSlot[] = [];
-
-    /** 当前页下标。和 setIndex 同一份，越界会夹紧 */
-    private _index = 0;
 
     onInit(): void {
         if (!this.bindNodes()) return console.error('[PfGMTabs] 需要子节点 tabs 和 panel');
@@ -112,7 +100,7 @@ export class PfGMTabs extends GMComponent {
         if (editing) this.syncIndex();
         this.layout();
         if (editing || this.pages.length === 0) return;
-        this.request(this.clamp(Math.round(this._index)), false);
+        this.request(this.clamp(Math.round(this.index)), false);
     }
 
     onRemove(): void {
@@ -122,10 +110,17 @@ export class PfGMTabs extends GMComponent {
         if (this.switching) gu.loadingHide(this.loadingKey());
     }
 
+    update(): void { // 检查器改下标、拉宽、或 setText 之后重排
+        if (!this.tabsNode) return;
+        if (editing) this.syncSlots(false);
+        this.syncIndex();
+        this.layout();
+    }
+
     /** 改当前页。和点页签同一套切换，但不调用 setOnChange */
     setIndex(index: number): void {
         if (this.pages.length === 0) {
-            this._index = 0;
+            this.index = 0;
             this.current = -1;
             return;
         }
@@ -152,7 +147,7 @@ export class PfGMTabs extends GMComponent {
         const entry = this.makeEntry(claimed.page, claimed.made);
         this.pages.splice(at, 0, entry);
         if (this.current >= at) this.current += 1;
-        if (this.current >= 0) this._index = this.current;
+        if (this.current >= 0) this.index = this.current;
         this.layout();
     }
 
@@ -165,7 +160,7 @@ export class PfGMTabs extends GMComponent {
         this.destroyEntry(index);
         if (shown > index) this.current = shown - 1;
         else if (shown === index) this.current = this.pages.length ? Math.min(index, this.pages.length - 1) : -1;
-        this._index = this.current < 0 ? 0 : this.current;
+        this.index = this.current < 0 ? 0 : this.current;
         this.layout();
     }
 
@@ -194,16 +189,21 @@ export class PfGMTabs extends GMComponent {
         for (const slot of this.slots) this.mountSlot(slot);
     }
 
-    /** 编辑器里初始化一次：把下标夹进范围并记下当前页。运行时切页走 request() */
     private syncIndex(): void {
+        if (this.switching) return;
         if (this.pages.length === 0) {
             this.current = -1;
-            this._index = 0;
+            this.index = 0;
             return;
         }
-        const next = this.clamp(Math.round(this._index));
-        this._index = next;
-        this.current = next;
+        const next = this.clamp(Math.round(this.index));
+        if (next !== this.index) this.index = next;
+        if (next === this.current) return;
+        if (editing) {
+            this.current = next;
+            return;
+        }
+        this.request(next, false);
     }
 
     private mountSlot(slot: GMTabSlot): void {
@@ -285,7 +285,7 @@ export class PfGMTabs extends GMComponent {
     private request(index: number, fromClick: boolean): void {
         if (editing || this.pages.length === 0) return;
         const next = this.clamp(index);
-        this._index = next; // 直接写字段，不走 setter（setter 会再叫一次 request）
+        this.index = next;
         if (this.switching) {
             this.pending = next;
             this.pendingClick = fromClick;
@@ -302,7 +302,7 @@ export class PfGMTabs extends GMComponent {
         this.runHook(prev?.page ?? null, 'onHide', () => {
             if (!this.isValid) return;
             this.current = next;
-            this._index = next;
+            this.index = next;
             this.layout();
             this.runHook(this.pages[next]?.page ?? null, 'onShow', () => this.endSwitch(fromClick, next));
         });
@@ -317,14 +317,14 @@ export class PfGMTabs extends GMComponent {
             this.destroyEntry(index);
             if (!neighbor || !neighbor.page.node.isValid) {
                 this.current = -1;
-                this._index = 0;
+                this.index = 0;
                 this.layout();
                 this.endSwitch(false, -1);
                 return;
             }
             const at = this.pages.indexOf(neighbor);
             this.current = at;
-            this._index = at;
+            this.index = at;
             this.layout();
             this.runHook(neighbor.page, 'onShow', () => this.endSwitch(false, at));
         });

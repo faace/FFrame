@@ -30,44 +30,16 @@ export class PfGMOption extends GMComponent {
     private iconView: Sprite | null = null;
     private labelView: Label | null = null;
     private dressed = '';
-
-    // 字段本体。检查器改属性走 setter，改了就当场重派
-    private _text = '';
-    private _icon = ''; // 物品槽名，例如 icon_star。空着只显示文字
-    private _selected = false;
+    private stamp = '';
 
     @property
-    get text(): string {
-        return this._text;
-    }
-    set text(v: string) {
-        const next = String(v ?? '');
-        if (this._text === next) return;
-        this._text = next;
-        this.layout(); // 字只影响 label，不用重新取图
-    }
+    text = '';
 
     @property
-    get icon(): string {
-        return this._icon;
-    }
-    set icon(v: string) {
-        const next = String(v ?? '');
-        if (this._icon === next) return;
-        this._icon = next;
-        this.sync();
-    }
+    icon = ''; // 物品槽名，例如 icon_star。空着只显示文字
 
     @property
-    get selected(): boolean {
-        return this._selected;
-    }
-    set selected(v: boolean) {
-        const next = !!v;
-        if (this._selected === next) return;
-        this._selected = next;
-        this.layout();
-    }
+    selected = false;
 
     onInit(): void {
         if (!this.bindNodes()) return console.error('[PfGMOption] 需要子节点 bg、icon 和 label');
@@ -76,19 +48,34 @@ export class PfGMOption extends GMComponent {
         this.sync();
     }
 
+    update(): void { // 检查器改了字、图标或选中后重画。编辑态和运行态同一条
+        if (!this.bg) return;
+        const mark = this.mark();
+        if (mark === this.stamp) return;
+        this.sync();
+        this.stamp = mark;
+    }
+
     /** 换字 */
     setText(text: string): void {
         this.text = text;
+        this.sync();
     }
 
     /** 换图标。空字符串把图标藏起来 */
     setIcon(name: string): void {
         this.icon = name;
+        this.sync();
     }
 
     /** 选中时画绿底、字转白加描边 */
     setSelected(on: boolean): void {
         this.selected = !!on;
+        this.sync();
+    }
+
+    private mark(): string {
+        return `${this.text}|${this.icon}|${this.selected}`;
     }
 
     private bindNodes(): boolean {
@@ -98,9 +85,8 @@ export class PfGMOption extends GMComponent {
         return !!(this.bg && this.iconView && this.labelView);
     }
 
-    /** 图标名变了才重新取图，其余交给 layout */
     private sync(): void {
-        if (this._icon !== this.dressed) this.dressIcon();
+        if (this.icon !== this.dressed) this.dressIcon();
         this.layout();
     }
 
@@ -109,14 +95,14 @@ export class PfGMOption extends GMComponent {
         const bg = this.bg;
         const icon = this.iconView;
         const label = this.labelView;
-        if (!root || !bg || !icon || !label) return; // 反序列化时 setter 先跑，那会儿还没绑节点
+        if (!root || !bg || !icon || !label) return;
         const width = root.width > 0 ? root.width : PF_GM_OPTION.width;
         const height = PF_GM_OPTION.height;
         root.setContentSize(width, height);
         bg.node.getComponent(UITransform)?.setContentSize(width, height);
         bg.node.setPosition(0, 0, 0);
-        bg.node.active = this._selected;
-        const hasIcon = this._icon.length > 0;
+        bg.node.active = this.selected;
+        const hasIcon = this.icon.length > 0;
         icon.node.active = hasIcon;
         icon.node.getComponent(UITransform)?.setContentSize(PF_GM_OPTION.iconSize, PF_GM_OPTION.iconSize);
         const left = -width / 2 + PF_GM_OPTION.padX;
@@ -124,12 +110,13 @@ export class PfGMOption extends GMComponent {
         const textLeft = hasIcon ? left + PF_GM_OPTION.iconSize + PF_GM_OPTION.gap : left;
         const textRight = width / 2 - PF_GM_OPTION.padX;
         this.placeLabel(label, textLeft, textRight, height);
+        this.stamp = this.mark();
     }
 
     private placeLabel(label: Label, left: number, right: number, height: number): void {
-        const ink = this._selected ? PF_GM_OPTION.onInk : PF_GM_OPTION.ink;
+        const ink = this.selected ? PF_GM_OPTION.onInk : PF_GM_OPTION.ink;
         const outline = PF_GM_OPTION.outline;
-        label.string = this._text;
+        label.string = this.text;
         label.fontSize = PF_GM_OPTION.fontSize;
         label.lineHeight = PF_GM_OPTION.fontSize;
         label.color = new Color(ink[0], ink[1], ink[2], 255);
@@ -137,8 +124,8 @@ export class PfGMOption extends GMComponent {
         label.verticalAlign = Label.VerticalAlign.CENTER;
         label.overflow = Label.Overflow.CLAMP; // 字号固定，不按字数缩小
         label.enableWrapText = false;
-        label.enableOutline = this._selected; // 奶油底上的深色字不描边
-        label.outlineWidth = this._selected ? PF_GM_OPTION.outlineWidth : 0;
+        label.enableOutline = this.selected; // 奶油底上的深色字不描边
+        label.outlineWidth = this.selected ? PF_GM_OPTION.outlineWidth : 0;
         label.outlineColor = new Color(outline[0], outline[1], outline[2], 255);
         const lut = label.node.getComponent(UITransform);
         lut?.setAnchorPoint(0, 0.5);
@@ -160,14 +147,14 @@ export class PfGMOption extends GMComponent {
     private dressIcon(): void {
         const sprite = this.iconView;
         if (!sprite) return;
-        const name = this._icon;
+        const name = this.icon;
         this.dressed = name;
         if (!name) {
             sprite.spriteFrame = null;
             return;
         }
         applySkin(name, (frame) => {
-            if (!sprite.isValid || this._icon !== name) return;
+            if (!sprite.isValid || this.icon !== name) return;
             sprite.spriteFrame = frame;
             sprite.sizeMode = Sprite.SizeMode.CUSTOM;
             sprite.type = Sprite.Type.SIMPLE;

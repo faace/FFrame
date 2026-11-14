@@ -16,36 +16,35 @@ const PF_GM_SWITCH = {
 export class PfGMSwitch extends GMComponent {
     private face: Sprite | null = null;
     private skin = '';
+    private stamp = '';
     private onChange: ((value: boolean) => void) | null = null; // 只在 toggle 调，setValue 不走这里
 
-    // 开没开。检查器改它走 setter，当场重派
-    private _value = false;
-
     @property
-    get value(): boolean {
-        return this._value;
-    }
-    set value(v: boolean) {
-        const next = !!v;
-        if (this._value === next) return; // 跟引擎 Label.string 一样，值没变就不重排
-        this._value = next;
-        this.layout();
-    }
+    value = false;
 
     onInit(): void {
         if (!this.bindNodes()) return console.error('[PfGMSwitch] 需要子节点 face');
         this.layout();
     }
 
+    update(): void { // 检查器改 value 或拉宽后重排。编辑态和运行态同一条
+        const uit = this.node.getComponent(UITransform);
+        if (!uit || !this.face) return;
+        const mark = `${this.value}|${uit.width}|${uit.height}`;
+        if (mark === this.stamp) return;
+        this.layout();
+    }
+
     /** 改开关。不调用 onChange。和检查器同一份 value */
     setValue(value: boolean): void {
         this.value = !!value;
+        this.layout();
     }
 
     /** 翻转。调用方在 gu.addClick 里调它，flip 完再回调 */
     toggle(): void {
-        this.setValue(!this._value);
-        this.onChange?.(this._value);
+        this.setValue(!this.value);
+        this.onChange?.(this.value);
     }
 
     /** 只在 toggle 时调用。setValue 不走这里 */
@@ -58,20 +57,21 @@ export class PfGMSwitch extends GMComponent {
         return !!this.face;
     }
 
-    /** 尺寸固定，外部拉宽也会被按回 96×48 */
     private layout(): void {
         const uit = this.node.getComponent(UITransform);
         const face = this.face;
-        if (!uit || !face) return; // 反序列化时 setter 先跑，那会儿还没绑节点
+        if (!uit || !face) return;
+        this.value = !!this.value;
         uit.setContentSize(PF_GM_SWITCH.width, PF_GM_SWITCH.height);
         const node = face.node;
         node.getComponent(UITransform)?.setContentSize(PF_GM_SWITCH.width, PF_GM_SWITCH.height);
         node.setPosition(0, 0, 0);
-        const name = this._value ? 'switch_on' : 'switch_off';
+        const name = this.value ? 'switch_on' : 'switch_off';
         if (name !== this.skin) {
             this.skin = name;
             this.dress(face, name);
         }
+        this.stamp = `${this.value}|${uit.width}|${uit.height}`;
     }
 
     private dress(sprite: Sprite, name: string): void {
