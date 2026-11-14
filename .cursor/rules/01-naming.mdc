@@ -183,7 +183,8 @@ export class PfX extends GMScene {}
 - 步进的加减嵌套小档纯图标 `PfGMBtn`，主题都是 `secondary`。点按仍是外层 `gu.addClick`，步进不挂 `Button`。整数 `value` / `min` / `max` / `step` 是同一份属性。到 `min` 禁用减号，到 `max` 禁用加号。
 - **控件不要用 `update()` 轮询属性变化**。检查器里改属性要重派的，用 `getter` + `setter`：setter 里 `===` 相等早退，不等才重排。跟引擎 `Label.string`、`Sprite.spriteFrame` 同一个路子。节点宽高变了用 `node.on(Node.EventType.SIZE_CHANGED, ...)`，不要靠 `update()` 里比对宽高。数组属性（如 `items`）由公开方法（`setItems()`）显式重排，检查器直接改数组成员不保证实时。
 - **确实需要 `update()` 时，要人工确认**。写之前说明为什么 setter / `SIZE_CHANGED` / 公开方法都覆盖不到，经人点头才加。不许图省事直接抄一段 `update()` + `stamp`。
-- 历史遗留的 `update()`（`PfGMBtn`、`PfGMTitle`、`PfGMSlider`、`PfGMBar`、`PfGMSwitch`、`PfGMCheck`、`PfGMItemCell`、`PfGMSelect`、`PfGMOption`、`PfGMToast`、`PfGMTabs`）待统一优化，改到哪个就顺手换掉，不要新增同类写法。
+- 历史遗留的 `update()`（`PfGMBtn`、`PfGMTitle`、`PfGMSlider`、`PfGMBar`、`PfGMSwitch`、`PfGMItemCell`、`PfGMSelect`、`PfGMOption`、`PfGMTabs`）待统一优化，改到哪个就顺手换掉，不要新增同类写法。
+- **`PfGMToast` 待重做（未做）**：队列、锚点、prefab 缓存、`seq` 现在都是 `PfGMToast.ts` 的模块级变量，控件既管一条又管一列，`relayout()` 还直接改别人的坐标。要按 `alert` 的样子把队列挪到管理器（`GMUIManager` 或挂在 `toasts` 节点上的 `GMToastHost`），`PfGMToast` 只留「一条」的宽高、字号、颜色、`text`、`bg`。改完再顺便去掉它的 `update()`。动它之前先确认分层方案。
 - 页签是 `PfGMTabs`，不继承 `PfGMBtn`。子节点固定 `tabs`、`panel`。内容必须是 `GMTabPage`（`text` / `setText`，`onShow` / `onHide` 收 `done`）。皮 `tab_normal`、`tab_selected`、`panel`，控件自己切九宫格。高 72，宽按五个中文字不缩放，从左挨着排，第一颗让过 panel 顶边圆角。点击用 `gu.addClick`。
 - 不要 `PfBtn`（太泛），不要 `PfFFBtn`（`FF*` 已废），不要只叫 `GMBtn`（看不出是预制体，也分不清 Ly/Pf）。
 - **本游戏**仍是 `PfShopItem` / `LyAlert`，中间不加 `GM`。纯基类仍是 `GMComponent` / `GMAlert` / `GMLayer` / `GMFrame`（没有对应预制体文件）。`GMFrame` 是普通弹窗骨架。

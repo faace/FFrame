@@ -13,11 +13,21 @@ const PF_GM_CHECK = 48;
 export class PfGMCheck extends GMComponent {
     private box: Sprite | null = null;
     private mark: Sprite | null = null;
-    private stamp = '';
     private onChange: ((value: boolean) => void) | null = null; // 只在 toggle 调，setValue 不走这里
 
+    // 勾没勾。检查器改它走 setter，当场重派
+    private _value = false;
+
     @property
-    value = false;
+    get value(): boolean {
+        return this._value;
+    }
+    set value(v: boolean) {
+        const next = !!v;
+        if (this._value === next) return; // 跟引擎 Label.string 一样，值没变就不重排
+        this._value = next;
+        this.layout();
+    }
 
     onInit(): void {
         if (!this.bindNodes()) return console.error('[PfGMCheck] 需要子节点 box 和 mark');
@@ -26,23 +36,15 @@ export class PfGMCheck extends GMComponent {
         this.layout();
     }
 
-    update(): void { // 检查器改了 value 后刷新勾。编辑态和运行态同一条
-        if (!this.box) return;
-        const mark = this.value ? '1' : '0';
-        if (mark === this.stamp) return;
-        this.layout();
-    }
-
     /** 改勾选。不调用 onChange。和检查器同一份 value */
     setValue(value: boolean): void {
         this.value = !!value;
-        this.layout();
     }
 
     /** 翻转。调用方在 gu.addClick 里调它，flip 完再回调 */
     toggle(): void {
-        this.setValue(!this.value);
-        this.onChange?.(this.value);
+        this.setValue(!this._value);
+        this.onChange?.(this._value);
     }
 
     /** 只在 toggle 时调用。setValue 不走这里 */
@@ -60,13 +62,11 @@ export class PfGMCheck extends GMComponent {
         const uit = this.node.getComponent(UITransform);
         const box = this.box;
         const mark = this.mark;
-        if (!uit || !box || !mark) return;
-        this.value = !!this.value;
+        if (!uit || !box || !mark) return; // 反序列化时 setter 先跑，那会儿还没绑节点
         uit.setContentSize(PF_GM_CHECK, PF_GM_CHECK);
         this.place(box);
         this.place(mark);
-        mark.node.active = this.value;
-        this.stamp = this.value ? '1' : '0';
+        mark.node.active = this._value;
     }
 
     private place(sprite: Sprite): void {

@@ -44,16 +44,44 @@ export class PfGMItemCell extends GMComponent {
     private frame: Sprite | null = null;
     private label: Label | null = null;
     private dressed = '';
-    private stamp = '';
+
+    // 字段本体。检查器改属性走 setter，改了就当场重派
+    private _icon = ''; // 槽名，例如 icon_gold。空着不画
+    private _selected = false;
+    private _count = 0; // 大于 0 才显示。超过 999 显示 999+
 
     @property
-    icon = ''; // 槽名，例如 icon_gold。空着不画
+    get icon(): string {
+        return this._icon;
+    }
+    set icon(v: string) {
+        const next = String(v ?? '');
+        if (this._icon === next) return;
+        this._icon = next;
+        this.sync(); // 图标名变了要重新取图
+    }
 
     @property
-    selected = false;
+    get selected(): boolean {
+        return this._selected;
+    }
+    set selected(v: boolean) {
+        const next = !!v;
+        if (this._selected === next) return;
+        this._selected = next;
+        this.layout();
+    }
 
     @property
-    count = 0; // 大于 0 才显示。超过 999 显示 999+
+    get count(): number {
+        return this._count;
+    }
+    set count(v: number) {
+        const next = whole(v);
+        if (this._count === next) return;
+        this._count = next;
+        this.layout();
+    }
 
     onInit(): void {
         if (!this.bindNodes()) return console.error('[PfGMItemCell] 需要子节点 bg、icon、frame 和 label');
@@ -63,33 +91,23 @@ export class PfGMItemCell extends GMComponent {
         this.sync();
     }
 
-    update(): void { // 检查器改了图标、选中或数量后重画。编辑态和运行态同一条
-        if (!this.bg) return;
-        const mark = `${this.icon}|${this.selected}|${this.count}`;
-        if (mark === this.stamp) return;
-        this.sync();
-    }
-
     /** 换物品图。空字符串把图标藏起来 */
     setIcon(name: string): void {
         this.icon = name;
-        this.sync();
     }
 
     /** 选中时显示框 */
     setSelected(on: boolean): void {
-        this.selected = on;
-        this.sync();
+        this.selected = !!on;
     }
 
     /** 设置数量。0 或负数把数字藏起来 */
     setCount(count: number): void {
         this.count = count;
-        this.sync();
     }
 
     private sync(): void {
-        if (this.icon !== this.dressed) this.dressIcon();
+        if (this._icon !== this.dressed) this.dressIcon();
         this.layout();
     }
 
@@ -107,24 +125,22 @@ export class PfGMItemCell extends GMComponent {
         const icon = this.iconView;
         const frame = this.frame;
         const label = this.label;
-        if (!root || !bg || !icon || !frame || !label) return;
-        this.count = whole(this.count);
-        if (this.count < 0) this.count = 0;
+        if (!root || !bg || !icon || !frame || !label) return; // 反序列化时 setter 先跑，那会儿还没绑节点
+        if (this._count < 0) this._count = 0;
         const size = PF_GM_ITEM_CELL.size;
         root.setContentSize(size, size);
         this.place(bg.node, size);
         this.place(icon.node, PF_GM_ITEM_CELL.icon);
         this.place(frame.node, PF_GM_ITEM_CELL.frame);
         this.placeCount(label);
-        icon.node.active = this.icon.length > 0;
-        frame.node.active = this.selected;
-        label.node.active = this.count > 0;
-        this.stamp = `${this.icon}|${this.selected}|${this.count}`;
+        icon.node.active = this._icon.length > 0;
+        frame.node.active = this._selected;
+        label.node.active = this._count > 0;
     }
 
     private placeCount(label: Label): void {
         const ink = PF_GM_ITEM_CELL.outline;
-        label.string = countText(this.count);
+        label.string = countText(this._count);
         label.fontSize = PF_GM_ITEM_CELL.fontSize;
         label.lineHeight = PF_GM_ITEM_CELL.fontSize; // 单行描边靠节点高度留空，不靠把行高改小
         label.color = Color.WHITE;
@@ -149,7 +165,7 @@ export class PfGMItemCell extends GMComponent {
     private dressIcon(): void {
         const sprite = this.iconView;
         if (!sprite) return;
-        const name = this.icon;
+        const name = this._icon;
         this.dressed = name;
         if (!name) {
             sprite.spriteFrame = null;
@@ -161,7 +177,7 @@ export class PfGMItemCell extends GMComponent {
     private dress(sprite: Sprite | null, name: string): void {
         if (!sprite) return;
         applySkin(name, (frame) => {
-            if (!sprite.isValid || (sprite === this.iconView && this.icon !== name)) return;
+            if (!sprite.isValid || (sprite === this.iconView && this._icon !== name)) return;
             sprite.spriteFrame = frame;
             sprite.sizeMode = Sprite.SizeMode.CUSTOM;
             sprite.type = Sprite.Type.SIMPLE;
