@@ -135,6 +135,8 @@ Overlay 是框架自己的常驻节点。第一次打开场景、弹层或确认
 | `slot_item` | `PfGMItemCell` 的木格底 |
 | `frame_select` | `PfGMItemCell` 的选中框，默认隐藏 |
 | `toast` | `PfGMToast` 的底板。480×72 |
+| `badge` | `PfGMBadge` 的点模式。圆点，12×12 |
+| `badge_num` | `PfGMBadge` 的数字模式。20 高胶囊，九宫格左右各 9 横向拉 |
 | `input` | `PfGMEditBox` 的底板。400×72。**还没画，暂借 `stepper_plate`** |
 
 主题枚举仍然叫 `primary` 这些。取图时拼成 `btn_` 加主题名，所以文件名能看出是按钮底板。
