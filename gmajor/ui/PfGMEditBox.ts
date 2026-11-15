@@ -14,14 +14,14 @@ Enum(PfGMEditBoxAlign);
 
 /** 输入框。高固定 72 跟皮槽一致，宽可以改。字号和两个颜色是这一层唯一要管的事 */
 const PF_GM_EDIT_BOX = {
-    width: 400, // 跟 ctrl.json 的 input 槽 display 一致
+    width: 400, // 默认宽。皮是 140×72 的 input，九宫格拉开
     height: 72,
     maxLength: 32, // 字数上限
     fontSize: 28,
     padX: 19, // 输入区左右内缩。EditBox 自己再往内 2，合计 21，跟上下留白一样
     ink: [92, 64, 32] as const, // 奶油底深墨，不描边
     hintInk: [132, 112, 88] as const, // 占位字浅一档
-    skin: 'stepper_plate', // 皮槽。input 槽还没画，临时借步进的数字板；图画好改回 'input'
+    skin: 'input', // 和步进共用的底板。图还是原来那张，槽名从 stepper_plate 改过来
 };
 
 /**
@@ -202,12 +202,11 @@ export class PfGMEditBox extends GMComponent {
     private dress(): void {
         const bg = this.bg;
         if (!bg) return;
-        // 临时借 stepper_plate 顶一下：input 槽还没画。图好了把 skin 改回 'input'
         applySkin(PF_GM_EDIT_BOX.skin, (frame) => {
             if (!bg.isValid) return;
             bg.spriteFrame = frame;
             bg.sizeMode = Sprite.SizeMode.CUSTOM;
-            bg.type = Sprite.Type.SLICED; // 九宫格拉伸，跟步进的数字板同一张
+            bg.type = Sprite.Type.SLICED; // 九宫格拉伸。步进中间嵌的也是这张
             this.fit(); // 贴图可能把底板打回原尺寸
         });
     }

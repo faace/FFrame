@@ -122,7 +122,7 @@ Overlay 是框架自己的常驻节点。第一次打开场景、弹层或确认
 | `switch_on` | `PfGMSwitch` 打开。草地绿，圆钮在右 |
 | `checkbox` | `PfGMCheck` 的框。浅橡木 |
 | `checkbox_mark` | `PfGMCheck` 的勾。草地绿，勾上才显示 |
-| `stepper_plate` | `PfGMStepper` 中间那块输入框的底板。140×72 |
+| `input` | `PfGMEditBox` 的底板。步进中间嵌的也是它。显示 140×72，九宫格拉开。原名 `stepper_plate` |
 | `tab_normal` | `PfGMTabs` 未选中的页签 |
 | `tab_selected` | `PfGMTabs` 选中的页签 |
 | `panel` | `PfGMTabs` 下面的板 |
@@ -137,11 +137,10 @@ Overlay 是框架自己的常驻节点。第一次打开场景、弹层或确认
 | `toast` | `PfGMToast` 的底板。480×72 |
 | `badge` | `PfGMBadge` 的点模式。圆点，12×12 |
 | `badge_num` | `PfGMBadge` 的数字模式。20 高胶囊，九宫格左右各 9 横向拉 |
-| `input` | `PfGMEditBox` 的底板。400×72。**还没画，暂借 `stepper_plate`** |
 
 主题枚举仍然叫 `primary` 这些。取图时拼成 `btn_` 加主题名，所以文件名能看出是按钮底板。
 
-按钮、标题、滑条轨道、进度条的槽和填充、步进板、页签、下拉盒子和列表底板、轻提示板、`panel` 按子图上的九宫格拉伸。图标和文字拖进控件才显示，没设就空着。关闭钮用的图标槽是 `icon_close`，由预制体引用，不是 `PfGMBtn` 按名字去取。
+按钮、标题、滑条轨道、进度条的槽和填充、`input`、页签、下拉盒子和列表底板、轻提示板、`panel` 按子图上的九宫格拉伸。图标和文字拖进控件才显示，没设就空着。关闭钮用的图标槽是 `icon_close`，由预制体引用，不是 `PfGMBtn` 按名字去取。
 
 ### 框架不会按名字来取
 
@@ -161,7 +160,7 @@ Overlay 是框架自己的常驻节点。第一次打开场景、弹层或确认
 | `TitleBar` | `title_bar` |
 | `BarBg` / `BarFill` | `bar_bg` / `bar_fill` |
 | `SliderTrack` / `SliderThumb` | `slider_track` / `slider_thumb` |
-| `PlateStepper` | `stepper_plate` |
+| `PlateStepper` | `stepper_plate`（0.9.0 再改名为 `input`） |
 
 业务侧原来按大驼峰 `addSkin` 的图也改成了蛇形，例如 `Panel` → `panel`，`IconClose` → `icon_close`。
 

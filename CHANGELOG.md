@@ -4,6 +4,14 @@
 
 app 在 `config.version.gmajor` 写所按的框架版本。开机只打日志，主.次不同时多打一条警告，不拦截。升级后怎么判断：看这里的破坏项，再跑一遍。
 
+## 0.9.0
+
+输入框和步进共用的那张底板改了槽名。图没有重画。
+
+- **破坏**：皮肤槽 `stepper_plate` 改名为 `input`。旧名字不再读取。
+- **改法**：主题图集里的帧名改成 `input`。取这张图的代码改成 `applySkin('input')`。九宫格名单里的 `stepper_plate` 换成 `input`。
+- **行为**：像素还是原来那张 140×72 的木板，九宫格拉开。`PfGMEditBox` 用它，步进中间嵌的也是这只输入框。预留的空 `input` 槽删掉，没有第二张图。
+
 ## 0.8.0
 
 步进中间改成输入框，可以直接打字。另外去掉 `PfGMStepper` / `PfGMEditBox` 的 `update()`，改成跟引擎一样的属性 setter。
@@ -41,7 +49,7 @@ app 在 `config.version.gmajor` 写所按的框架版本。开机只打日志，
 - **新增（可选）**：`setText` / `getText` / `setOnChange` / `setOnDone`。`setText` 两个回调都不触发；`setOnChange` 每改一个字调一次（输入法在选词完成后调）；`setOnDone` 失焦或回车离开时调一次。
 - **行为**：高固定 72，宽随调用方（默认 400）。`EditBox` 挂在左右各内缩 19 的 `text` 上——引擎把 Label 和编辑态的 DOM 输入框都摆在「所在节点」左边缘 +2 处，挂根上会压到皮的边框。
 - **注意**：检查器里填初始文字去点 `text` 上 `EditBox` 组件的 `String`，控件不另存一份 `text`。
-- **还没画槽**：`input` 槽仍在 `ctrl.json` 里预留，暂无图。这一步先借 `stepper_plate` 顶一下（`PF_GM_EDIT_BOX.skin`），图画好后把 `skin` 改回 `'input'`。
+- **还没画槽**：当时 `input` 槽仍预留，先借 `stepper_plate`。0.9.0 没有另画，把这张图改名为 `input`。
 
 ## 0.7.0
 

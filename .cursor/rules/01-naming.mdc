@@ -194,7 +194,7 @@ export class PfX extends GMScene {}
 - 素材和提示语放 `FFrame-asset-line/style/<主题>/`。长期脚本放 `FFrame-asset-line/tools/`。场景的原始生成素材放 `FFrame-asset-line/scenes/<场景>/资源生成/`，被该仓库 `.gitignore` 忽略，不入库，换电脑用 U 盘拷贝。
 - 没有这个包，或少某一张：该槽用 Cocos 内置白图。整包没有打一条 info，缺一张打一条 warn，开机不停。编辑器和播放用同一份已导入的子图。
 - 槽名用**小写蛇形**，种类在前。按钮底板是 `btn_` 加主题名：`btn_primary`、`btn_secondary`、`btn_warning`、`btn_neutral`、`btn_info`。主题枚举仍是 `primary` 这些，`PfGMBtn` 取图时加 `btn_`。脚本不挂底板属性。图标的九宫格边为 0。
-- 框架会取的其它槽：`title_bar`、`bar_bg`、`bar_fill`、`slider_track`、`slider_thumb`、`stepper_plate`、`tab_normal`、`tab_selected`、`panel`。只有一张、种类就是名字的，不加第二段，例如 `panel`。图标 `icon_close` 这种。Bundle、脚本、预制体仍大驼峰，禁止蛇形。
+- 框架会取的其它槽：`title_bar`、`bar_bg`、`bar_fill`、`slider_track`、`slider_thumb`、`input`、`tab_normal`、`tab_selected`、`panel`。只有一张、种类就是名字的，不加第二段，例如 `panel`。图标 `icon_close` 这种。Bundle、脚本、预制体仍大驼峰，禁止蛇形。
 - 图标和文字拖入或设入才显示，没设就空着。`PfGMTitle` 自己取 `title_bar`。必取清单在框架仓库 README。
 - 嵌套 `PfGMBtn` / `PfGMTitle` 时，实例只覆盖和默认不同的项：节点名、坐标、档位、主题、版式、`text`、图标。底板、描边、字色、显隐、`contentSize` 留给控件预制体和脚本。`PfGMTitle` 没有 `text`，字覆盖在 Label 字符串上。
 - 取图只给 `SpriteFrame`。按钮、标题、滑条轨道、进度条的槽和填充按子图上的九宫格拉伸。其它节点由使用方设 `SLICED`。控件不要 import 游戏 `SkinKit`。点击仍用 `gu.addClick`，控件不包一层点击。滑条的拖动不是点击，不走 `addClick`。

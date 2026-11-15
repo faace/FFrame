@@ -610,7 +610,7 @@
       "uuid": "4b756a97-47ca-464f-b3f7-c780df66202c@01f49",
       "displayName": "",
       "id": "01f49",
-      "name": "stepper_plate",
+      "name": "input",
       "userData": {
         "trimThreshold": 1,
         "rotated": false,
