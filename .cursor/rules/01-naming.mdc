@@ -290,7 +290,7 @@ export class PfX extends GMScene {}
 ✅ gmajor/…/PfGMBtn.prefab + PfGMBtn.ts（框架预制体；extends GMComponent）
 ✅ gmajor/…/PfGMSlider、PfGMBar、PfGMStepper（滑条含轨道、填充、滑块和裁剪层；进度条 bar_bg/bar_fill；步进加减嵌套 PfGMBtn）
 ✅ gmajor/…/PfGMSwitch（face）、PfGMCheck（box/mark）、PfGMItemCell（bg/icon/frame/label）
-✅ gmajor/…/PfGMSelect（bg/icon/label/arrow + 内嵌 list 骨架）、PfGMOption（bg/icon/label）、PfGMToast（bg/label；调用 gu.toast，队列在 GMToastHost）
+✅ gmajor/…/PfGMSelect（bg/icon/label/arrow；展开用 PfGMList，底板 dropdown_list）、PfGMOption（bg/icon/label，继承 GMListItem）、PfGMToast（bg/label；调用 gu.toast，队列在 GMToastHost）
 ❌ PfGMToast.show / hide / setAnchor；gu.toastRoot()
 ✅ gmajor/…/PfGMList（view/content 锚点 0.5；不满且居中时关 ScrollView，content 归 0）+ GMListItem（无预制体，游戏行继承）
 ✅ 普通弹窗 extends GMFrame（默认 620×800；铆钉压棕色顶边；左上角有回调才出现）

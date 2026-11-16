@@ -1,8 +1,9 @@
-import { _decorator, assetManager, BlockInputEvents, Color, instantiate, Label, Node, Prefab, ScrollBar, ScrollView, Sprite, UITransform, Vec2 } from 'cc';
+import { _decorator, assetManager, BlockInputEvents, Color, Label, Node, Prefab, Sprite, UITransform } from 'cc';
 import { EDITOR, PREVIEW } from 'cc/env';
 import { gu } from '../launch/GMLauncher';
 import { GMComponent } from './GMComponent';
 import { applySkin } from './GMSkin';
+import { GMListDir, PfGMList } from './PfGMList';
 import { PfGMOption } from './PfGMOption';
 
 const { ccclass, executeInEditMode, property } = _decorator;
@@ -10,8 +11,7 @@ const { ccclass, executeInEditMode, property } = _decorator;
 /**
  * 下拉可调参数。改数字改这里。
  * 收起态 72 高，宽读根节点。子节点固定 bg、icon、label、arrow。
- * 展开列表用引擎自带 ScrollView（预制体里就摆好 view / content / scrollBar / bar），运行时克隆，这里只往 content 里塞行。
- * 行高 64，上下内衬 6。一屏最多 8 行，再多由 ScrollView 滚。
+ * 展开用 PfGMList，底板 dropdown_list（上边直角贴住盒子）。行高 64，上下内衬 6。一屏最多 8 行。
  */
 const PF_GM_SELECT = {
     width: 320, // 根宽为 0 时的占位
@@ -27,9 +27,6 @@ const PF_GM_SELECT = {
     boardPad: 6, // 列表底板上下内衬
     stick: 6, // 列表上边压住盒底这么多，看起来是一体的
     maxVisible: 8, // 一屏最多铺几行，再多交给 ScrollView 滚
-    scrollW: 16, // 滚动条显示宽；图已经画成 16，不用再缩放
-    barInset: 3, // 滚动条离底板右内边多少
-    autoHide: 0.8, // 秒；停手后滚动条渐隐的时间
     ink: [92, 64, 32] as const,
 };
 
@@ -83,11 +80,10 @@ export class PfGMSelect extends GMComponent {
     private iconView: Sprite | null = null;
     private labelView: Label | null = null;
     private arrowView: Sprite | null = null;
-    private list: Node | null = null; // 运行时克隆出来的整块（含 ScrollView）
+    private list: PfGMList | null = null; // 展开时建的列表
     private shield: Node | null = null; // 点外面关闭的透明遮罩
-    private scroll: ScrollView | null = null;
-    private content: Node | null = null;
-    private rows: PfGMOption[] = [];
+    private opening = false; // 列表预制体还没回来时，挡住第二次展开
+    private openGen = 0; // 收起后丢掉迟到的列表加载
     private dressed = '';
     private stamp = '';
     private onChange: ((index: number) => void) | null = null; // 只在用户点选时调
@@ -103,28 +99,8 @@ export class PfGMSelect extends GMComponent {
         if (this.labelView!.isSystemFontUsed || !this.labelView!.font) console.error('[PfGMSelect] label 未挂 db://gmajor/fonts/main.ttf');
         this.dress(this.bg, 'dropdown', true);
         this.dress(this.arrowView, 'icon_arrow', false);
-        this.dressSkeleton(); // 列表骨架也先贴上皮肤，编辑器里就是真样子，不用等展开
-        this.hideTemplate(); // 播放时模板本身不能露出来，展开是克隆它
         this.index = clampIndex(this.index, this.items.length);
         this.layout();
-    }
-
-    /** 模板 list 在编辑器里可见（所见即所得），播放时收起，展开靠克隆 */
-    private hideTemplate(): void {
-        if (editing) return;
-        const list = this.node.getChildByName('list');
-        if (list) list.active = false;
-    }
-
-    /** list / scrollBar / bar 三处的皮。运行时 build 会再贴一次，编辑器和播放同一套 */
-    private dressSkeleton(): void {
-        const list = this.node.getChildByName('list');
-        if (!list) return;
-        this.dress(list.getComponent(Sprite), 'dropdown_list', true);
-        const track = list.getChildByName('scrollBar');
-        if (track) this.dress(track.getComponent(Sprite), 'scrollbar', true);
-        const thumb = track?.getChildByName('bar');
-        if (thumb) this.dress(thumb.getComponent(Sprite), 'scrollbar_thumb', true); // 九宫格，纵向拉伸圆头才不走形
     }
 
     onDisable(): void { // 页面被切走时收起，免得不小心留一个浮层
@@ -179,17 +155,21 @@ export class PfGMSelect extends GMComponent {
 
     /** 展开。已经在列表里、或编辑态则不做事 */
     open(): void {
-        if (editing || this.list || this.items.length === 0) return;
+        if (editing || this.list || this.opening || this.items.length === 0) return;
         if (!this.node.isValid || !this.node.parent) return;
+        this.opening = true;
         loadOptionPrefab((prefab) => {
-            if (!prefab || !this.node.isValid || this.list) return;
+            if (!this.opening || !prefab || !this.node.isValid || this.list) {
+                if (!this.list) this.opening = false;
+                return;
+            }
             this.build(prefab);
         });
     }
 
     /** 收起。点外面、点已选中项、页面切走都走这里 */
     close(): void {
-        if (!this.list && !this.shield) return;
+        if (!this.list && !this.shield && !this.opening) return;
         this.destroyOpen();
         this.setArrow(false);
     }
@@ -265,13 +245,14 @@ export class PfGMSelect extends GMComponent {
         label.node.setPosition(left, 0, 0);
     }
 
-    /** 展开：算上下哪边放得下，克隆预制体里的 list 骨架（ScrollView），再往 content 塞行 */
+    /** 展开：算上下哪边放得下，建一块 PfGMList，底板用 dropdown_list */
     private build(prefab: Prefab): void {
         const parent = this.node.parent;
         const page = parent?.getComponent(UITransform) ?? null;
-        const tpl = this.node.getChildByName('list');
-        if (!parent || !page) return;
-        if (!tpl) return console.error('[PfGMSelect] 预制体缺少 list 骨架');
+        if (!parent || !page) {
+            this.opening = false;
+            return;
+        }
         const width = this.boxWidth();
         const pos = this.node.position;
         const half = PF_GM_SELECT.height / 2;
@@ -296,105 +277,41 @@ export class PfGMSelect extends GMComponent {
         const shield = this.makeShield(parent, page);
         if (!shield) return;
         this.shield = shield; // 遮罩先入树，列表随后再入树，压在它上面
-
-        const list = instantiate(tpl);
-        list.active = true;
-        list.layer = parent.layer; // 跟父同层，否则 Overlay 相机不画
-        this.applyLayer(list, parent.layer);
-        list.getComponent(UITransform)?.setContentSize(width, listH);
-        list.addComponent(BlockInputEvents); // 点行与行之间的缝不穿透到页面
-        parent.addChild(list);
-        list.setPosition(pos.x, listY, 0);
-        this.list = list;
-        this.scroll = list.getComponent(ScrollView);
-        this.dress(list.getComponent(Sprite), 'dropdown_list', true);
-
-        const view = list.getChildByName('view');
-        const content = view?.getChildByName('content') ?? null;
-        this.content = content;
-        if (view) view.getComponent(UITransform)?.setContentSize(width, listH);
-        if (content) {
-            const cut = content.getComponent(UITransform);
-            cut?.setAnchorPoint(0.5, 1);
-            cut?.setContentSize(width, listH);
-            content.setPosition(0, listH / 2, 0);
-        }
-
-        const track = list.getChildByName('scrollBar');
-        if (track) {
-            const trackH = listH - PF_GM_SELECT.boardPad * 2;
-            track.getComponent(UITransform)?.setContentSize(PF_GM_SELECT.scrollW, trackH);
-            // 图已经画成 16 宽，直接用绝对尺寸，不用 scale（缩放会把高度也缩小）
-            track.setScale(1, 1, 1);
-            track.setPosition(width / 2 - PF_GM_SELECT.scrollW / 2 - PF_GM_SELECT.barInset, 0, 0);
-            this.dress(track.getComponent(Sprite), 'scrollbar', true);
-            const thumb = track.getChildByName('bar');
-            if (thumb) {
-                thumb.getComponent(UITransform)?.setContentSize(PF_GM_SELECT.scrollW, Math.max(32, trackH / 3));
-                this.dress(thumb.getComponent(Sprite), 'scrollbar_thumb', true); // 九宫格，纵向拉伸圆头才不走形
+        const gen = this.openGen;
+        const bundle = assetManager.getBundle(CORE);
+        if (!bundle) return this.close();
+        bundle.load('PfGMList', Prefab, (err, listPrefab) => {
+            if (err || !listPrefab) {
+                console.error('[PfGMSelect] 列表预制体加载失败', err);
+                if (gen === this.openGen) this.close();
+                return;
             }
-            const sb = track.getComponent(ScrollBar);
-            if (sb) {
-                sb.enableAutoHide = true; // 平时透明，滚动时出来，停手 autoHide 秒后渐隐
-                sb.autoHideTime = PF_GM_SELECT.autoHide;
+            if (gen !== this.openGen || !this.node.isValid) return;
+            const ts = gu.createTs(listPrefab, { parent, x: pos.x, y: listY });
+            if (!(ts instanceof PfGMList) || gen !== this.openGen) {
+                ts?.node.destroy();
+                return;
             }
-            track.active = this.items.length > shown; // 内容放得下就不出滚动条
-        }
-        if (this.scroll) this.scroll.verticalScrollBar = track?.getComponent(ScrollBar) ?? null;
-
-        this.setArrow(true); // 展开就转 180°，向下往上弹都一样
-        this.fillRows(prefab, width, listH);
-    }
-
-    /** 整棵树设层，克隆出来的节点都要跟父同层 */
-    private applyLayer(node: Node, layer: number): void {
-        node.layer = layer;
-        for (const child of node.children) this.applyLayer(child, layer);
-    }
-
-    /** 所有行一次铺进 content。ScrollView 自己负责滚，行不做复用 */
-    private fillRows(prefab: Prefab, width: number, listH: number): void {
-        const content = this.content;
-        if (!content) return;
-        const cut = content.getComponent(UITransform);
-        const total = this.items.length * PF_GM_SELECT.rowH + PF_GM_SELECT.boardPad * 2;
-        cut?.setContentSize(width, Math.max(total, listH)); // content 高度按全部行算，才能滚
-        const rowW = width - PF_GM_SELECT.boardPad * 2;
-        for (let i = 0; i < this.items.length; i++) {
-            const y = -PF_GM_SELECT.boardPad - PF_GM_SELECT.rowH * (i + 0.5); // 从 content 顶端往下排
-            const ts = gu.createTs(prefab, { parent: content, x: 0, y });
-            if (!(ts instanceof PfGMOption)) continue;
-            ts.node.getComponent(UITransform)?.setContentSize(rowW, PF_GM_SELECT.rowH);
-            const item = this.items[i];
-            ts.setIcon(item.icon);
-            ts.setText(item.text);
-            ts.setSelected(i === this.index);
-            const at = i;
-            gu.addClick(ts.node, () => this.pick(at), { press: 'none' });
-            this.rows.push(ts);
-        }
-        // 行放好后再让 ScrollView 算一次，否则滚动区间还是旧的
-        this.scroll?.stopAutoScroll();
-        this.scrollToIndex(this.index);
-    }
-
-    /** 把选中项滚进可见范围。没有选中就滚到顶 */
-    private scrollToIndex(at: number): void {
-        const sv = this.scroll;
-        const content = this.content;
-        if (!sv || !content) return;
-        if (at < 0) {
-            sv.scrollToTop(0);
-            return;
-        }
-        const cut = content.getComponent(UITransform);
-        const view = content.parent?.getComponent(UITransform);
-        if (!cut || !view) return;
-        const travel = cut.height - view.height;
-        if (travel <= 0) return;
-        const center = PF_GM_SELECT.boardPad + PF_GM_SELECT.rowH * (at + 0.5);
-        const want = Math.max(0, Math.min(travel, center - view.height / 2));
-        sv.scrollToOffset(new Vec2(0, want), 0); // 第二参 0 = 不带动效
+            ts.node.getComponent(UITransform)?.setContentSize(width, listH);
+            if (!ts.node.getComponent(BlockInputEvents)) ts.node.addComponent(BlockInputEvents);
+            ts.setPlate('dropdown_list');
+            ts.setPad(PF_GM_SELECT.boardPad);
+            ts.setDir(GMListDir.vertical);
+            ts.setLineCount(1);
+            ts.setCenter(false);
+            ts.setItems(prefab, this.items.length, (item, i) => {
+                if (!(item instanceof PfGMOption)) return;
+                const data = this.items[i];
+                item.setIcon(data?.icon ?? '');
+                item.setText(data?.text ?? '');
+                item.setSelected(i === this.index);
+                gu.addClick(item.node, () => this.pick(i), { press: 'none' });
+            });
+            if (this.index >= 0) ts.scrollToIndex(this.index);
+            this.list = ts;
+            this.opening = false;
+            this.setArrow(true); // 展开就转 180°，向下往上弹都一样
+        });
     }
 
     /** 透明遮罩：盖住整页，点它只收起不改值 */
@@ -426,16 +343,15 @@ export class PfGMSelect extends GMComponent {
     }
 
     private destroyOpen(): void {
-        if (this.list?.isValid) this.list.destroy();
+        this.openGen++;
+        this.opening = false;
+        if (this.list?.node.isValid) this.list.node.destroy();
         if (this.shield?.isValid) {
             gu.removeClick(this.shield);
             this.shield.destroy();
         }
         this.list = null;
         this.shield = null;
-        this.scroll = null;
-        this.content = null;
-        this.rows = [];
     }
 
     private setArrow(up: boolean): void {

@@ -36,7 +36,7 @@ export { PfGMBar, PfGMBarText } from './ui/PfGMBar'; // 框架进度条；槽+�
 export { PfGMStepper } from './ui/PfGMStepper'; // 框架步进；嵌套 PfGMBtn；整数 value/min/max/step
 export { PfGMItemCell } from './ui/PfGMItemCell'; // 框架道具格；底+图标+选中框+数量；setIcon / selected / setCount
 export { PfGMBadge } from './ui/PfGMBadge'; // 框架角标；setDot 点模式可开动效 / setCount 数字模式 99+ / 不接收点击
-export { PfGMSelect, GMOptionItem } from './ui/PfGMSelect'; // 框架下拉；收起态 bg/icon/label/arrow；items；index；setOnChange 只在用户点选时叫
+export { PfGMSelect, GMOptionItem } from './ui/PfGMSelect'; // 框架下拉；收起态 bg/icon/label/arrow；展开用 PfGMList，底板 dropdown_list
 export { PfGMList, GMListDir } from './ui/PfGMList'; // 框架列表；view/content 锚点 0.5；一次铺完；竖向、横向、网格
 export { GMListItem } from './ui/GMListItem'; // 列表行基类；没有预制体；setIndex
 export { PfGMOption } from './ui/PfGMOption'; // 框架下拉行；底+图标+字；选中换绿底白字；点击由调用方注册

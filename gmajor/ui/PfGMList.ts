@@ -1,4 +1,4 @@
-import { _decorator, Enum, Mask, Node, Prefab, ScrollBar, ScrollView, Sprite, UITransform } from 'cc';
+import { _decorator, Enum, Mask, Node, Prefab, ScrollBar, ScrollView, Sprite, UITransform, Vec2 } from 'cc';
 import { gu } from '../launch/GMLauncher';
 import { GMComponent } from './GMComponent';
 import { GMListItem } from './GMListItem';
@@ -42,6 +42,10 @@ export class PfGMList extends GMComponent {
     private itemCount = 0;
     private srcW = 0; // 预制体原来的宽。排版用它，不用已经被拉过的宽
     private srcH = 0;
+    private plate = 'panel'; // 四角圆角。下拉展开时改成 dropdown_list
+    private plateGen = 0; // 丢掉迟到的旧底板
+    private pad = PF_GM_LIST.pad;
+    private fill: ((item: GMListItem, index: number) => void) | null = null;
 
     @property({ type: Enum(GMListDir) })
     dir = GMListDir.vertical;
@@ -54,7 +58,7 @@ export class PfGMList extends GMComponent {
 
     onInit(): void {
         if (!this.bindNodes()) return console.error('[PfGMList] 需要 view、content、scrollBar、scrollBarX');
-        this.dress(this.node.getComponent(Sprite), 'panel');
+        this.dressPlate();
         this.dress(this.barV?.getComponent(Sprite) ?? null, 'scrollbar');
         this.dress(this.barV?.getChildByName('bar')?.getComponent(Sprite) ?? null, 'scrollbar_thumb');
         this.dress(this.barH?.getComponent(Sprite) ?? null, 'scrollbar');
@@ -82,12 +86,53 @@ export class PfGMList extends GMComponent {
         this.layout();
     }
 
-    /** 用这个预制体铺 count 行。预制体根上必须是 GMListItem。再调一次就先拆掉旧行 */
-    setItems(prefab: Prefab, count: number): void {
+    /** 换底板。默认 panel。下拉展开列表传 dropdown_list */
+    setPlate(name: string): void {
+        const next = name || 'panel';
+        if (next === this.plate) return;
+        this.plate = next;
+        this.dressPlate();
+    }
+
+    /** 内容离底板内沿多少。panel 是 20，下拉展开列表是 6 */
+    setPad(pad: number): void {
+        this.pad = Math.max(0, pad);
+        this.layout();
+    }
+
+    /** 用这个预制体铺 count 行。预制体根上必须是 GMListItem。fill 在写完序号后调用。再调一次就先拆掉旧行 */
+    setItems(prefab: Prefab, count: number, fill?: (item: GMListItem, index: number) => void): void {
         this.itemPrefab = prefab;
         this.itemCount = Math.max(0, Math.round(count) || 0);
+        this.fill = fill ?? null;
         this.rebuild();
         this.layout();
+    }
+
+    /** 把这一行滚到可视区中间。放得下、或滚动关着时不滚 */
+    scrollToIndex(index: number): void {
+        const scroll = this.scroll;
+        const content = this.content;
+        const view = this.viewNode;
+        const row = this.rows[index];
+        if (!scroll?.enabled || !content || !view || !row) return;
+        const cut = content.getComponent(UITransform);
+        const viewUt = view.getComponent(UITransform);
+        const itemUt = row.node.getComponent(UITransform);
+        if (!cut || !viewUt || !itemUt) return;
+        const vertical = this.dir !== GMListDir.horizontal;
+        const line = Math.max(1, Math.round(this.lineCount) || 1);
+        const along = Math.floor(index / line); // 竖向是第几行，横向是第几列
+        const cell = vertical ? itemUt.height : itemUt.width;
+        const span = vertical ? cut.height : cut.width;
+        const viewSpan = vertical ? viewUt.height : viewUt.width;
+        const travel = span - viewSpan;
+        if (travel <= 1) return;
+        const center = cell * (along + 0.5);
+        const want = Math.max(0, Math.min(travel, center - viewSpan / 2));
+        scroll.stopAutoScroll();
+        if (vertical) scroll.scrollToOffset(new Vec2(0, want), 0);
+        else scroll.scrollToOffset(new Vec2(want, 0), 0);
     }
 
     private bindNodes(): boolean {
@@ -100,6 +145,24 @@ export class PfGMList extends GMComponent {
         this.barV = this.node.getChildByName('scrollBar');
         this.barH = this.node.getChildByName('scrollBarX');
         return !!(view && content && scroll && this.barV && this.barH);
+    }
+
+    /** 根上的底板。后一次换皮作废前一次还没回来的图 */
+    private dressPlate(): void {
+        const sprite = this.node.getComponent(Sprite);
+        if (!sprite) return;
+        const gen = ++this.plateGen;
+        const slot = this.plate;
+        applySkin(slot, (frame) => {
+            if (gen !== this.plateGen || !sprite.isValid) return;
+            const uit = sprite.node.getComponent(UITransform);
+            const w = uit?.width ?? 0;
+            const h = uit?.height ?? 0;
+            sprite.sizeMode = Sprite.SizeMode.CUSTOM;
+            sprite.type = Sprite.Type.SLICED;
+            sprite.spriteFrame = frame;
+            if (uit && w > 0 && h > 0) uit.setContentSize(w, h);
+        });
     }
 
     private dress(sprite: Sprite | null, slot: string): void {
@@ -140,6 +203,7 @@ export class PfGMList extends GMComponent {
                 this.srcH = ut?.height ?? 0;
             }
             ts.setIndex(i);
+            this.fill?.(ts, i);
             this.rows.push(ts);
         }
     }
@@ -168,15 +232,15 @@ export class PfGMList extends GMComponent {
 
         const rootW = root.width > 0 ? root.width : PF_GM_LIST.width;
         const rootH = root.height > 0 ? root.height : PF_GM_LIST.height;
-        const pad = PF_GM_LIST.pad;
+        const pad = this.pad;
         const innerW = Math.max(0, rootW - pad * 2);
         const innerH = Math.max(0, rootH - pad * 2);
         // 滚动那一边用预制体尺寸。另一边铺满整块，滚动条叠在上面，不占这一边
         const overflow = vertical ? rowN * this.srcH > innerH + 0.5 : cols * this.srcW > innerW + 0.5;
         const viewW = innerW;
         const viewH = innerH;
-        const cellW = vertical ? Math.max(this.srcW, viewW / line) : this.srcW; // 上下滚，宽铺满，含滚动条那一截
-        const cellH = vertical ? this.srcH : Math.max(this.srcH, viewH / line); // 左右滚，高铺满，含滚动条那一截
+        const cellW = vertical ? viewW / line : this.srcW; // 上下滚，宽铺满这一边，含滚动条那一截
+        const cellH = vertical ? this.srcH : viewH / line; // 左右滚，高铺满这一边，含滚动条那一截
         const fullW = cols * cellW;
         const fullH = rowN * cellH;
         // 没排满一行或一列时，空位不要算进内容，居中才是两向都在正中
@@ -241,7 +305,7 @@ export class PfGMList extends GMComponent {
         const span = Math.max(PF_GM_LIST.thumbMin, length - PF_GM_LIST.barInset * 2);
         const ut = track.getComponent(UITransform) ?? track.addComponent(UITransform);
         ut.setAnchorPoint(0.5, 0.5);
-        const pad = PF_GM_LIST.pad;
+        const pad = this.pad;
         if (vertical) {
             ut.setContentSize(thick, span);
             track.setPosition(rootW / 2 - pad - thick / 2 - PF_GM_LIST.barInset, 0, 0);

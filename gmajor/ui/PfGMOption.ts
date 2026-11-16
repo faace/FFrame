@@ -1,5 +1,5 @@
 import { _decorator, Color, Label, Sprite, UITransform } from 'cc';
-import { GMComponent } from './GMComponent';
+import { GMListItem } from './GMListItem';
 import { applySkin } from './GMSkin';
 
 const { ccclass, executeInEditMode, property } = _decorator;
@@ -25,7 +25,7 @@ const PF_GM_OPTION = {
 /** 框架下拉行。底、图标、字。selected 换绿底白字。点击由外层 gu.addClick 注册 */
 @ccclass('PfGMOption')
 @executeInEditMode(true)
-export class PfGMOption extends GMComponent {
+export class PfGMOption extends GMListItem {
     private bg: Sprite | null = null;
     private iconView: Sprite | null = null;
     private labelView: Label | null = null;
@@ -72,6 +72,11 @@ export class PfGMOption extends GMComponent {
     setSelected(on: boolean): void {
         this.selected = !!on;
         this.sync();
+    }
+
+    /** 列表改完这一行的宽高后，字和图标跟着重排 */
+    onLayout(): void {
+        this.layout();
     }
 
     private mark(): string {
