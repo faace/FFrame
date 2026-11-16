@@ -125,13 +125,13 @@ Overlay 是框架自己的常驻节点。第一次打开场景、弹层或确认
 | `input` | `PfGMEditBox` 的底板。步进中间嵌的也是它。显示 140×72，九宫格拉开。原名 `stepper_plate` |
 | `tab_normal` | `PfGMTabs` 未选中的页签 |
 | `tab_selected` | `PfGMTabs` 选中的页签 |
-| `panel` | `PfGMTabs` 下面的板 |
+| `panel` | `PfGMTabs` 下面的板，也是 `PfGMList` 的底板。四角圆角 |
 | `dropdown` | `PfGMSelect` 收起态的盒子。320×72 |
-| `dropdown_list` | `PfGMSelect` 展开列表的底板，上边直角贴住盒子 |
+| `dropdown_list` | 下拉展开列表的底板，上边直角贴住盒子。由 `PfGMList` 换上 |
 | `dropdown_item_on` | `PfGMOption` 选中那一行。草地绿 |
 | `icon_arrow` | `PfGMSelect` 右侧箭头，展开时控件转 180° |
-| `scrollbar` | `PfGMSelect` 展开列表的滚动条槽 |
-| `scrollbar_thumb` | 滚动条滑块，九宫格纵向拉伸 |
+| `scrollbar` | `PfGMList` 的滚动条槽。下拉展开用的也是它 |
+| `scrollbar_thumb` | 滚动条滑块。横条把竖图转到 -90° 再拉 |
 | `slot_item` | `PfGMItemCell` 的木格底 |
 | `frame_select` | `PfGMItemCell` 的选中框，默认隐藏 |
 | `toast` | `PfGMToast` 的底板。480×72 |

@@ -87,7 +87,8 @@ app 在 `config.version.gmajor` 写所按的框架版本。开机只打日志，
 
 ### 下拉：`PfGMSelect` / `PfGMOption`
 
-- **新增（可选）**：`PfGMSelect`。子节点 `bg`、`icon`、`label`、`arrow`。预制体里带一套 `list` 骨架（`list` → `view`(Mask) → `content`，另有 `scrollBar` → `bar`），运行时克隆，用引擎 `ScrollView` 滚。
+- **新增（可选）**：`PfGMSelect`。子节点 `bg`、`icon`、`label`、`arrow`。当时预制体里带一套 `list` 骨架，运行时克隆。
+- **后来**：展开不再克隆那套骨架，改成建 `PfGMList`，底板仍是 `dropdown_list`。`PfGMOption` 继承 `GMListItem`。调用方式没变。
 - **新增（可选）**：`PfGMOption`，展开列表的一行。子节点 `bg`、`icon`、`label`。
 - **新增（可选）**：`GMOptionItem`（`text` + `icon`）。`setItems` / `setIndex` 不回调；`setOnChange` 只在用户点选且值真的变了时调。`index` 为 `-1` 表示不选。
 - **新增槽**：`dropdown`（收起态盒子，320×72）、`dropdown_list`（列表底板，上边直角贴住盒子）、`dropdown_item_on`（选中行）、`icon_arrow`（44×44，展开时控件自己转 180°）、`scrollbar`、`scrollbar_thumb`。行高 64，一屏最多 8 行，再多交给 `ScrollView`。
