@@ -256,7 +256,7 @@ export class LyControls extends GMFrame {
         return label;
     }
 
-    /** 轻提示三颗：弹一条、连点同一句、弹三条。节点运行时建（预制体里手写嵌套实例会被 Creator 丢掉） */
+    /** 轻提示三颗：各弹一句，内容不同。节点运行时建（预制体里手写嵌套实例会被 Creator 丢掉） */
     private bindToast(page: Node): void {
         const bundle = assetManager.getBundle('GMUI');
         if (!bundle) return console.error('[LyControls] 没有 GMUI，轻提示按钮建不出来');
@@ -270,23 +270,19 @@ export class LyControls extends GMFrame {
             // 标题：说清这三颗在测什么（和下面「角标」那行同一个位置风格）
             this.makeHead(page, TOAST_HEAD_Y, '轻提示　PfGMToast');
             const items: Array<[number, string, PfGMBtnTheme, () => void]> = [
-                [-TOAST_BTN_X, '提示一次', PfGMBtnTheme.primary, () => {
+                [-TOAST_BTN_X, '棋盘已满', PfGMBtnTheme.primary, () => {
                     gu.toast('棋盘已满，请先整理');
-                    say('从屏幕中线向上飘');
+                    say('弹了一条：棋盘已满，请先整理');
                 }],
-                [0, '连点同句', PfGMBtnTheme.info, () => {
-                    gu.toast('连点同一句');
-                    gu.toast('连点同一句');
-                    gu.toast('连点同一句');
-                    say('同一句连发三次就是三条，各走各的计时');
+                [0, '不适用', PfGMBtnTheme.info, () => {
+                    gu.toast('提示不适用');
+                    say('弹了一条：提示不适用');
                 }],
-                [TOAST_BTN_X, '三条一起', PfGMBtnTheme.warning, () => {
-                    gu.toast('第一条　完成合成任务获得园景素材');
-                    gu.toast('第二条　提示不适用');
-                    gu.toast('第三条　棋盘已满，请先整理');
-                    say('新的从中线飘上去，旧的往上补');
+                [TOAST_BTN_X, '园景素材', PfGMBtnTheme.warning, () => {
+                    gu.toast('完成合成任务获得园景素材');
+                    say('弹了一条：完成合成任务获得园景素材');
                 }],
-            ]; // 左 / 中 / 右三颗，小档 180×64
+            ]; // 左 / 中 / 右三颗，各发一次，小档 180×64
             items.forEach(([x, text, theme, cb], i) => {
                 // 尺寸只交给 setSize，绝不再改 contentSize：PfGMBtn 里 width = Math.max(档位宽, 当前宽)，
                 // 改了会被它拉回去，三颗就会撞在一起。
@@ -311,7 +307,7 @@ export class LyControls extends GMFrame {
         node.getComponent(UITransform) ?? node.addComponent(UITransform);
         node.getComponent(UITransform)!.setContentSize(560, 40);
         const label = node.addComponent(Label);
-        label.string = '点上面三颗，看屏幕中间偏上';
+        label.string = '每颗只弹一条，内容各不相同';
         label.fontSize = 20;
         label.lineHeight = 24;
         label.color = new Color(132, 112, 88, 255);
