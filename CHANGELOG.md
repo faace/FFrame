@@ -89,9 +89,9 @@ app 在 `config.version.gmajor` 写所按的框架版本。开机只打日志，
 ### 轻提示：`PfGMToast`
 
 - **新增（可选）**：`PfGMToast`。子节点 `bg`、`label`。皮 `toast`，显示 480×72。
-- **新增（可选）**：`PfGMToast.show(text)` / `hide()` / `setAnchor('top'|'center'|'bottom')`。位置只能定一次。
-- **新增（可选）**：`gu.toastRoot()`，Overlay 上不挡输入的 `toasts` 容器。
-- **行为**：不进弹层栈、不挡输入、不可点。最多叠 3 条、间距 12，新的在最上，第 4 条挤掉最老的；同一句去重只续命。
+- **当时**：调用是 `PfGMToast.show` / `hide` / `setAnchor`，另有 `gu.toastRoot()`。位置只能定一次。新的插在最上，同一句去重只续命。
+- **后来（0.10.0）**：改成 `gu.toast` / `gu.toastHide` / `gu.setToastAnchor`。上面那套入口已删。默认 `center`，锚点可随时改。最老的贴着停靠点，新的在最外一格。同一句再弹再出一条。队列在 `GMToastHost`。以本节上面的 0.10.0 为准。
+- **未改**：不进弹层栈、不挡输入、不可点。最多仍然 3 条、间距 12。
 - **注意**：这个槽在 0.7.0 里先当可选皮。动物园当前的 `toast` 已画好（480×72，九宫格 20），没有也能跑（白图 + 一条 warn）。
 
 ### 变更回调补齐

@@ -138,7 +138,7 @@
 
 - 2026-11-12 两个窗口并行做下拉框和 Toast（我给的拷贝文按「图集归下拉框窗口独占、Toast 先走白图」分工）：
   - 下拉框 `PfGMSelect` / `PfGMOption`（第 10 个控件，`33fa059`）。收起态子节点 `bg`/`icon`/`label`/`arrow`；预制体里带 `list` 骨架（`view`(Mask) → `content` + `scrollBar`），运行时克隆，用引擎 `ScrollView` 滚，不手写滚动。行高 64，一屏最多 8 行。`GMOptionItem` 是 `text` + `icon`。新增 6 个皮：`dropdown`、`dropdown_list`、`dropdown_item_on`、`icon_arrow`、`scrollbar`、`scrollbar_thumb`。
-  - 轻提示 `PfGMToast`（第 11 个控件，`1724c84`）。子节点 `bg`/`label`，皮 `toast`。`show` / `hide` / `setAnchor`，最多叠 3 条、间距 12、新的在最上、同一句去重只续命。不进弹层栈、不挡输入、不可点。新增 `gu.toastRoot()` 和 Overlay 上的 `toasts` 容器。
+  - 轻提示 `PfGMToast`（第 11 个控件，`1724c84`）。子节点 `bg`/`label`，皮 `toast`。这是第一版：静态 `show` / `hide` / `setAnchor`，新的在最上，同一句去重只续命，并有 `gu.toastRoot()`。2026-11-16 已改掉，按下面那条，不要再按这套做。
   - 开关、勾选、步进补了 `setOnChange` / `toggle` / `stepBy`（`94abdb9`），框架记到 0.7.0。语义统一：`setValue` 不回调，用户操作才回调。
   - `5a702ac` 把选择页从 4 个下拉精简成 2 个，顺手踩了「并排改纵向只改 y」的坑，控件压进 panel 边框 12px。于是加了规则 `70ee2d5`：控件不许压背景边框；并排改纵向要连 x 和宽一起改。
   - 图集：asset-line `094369d` 加下拉和滚动条（实画 25 → 31），`fa7e524` 加 toast（480×72，九宫格 20，实画 32 预留 4）。
@@ -158,9 +158,14 @@
   - 用户说这张木板可以共用，不要重画。槽名改成 `input`，删掉空着的预留 `input`。游戏图集帧名、`PfGMEditBox`、`SkinKit` 九宫格名单、素材侧 `ctrl.json` 和画图脚本一起改。工作区版本写成 0.9.0。像素没动，没有跑画图脚本。
   - `PfGMBadge.ts`、它的 meta、预制体 meta 在 `git status` 里是已改，`git diff` 没有正文，像换行。不要和槽名改名混成一次提交。
 
+- 2026-11-16 轻提示总控改完（`b771eb7`、`9ea7608`，框架 0.10.0）：
+  - 调用是 `gu.toast(text)`、`gu.toastHide()`、`gu.setToastAnchor('top'|'center'|'bottom')`。队列在 Overlay `toasts` 上的 `GMToastHost`。`PfGMToast` 只画一条。`show` / `hide` / `setAnchor` 和 `gu.toastRoot()` 已删。
+  - 开机默认 `center`。锚点可随时改，值变了先收起。最老的贴着停靠点，新的在最外一格。同一句再弹再出一条。最多 3 条，数字在 Host 的 `max`。
+  - 演示三颗按钮各弹一句：棋盘已满 / 不适用 / 园景素材。
+
 ## 3. 结论
 
-有结论。已推送的框架是 0.8.0（FFrame `4a7839e`）：按钮、标题、页签、滑条、进度条、步进、开关、勾选框、道具格、下拉、下拉行、轻提示、角标、输入框都在。输入底板和步进共用一张图，槽名改为 `input`，这次改名还在本地，工作区写成 0.9.0，没有提交。图集空槽剩 `radio`、`count_plate`。虚拟列表不在这台电脑。
+有结论。已推送的框架是 0.8.0（FFrame `4a7839e`）：按钮、标题、页签、滑条、进度条、步进、开关、勾选框、道具格、下拉、下拉行、轻提示、角标、输入框都在。输入底板和步进共用一张图，槽名改为 `input`，这次改名还在本地，工作区写成 0.9.0，没有提交。图集空槽剩 `radio`、`count_plate`。虚拟列表不在这台电脑。轻提示总控已在 0.10.0（`b771eb7`）改成 `gu.toast`，队列在 `GMToastHost`，不再挂在控件上。
 
 ## 4. 接着做
 
@@ -177,7 +182,6 @@
 - `radio`、`count_plate` 按需再填，不预先画。
 - 红点系统（谁该亮）不做。`PfGMBadge` 只是视觉元件。
 - 设置页「语言 中文」不用动。
-- `PfGMToast` 的队列还在控件文件的模块变量里。规则写了要挪到管理器，动之前先确认分层。
 - `CHANGELOG` 的 0.8.0 仍写着 setter 方案，代码已经退回普通字段。要对齐再改文档。
 - `FFrame-zoo` 的 `config.ts` 仍是 `gmajor: '0.6.3'`，extension 仍是 0.5.0。这台没改。
 - 资源生成目录那条已经写进 `01-naming.mdc`，不用再草拟。

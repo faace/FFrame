@@ -1,5 +1,5 @@
 ---
-description: Bundle/功能目录/绑定名、Sc/Ly/Pf、双基类、layer 结构（根+panel、mask 克隆）、界面控件进 gmajor、默认皮、换皮、控件不压背景边框、并排改纵向要连 x 和宽一起改、数据 watch、业务事件 on、事件大类前缀（Gp/Bind）、平台 gp.call/send、loading、addClick、createTs、动态 UI 挂 Canvas、双窗数据权。新建或改 Bundle、场景、预制体、gmajor/game 脚本时引用。用户说数据变了刷新 UI、金币/字段变化、监听事件、事件前缀、Gp、gp.call、平台通道、原生回包、新建功能包、异步等待、挡住操作、loading、注册点击、addClick、列表项、createTs、按钮看不见、动态创建节点、新建 Ly、layer 结构、mask、panel、生成 Ly 预制体、弹窗标题、关闭钮、GMFrame、不要标题、不要底框、左上角、铆钉、Ly 后不加 Popup、按钮组件、PfGMBtn、描边、白字、次要、加减、关闭、PfGMSlider、PfGMBar、PfGMStepper、PfGMTabs、滑条、进度条、步进、页签、默认皮、换皮、Skin、plist、主题图集、界面图蛇形、btn_、按钮底板、九宫格、圆角、压边框、贴边、超出弹窗、控件太宽、并排改竖向、AI 风格稿、改 gmajor 还是游戏、兼容、升 gm.version、嵌套覆盖、只留差异项、双窗、第二窗、指令回矿、UI 不落盘、Bundle 内 res/spine/font/anim/prefab、目录小驼峰或大驼峰、实例节点、图片蛇形、文件名英文时也引用。
+description: Bundle/功能目录/绑定名、Sc/Ly/Pf、双基类、layer 结构（根+panel、mask 克隆）、界面控件进 gmajor、默认皮、换皮、控件不压背景边框、并排改纵向要连 x 和宽一起改、数据 watch、业务事件 on、事件大类前缀（Gp/Bind）、平台 gp.call/send、loading、addClick、createTs、动态 UI 挂 Canvas、双窗数据权。新建或改 Bundle、场景、预制体、gmajor/game 脚本时引用。用户说数据变了刷新 UI、金币/字段变化、监听事件、事件前缀、Gp、gp.call、平台通道、原生回包、新建功能包、异步等待、挡住操作、loading、注册点击、addClick、列表项、createTs、按钮看不见、动态创建节点、新建 Ly、layer 结构、mask、panel、生成 Ly 预制体、弹窗标题、关闭钮、GMFrame、不要标题、不要底框、左上角、铆钉、Ly 后不加 Popup、按钮组件、PfGMBtn、描边、白字、次要、加减、关闭、PfGMSlider、PfGMBar、PfGMStepper、PfGMTabs、滑条、进度条、步进、页签、轻提示、gu.toast、GMToastHost、PfGMToast、默认皮、换皮、Skin、plist、主题图集、界面图蛇形、btn_、按钮底板、九宫格、圆角、压边框、贴边、超出弹窗、控件太宽、并排改竖向、AI 风格稿、改 gmajor 还是游戏、兼容、升 gm.version、嵌套覆盖、只留差异项、双窗、第二窗、指令回矿、UI 不落盘、Bundle 内 res/spine/font/anim/prefab、目录小驼峰或大驼峰、实例节点、图片蛇形、文件名英文时也引用。
 globs: assets/game/**,gmajor/**,**/*.{scene,prefab}
 alwaysApply: false
 ---
@@ -185,7 +185,7 @@ export class PfX extends GMScene {}
 - **属性用普通字段 + `setXxx()` 方法，不要用 getter/setter**。Cocos 3.8 里 `@property` 挂在 getter 上的访问器是 `serializable: false`，预制体的属性覆盖**不会应用**（引擎自己绕开了：`Label._string` 是 `@serializable` 字段，`string` 只是转发）。所以：`@property size = ...` 存普通字段，改值要走 `setSize()` 并由它重排；直接赋 `btn.size` 不会重排。尺寸变化用 `node.on(Node.EventType.SIZE_CHANGED, ...)`。
 - **确实需要 `update()` 时，要人工确认**。写之前说明为什么 `SIZE_CHANGED` / `setXxx()` 覆盖不到（典型理由：检查器里改这个字段要当场看到效果，而字段本身不经过我们的代码）。经人点头才加，并加 `stamp` 字符串早退，值没变就 `return`。
 - 历史遗留的 `update()`（`PfGMBtn`、`PfGMTitle`、`PfGMSlider`、`PfGMBar`、`PfGMSwitch`、`PfGMCheck`、`PfGMItemCell`、`PfGMSelect`、`PfGMOption`、`PfGMTabs`、`PfGMEditBox`、`PfGMStepper`）已全部保留为「检查器改字段当场刷新」，各有 `stamp` 早退。不要再新增同类写法；真要加先按上一条说明理由。`PfGMSlider` / `PfGMBar` 的宽度变化已改用 `SIZE_CHANGED`。
-- **`PfGMToast` 待重做（未做）**：队列、锚点、prefab 缓存、`seq` 现在都是 `PfGMToast.ts` 的模块级变量，控件既管一条又管一列，`relayout()` 还直接改别人的坐标。要按 `alert` 的样子把队列挪到管理器（`GMUIManager` 或挂在 `toasts` 节点上的 `GMToastHost`），`PfGMToast` 只留「一条」的宽高、字号、颜色、`text`、`bg`。改完再顺便去掉它的 `update()`。动它之前先确认分层方案。
+- 轻提示调用写 `gu.toast(text)`、`gu.toastHide()`、`gu.setToastAnchor('top'|'center'|'bottom')`。队列、锚点、条数在 `GMToastHost`（挂在 Overlay 的 `toasts` 上）。`PfGMToast` 只画一条（`bg` / `label`、`setText`），不做 `show` / `hide` / `setAnchor`，也不要 `gu.toastRoot()`。开机默认 `center`。锚点可随时改，这次的值和当前不同就先收起。最多 3 条，这个数只写在 Host 的 `max`。最老的贴着停靠点，新的在最外一格。同一句再弹再出一条。
 - 页签是 `PfGMTabs`，不继承 `PfGMBtn`。子节点固定 `tabs`、`panel`。内容必须是 `GMTabPage`（`text` / `setText`，`onShow` / `onHide` 收 `done`）。皮 `tab_normal`、`tab_selected`、`panel`，控件自己切九宫格。高 64。整排一样宽，`chars` 默认 5，按中文字数来量，不按每一页标题各定宽。左右各让出 panel 圆角的一个直径（显示尺寸各 40）。超出只横滑页签条，板子不跟着滑。窄于 360 拉回 360。标题更长时字缩小。点击用 `gu.addClick`。
 - 不要 `PfBtn`（太泛），不要 `PfFFBtn`（`FF*` 已废），不要只叫 `GMBtn`（看不出是预制体，也分不清 Ly/Pf）。
 - **本游戏**仍是 `PfShopItem` / `LyAlert`，中间不加 `GM`。纯基类仍是 `GMComponent` / `GMAlert` / `GMLayer` / `GMFrame`（没有对应预制体文件）。`GMFrame` 是普通弹窗骨架。
@@ -220,7 +220,7 @@ export class PfX extends GMScene {}
 
 ## 兼容
 
-- 公开面：`config` 的 `boot` / `entry` / `alert`、`gm.boot`、`gu.toastRoot`、确认框节点名（`body` / `btnOk` / `btnCancel` / `label`）、框架写死的皮肤槽、`PfGM*` 子节点名（滑条 `track` / `thumb` / `fillClip` / `fill`，进度条 `bg` / `fill` / `label`，页签 `tabs` / `panel`，开关 `face`，勾选框 `box` / `mark`，道具格 `bg` / `icon` / `frame` / `label`，下拉 `bg` / `icon` / `label` / `arrow`，下拉行 `bg` / `icon` / `label`，轻提示 `bg` / `label`）。
+- 公开面：`config` 的 `boot` / `entry` / `alert`、`gm.boot`、`gu.toast` / `gu.toastHide` / `gu.setToastAnchor`、确认框节点名（`body` / `btnOk` / `btnCancel` / `label`）、框架写死的皮肤槽、`PfGM*` 子节点名（滑条 `track` / `thumb` / `fillClip` / `fill`，进度条 `bg` / `fill` / `label`，页签 `tabs` / `panel`，开关 `face`，勾选框 `box` / `mark`，道具格 `bg` / `icon` / `frame` / `label`，下拉 `bg` / `icon` / `label` / `arrow`，下拉行 `bg` / `icon` / `label`，轻提示 `bg` / `label`）。
 - 这些改名、删字段、改节点名：升 `gm.version`（`GMLauncher`），并在仓库根 `CHANGELOG.md` 写破坏项和改法。
 - 版本号 `主.次.修`：0.x 阶段破坏性改动升「次」；只加可选字段、只加新槽升「修」。app 在 `config.version.gmajor` 写所按的框架版本；开机只打印日志，不一致只警告，不拦截，由人判断。
 - 各 app 不锁框架版本：app 的 `extensions/gmajor` 用相对路径指向兄弟目录 `FFrame/gmajor`（只读）。尽量保持兼容，实在不兼容再同步各 app。
@@ -289,7 +289,8 @@ export class PfX extends GMScene {}
 ✅ gmajor/…/PfGMBtn.prefab + PfGMBtn.ts（框架预制体；extends GMComponent）
 ✅ gmajor/…/PfGMSlider、PfGMBar、PfGMStepper（滑条含轨道、填充、滑块和裁剪层；进度条 bar_bg/bar_fill；步进加减嵌套 PfGMBtn）
 ✅ gmajor/…/PfGMSwitch（face）、PfGMCheck（box/mark）、PfGMItemCell（bg/icon/frame/label）
-✅ gmajor/…/PfGMSelect（bg/icon/label/arrow + 内嵌 list 骨架）、PfGMOption（bg/icon/label）、PfGMToast（bg/label）
+✅ gmajor/…/PfGMSelect（bg/icon/label/arrow + 内嵌 list 骨架）、PfGMOption（bg/icon/label）、PfGMToast（bg/label；调用 gu.toast，队列在 GMToastHost）
+❌ PfGMToast.show / hide / setAnchor；gu.toastRoot()
 ✅ 普通弹窗 extends GMFrame（默认 620×800；铆钉压棕色顶边；左上角有回调才出现）
 ✅ 界面图小写蛇形：btn_primary、title_bar、icon_close、panel
 ✅ 嵌套 PfGMBtn / PfGMTitle 只盖差异项（名、坐标、档位、主题、版式、text、图标；标题字在 Label 上）

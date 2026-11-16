@@ -183,6 +183,7 @@ Overlay 是框架自己的常驻节点。第一次打开场景、弹层或确认
 - `gm.boot` 的调用形状
 - 确认框节点名 `body`、`btnOk`、`btnCancel`、`label`
 - 上一节「框架会取的图」
+- `gu.toast` / `gu.toastHide` / `gu.setToastAnchor`。轻提示子节点是 `bg`、`label`
 - `PfGM*` 的子节点名。滑条是 `track`、`fill`、`thumb`。进度条是 `bg`、`fill`。按钮是 `label`、`icon`。页签是 `tabs`、`panel`。开关是 `face`。勾选框是 `box`、`mark`
 
 只加可选字段，或只加新的皮肤槽，不记破坏。app 里的业务怎么写，不保证别的 app 还能跑。
