@@ -514,6 +514,36 @@
 			<key>textureRotated</key>
 			<false/>
 		</dict>
+		<key>radio.png</key>
+		<dict>
+			<key>aliases</key>
+			<array/>
+			<key>spriteOffset</key>
+			<string>{0,0}</string>
+			<key>spriteSize</key>
+			<string>{48,48}</string>
+			<key>spriteSourceSize</key>
+			<string>{48,48}</string>
+			<key>textureRect</key>
+			<string>{{280,697},{48,48}}</string>
+			<key>textureRotated</key>
+			<false/>
+		</dict>
+		<key>radio_mark.png</key>
+		<dict>
+			<key>aliases</key>
+			<array/>
+			<key>spriteOffset</key>
+			<string>{0,0}</string>
+			<key>spriteSize</key>
+			<string>{48,48}</string>
+			<key>spriteSourceSize</key>
+			<string>{48,48}</string>
+			<key>textureRect</key>
+			<string>{{344,697},{48,48}}</string>
+			<key>textureRotated</key>
+			<false/>
+		</dict>
 	</dict>
 	<key>metadata</key>
 	<dict>

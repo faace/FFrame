@@ -122,6 +122,8 @@ Overlay 是框架自己的常驻节点。第一次打开场景、弹层或确认
 | `switch_on` | `PfGMSwitch` 打开。草地绿，圆钮在右 |
 | `checkbox` | `PfGMCheck` 的框。浅橡木 |
 | `checkbox_mark` | `PfGMCheck` 的勾。草地绿，勾上才显示 |
+| `radio` | `PfGMRadio` 的空心圆。浅橡木，中间透空。显示 48×48 |
+| `radio_mark` | `PfGMRadio` 的实心点。草地绿，选中才显示 |
 | `input` | `PfGMEditBox` 的底板。步进中间嵌的也是它。显示 140×72，九宫格拉开。原名 `stepper_plate` |
 | `tab_normal` | `PfGMTabs` 未选中的页签 |
 | `tab_selected` | `PfGMTabs` 选中的页签 |

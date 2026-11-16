@@ -1,5 +1,5 @@
 import { _decorator, assetManager, Color, Label, Node, Prefab, TTFFont, UITransform } from 'cc';
-import { GMFrame, GMListDir, GMOptionItem, gu, PfGMBadge, PfGMBar, PfGMBtn, PfGMBtnSize, PfGMBtnStyle, PfGMBtnTheme, PfGMCheck, PfGMEditBox, PfGMItemCell, PfGMList, PfGMSelect, PfGMSlider, PfGMStepper, PfGMSwitch, PfGMTabs } from 'db://gmajor/index';
+import { GMFrame, GMListDir, GMOptionItem, gu, PfGMBadge, PfGMBar, PfGMBtn, PfGMBtnSize, PfGMBtnStyle, PfGMBtnTheme, PfGMCheck, PfGMEditBox, PfGMItemCell, PfGMList, PfGMRadioGroup, PfGMSelect, PfGMSlider, PfGMStepper, PfGMSwitch, PfGMTabs } from 'db://gmajor/index';
 import { loadSkin } from '../../GameUI/SkinKit';
 import { PfControlPage } from './PfControlPage';
 import { PfListDemoItem } from './PfListDemoItem';
@@ -143,6 +143,12 @@ export class LyControls extends GMFrame {
             check.setOnChange((v) => this.note(`勾选 → ${v ? '勾上' : '取消'}`));
             gu.addClick(check.node, () => check.toggle());
         } else console.error('[LyControls] 没有勾选框');
+
+        const radio = page.getChildByName('ctlRadio')?.getComponent(PfGMRadioGroup) ?? null;
+        if (radio) {
+            const names = ['低', '中', '高'];
+            radio.setOnChange((at) => this.note(`单选 → ${names[at] ?? at}`));
+        } else console.error('[LyControls] 没有单选');
 
         this.bindSelect(page.getChildByName('ctlSelectDown')?.getComponent(PfGMSelect) ?? null, [
             this.option('星星', 'icon_star'),

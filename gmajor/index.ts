@@ -31,6 +31,8 @@ export { PfGMTitle, PfGMTitleSize } from './ui/PfGMTitle'; // 框架标题；三
 export { PfGMSlider } from './ui/PfGMSlider'; // 框架滑条；轨道+填充+滑块；value 0–1；自己听拖动
 export { PfGMSwitch } from './ui/PfGMSwitch'; // 框架开关；face；value 布尔；setValue 与检查器同一份；点击由调用方注册
 export { PfGMCheck } from './ui/PfGMCheck'; // 框架勾选框；box+mark；value 布尔；setValue 与检查器同一份；点击由调用方注册
+export { PfGMRadio } from './ui/PfGMRadio'; // 框架单选圆点；ring+mark；显隐由组 setOn；自己不听点击
+export { PfGMRadioGroup } from './ui/PfGMRadioGroup'; // 框架单选组；直接子节点顺序即 index；热区是行；setIndex 不回调
 export { PfGMEditBox, PfGMEditBoxAlign } from './ui/PfGMEditBox'; // 框架输入框；根上引擎 EditBox；bg+label+placeholder；对齐三档；检查器填字走 EditBox.string
 export { PfGMBar, PfGMBarText } from './ui/PfGMBar'; // 框架进度条；槽+填充；value 0–1；text 不显示/百分比/当前总值
 export { PfGMStepper } from './ui/PfGMStepper'; // 框架步进；嵌套 PfGMBtn；整数 value/min/max/step
