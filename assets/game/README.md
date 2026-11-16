@@ -59,7 +59,7 @@ bundles/Demo/DemoChild/ 子包生命周期示例，开机不绑定
 
 - **GameUI**：预载确认框 `LyAlert`，之后 `gu.alert` 用这张皮。
 - **User**：绑定后 `gd.sync('User')`，拉账号数据树。
-- **Setting**：本地设置 `gl.Setting`。没有值时补上背景乐音量、音效音量、语言（默认中文）。
+- **Setting**：本地设置 `gl.Setting`。没有值时补上背景乐音量、音效音量。
 - **DemoHome**：打开场景 `ScDemoHome`。
 
 ## 留在包里、开机不会自动跑

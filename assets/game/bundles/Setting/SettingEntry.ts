@@ -11,7 +11,6 @@ class SettingEntry extends GMBundleEntryBase {
         if (!setting) return console.error('[Setting] gl.Setting 未建树');
         if (setting.bgmVolume === undefined) setting.bgmVolume = 1;
         if (setting.sfxVolume === undefined) setting.sfxVolume = 1;
-        if (setting.language === undefined) setting.language = 'zh';
     }
 }
 

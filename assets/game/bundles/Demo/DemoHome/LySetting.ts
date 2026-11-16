@@ -18,12 +18,10 @@ export class LySetting extends GMLayer {
         const close = panel.getChildByName('btnClose');
         const help = panel.getChildByName('btnHelp');
         if (close) gu.addClick(close, () => gu.closeLayer('LySetting'));
-        if (help) gu.addClick(help, () => gu.alert('音乐、音效和语言都记在本机。'));
+        if (help) gu.addClick(help, () => gu.alert('音乐和音效都记在本机。'));
         this.caption(panel, 'icon_music', '音乐', 200);
         this.caption(panel, 'icon_sfx', '音效', 110);
         addText(panel, '经验', 22, skinInk, 80, 36).node.setPosition(-172, 16, 0);
-        this.put(panel, 'icon_settings', -220, -80, 56, 56);
-        addText(panel, '语言  中文', 26, skinInk, 220, 48).node.setPosition(20, -80, 0);
         this.bindBar(panel);
         this.bindStepper(panel);
         this.slot(panel, -312);
