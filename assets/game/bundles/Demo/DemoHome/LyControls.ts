@@ -1,6 +1,7 @@
 import { _decorator, assetManager, Color, Label, Node, Prefab, TTFFont, UITransform } from 'cc';
 import { GMFrame, GMOptionItem, gu, PfGMBadge, PfGMBar, PfGMBtn, PfGMBtnSize, PfGMBtnStyle, PfGMBtnTheme, PfGMCheck, PfGMEditBox, PfGMItemCell, PfGMSelect, PfGMSlider, PfGMStepper, PfGMSwitch, PfGMTabs } from 'db://gmajor/index';
 import { loadSkin } from '../../GameUI/SkinKit';
+import { PfControlPage } from './PfControlPage';
 
 const { ccclass } = _decorator;
 
@@ -24,7 +25,7 @@ const PAGES: Array<[string, string]> = [
     ['pageShow', '显示'],
 ];
 
-/** 控件展示：三页平铺已完成的控件。尺寸与默认 620×800 不同 */
+/** 控件展示：三页平铺已完成的控件，再加一页空的「更多」。页签按三个字宽。尺寸与默认 620×800 不同 */
 @ccclass('LyControls')
 export class LyControls extends GMFrame {
     width = 640;
@@ -64,7 +65,7 @@ export class LyControls extends GMFrame {
         });
     }
 
-    /** 尺寸按骨架的 body 走，再把三页交给页签收编 */
+    /** 尺寸按骨架的 body 走，再把页面交给页签收编。字数设成 3，看窄页签 */
     private bindTabs(panel: Node, pages: Node[]): void {
         const ts = panel.getChildByName('tabs')?.getComponent(PfGMTabs) ?? null;
         if (!ts) return console.error('[LyControls] 没有页签');
@@ -73,7 +74,12 @@ export class LyControls extends GMFrame {
         const height = uit?.height ?? 1021;
         ts.node.getComponent(UITransform)?.setContentSize(width, height);
         ts.node.setPosition(0, this.body?.position.y ?? 0, 0);
+        ts.setChars(3);
         for (let i = 0; i < pages.length; i++) ts.insert(pages[i], PAGES[i][1]);
+        const more = new Node('pageMore');
+        more.layer = panel.layer;
+        more.addComponent(PfControlPage);
+        ts.insert(more, '更多');
         ts.setIndex(0);
     }
 

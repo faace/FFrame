@@ -41,7 +41,7 @@ export { PfGMOption } from './ui/PfGMOption'; // 框架下拉行；底+图标+�
 export { PfGMToast } from './ui/PfGMToast'; // 轻提示一条；bg + label；队列在 GMToastHost
 export type { GMToastAnchor } from './ui/GMToastHost'; // gu.setToastAnchor：top / center / bottom
 export { GMTabPage } from './ui/GMTabPage'; // 页签内容基类；onShow/onHide(done)；text/setText
-export { PfGMTabs, GMTabSource } from './ui/PfGMTabs'; // 框架页签；tabs+panel；index；insert/remove
+export { PfGMTabs, GMTabSource } from './ui/PfGMTabs'; // 框架页签；tabs+panel；chars 定宽；超出横滑
 export { loadSkin, setSkinTheme, applySkin, skinFrame, SKIN_BUNDLE } from './ui/GMSkin'; // 游戏 Skin 包；setSkinTheme 告诉编辑器当前主题；缺槽用内置白图
 export { GMLayer } from './ui/GMLayer'; // Layer 基类；Ly* 继承；mask+panel 入场；场景不套
 export { GMFrame, FRAME_EDGE } from './ui/GMFrame'; // 普通弹窗骨架；铆钉压棕色框线；默认 620×800；确认框不走

@@ -1,4 +1,4 @@
-import { _decorator, assetManager, BlockInputEvents, CCObjectFlags, Color, Enum, instantiate, Label, Node, Prefab, Sprite, SpriteFrame, TTFFont, UITransform } from 'cc';
+import { _decorator, assetManager, BlockInputEvents, CCObjectFlags, Color, Enum, EventTouch, instantiate, Label, Mask, Node, Prefab, Sprite, SpriteFrame, TTFFont, UITransform } from 'cc';
 import { EDITOR, PREVIEW } from 'cc/env';
 import { gu } from '../launch/GMLauncher';
 import { GMComponent } from './GMComponent';
@@ -9,20 +9,23 @@ const { ccclass, executeInEditMode, property } = _decorator;
 
 /**
  * 页签可调参数。改数字改这里。
- * 外框读根节点，预制体默认 640×480。页签高 64，和小档按钮一样。板子比页签宽，页签从左上圆角后往右排，右边留空。
- * 字号 26。宽按五个中文字不缩放来排，相邻页签边线叠 3 像素。底边黑线压住 panel 顶边黑线。激活的那颗画在最上面。
+ * 外框读根节点，预制体默认 640×480，窄于 360 拉回 360。页签高 64，和小档按钮一样。
+ * chars 默认 5，整排一样宽。左右各让出一个圆角直径（半径 20，各留 40）。超出只横滑页签条。
+ * 字号 26。相邻页签边线叠 3 像素。底边黑线压住 panel 顶边黑线。激活的那颗画在最上面。
  * 页签九宫格上 10、下 2、左 10、右 10。panel 四边 20。
  */
 const PF_GM_TABS = {
     width: 640,
+    minWidth: 360, // 再窄拉回这里
     tabH: 64, // 和小档按钮同高
-    corner: 20, // 左上圆角。第一颗从这里起，板子右边空着
+    corner: 20, // panel 显示尺寸圆角半径。左右留白是它的 2 倍
     join: 3, // 相邻页签各让 3 像素，边线叠成一条
     fontSize: 26,
-    padX: 12, // 五个字两侧留白，躲开左右圆角
-    sample: '中中中中中', // 用来量一颗页签的宽
+    padX: 12, // 字两侧留白
+    chars: 5, // 不填时按五个中文字量宽
     ink: [92, 64, 32] as const, // 和标题同一套深墨
     fallback: 5, // 秒；页面忘了调用 done
+    drag: 8, // 超过这么多像素算拖，不再当点击
     font: 'ee40121d-0b21-4bb3-b95c-fa7d2df322b4', // db://gmajor/fonts/main.ttf
     dontSave: CCObjectFlags.DontSave, // 编辑器里生成的页签不写进预制体
 };
@@ -82,12 +85,27 @@ export class PfGMTabs extends GMComponent {
     private stepGen = 0;
     private hookName = '';
     private closeStep: (() => void) | null = null;
+    private clipNode: Node | null = null;
+    private reelNode: Node | null = null;
     private normal: SpriteFrame | null = null;
     private selected: SpriteFrame | null = null;
-    private fixedW = 0; // 五个字量出来的页签宽。字库晚到就重测
+    private fixedW = 0; // 按 chars 量出来的页签宽。字数或字库变了就重测
+    private scroll = 0; // 页签条向左滑了多少。0 贴着左留白
+    private maxScroll = 0;
+    private viewW = 0;
+    private dragged = false;
+    private dragDelta = 0;
+    private grabScroll = 0;
+    private charsMark = PF_GM_TABS.chars;
+    private badChars = Number.NaN; // 上次打过日志的非法字数，避免每帧再打
+    private narrowAt = 0; // 上次因过窄警告过的宽度，避免每帧再打
+    private fitKey = '';
 
     @property
     index = 0; // 和 setIndex 同一份。越界会夹紧
+
+    @property
+    chars = PF_GM_TABS.chars; // 整排按几个中文字量宽。必须是大于 1 的整数
 
     @property({ type: [GMTabSlot] })
     slots: GMTabSlot[] = [];
@@ -107,6 +125,7 @@ export class PfGMTabs extends GMComponent {
         this.stepGen++;
         this.unschedule(this.lateStep);
         this.closeStep = null;
+        this.unbindDrag();
         if (this.switching) gu.loadingHide(this.loadingKey());
     }
 
@@ -114,6 +133,15 @@ export class PfGMTabs extends GMComponent {
         if (!this.tabsNode) return;
         if (editing) this.syncSlots(false);
         this.syncIndex();
+        this.layout();
+    }
+
+    /** 整排页签按几个中文字量宽。小于等于 1、或不是整数时打错误日志，不改 */
+    setChars(chars: number): void {
+        if (!this.charsOk(chars)) return console.error('[PfGMTabs] chars 必须是大于 1 的整数', chars);
+        this.chars = chars;
+        this.charsMark = chars;
+        this.fixedW = 0;
         this.layout();
     }
 
@@ -175,8 +203,63 @@ export class PfGMTabs extends GMComponent {
         this.panelSprite = this.panelNode?.getComponent(Sprite) ?? null;
         if (!this.tabsNode || !this.panelNode || !this.panelSprite) return false;
         if (!this.panelNode.getComponent(BlockInputEvents)) this.panelNode.addComponent(BlockInputEvents);
+        this.ensureClip();
         return true;
     }
+
+    /** 页签条上套一层遮罩，左右留白外面的部分裁掉。运行时生成，不写进预制体 */
+    private ensureClip(): void {
+        const tabs = this.tabsNode;
+        if (!tabs || this.clipNode?.isValid) return;
+        const clip = new Node('tabClip');
+        clip.layer = tabs.layer;
+        tabs.addChild(clip);
+        const cut = clip.addComponent(UITransform);
+        cut.setAnchorPoint(0.5, 0.5);
+        clip.addComponent(Mask).type = Mask.Type.RECT;
+        const reel = new Node('tabReel');
+        reel.layer = tabs.layer;
+        clip.addChild(reel);
+        const rut = reel.addComponent(UITransform);
+        rut.setAnchorPoint(0, 0.5);
+        this.clipNode = clip;
+        this.reelNode = reel;
+        this.transient(clip);
+        if (editing) return;
+        clip.on(Node.EventType.TOUCH_START, this.onTabStart, this, true);
+        clip.on(Node.EventType.TOUCH_MOVE, this.onTabMove, this, true);
+        clip.on(Node.EventType.TOUCH_END, this.onTabEnd, this, true);
+        clip.on(Node.EventType.TOUCH_CANCEL, this.onTabEnd, this, true);
+    }
+
+    private unbindDrag(): void {
+        const clip = this.clipNode;
+        if (!clip?.isValid) return;
+        clip.off(Node.EventType.TOUCH_START, this.onTabStart, this, true);
+        clip.off(Node.EventType.TOUCH_MOVE, this.onTabMove, this, true);
+        clip.off(Node.EventType.TOUCH_END, this.onTabEnd, this, true);
+        clip.off(Node.EventType.TOUCH_CANCEL, this.onTabEnd, this, true);
+    }
+
+    private onTabStart = (): void => {
+        this.dragged = false;
+        this.dragDelta = 0;
+        this.grabScroll = this.scroll;
+    };
+
+    private onTabMove = (event: EventTouch): void => {
+        if (editing || this.maxScroll <= 0) return;
+        const scale = Math.abs(this.node.worldScale.x) || 1;
+        this.dragDelta += event.getUIDelta().x / scale;
+        if (Math.abs(this.dragDelta) <= PF_GM_TABS.drag) return; // 没过阈值仍当点击，页签条先不动
+        this.dragged = true;
+        this.scroll = this.clampScroll(this.grabScroll - this.dragDelta);
+        this.placeReel();
+    };
+
+    private onTabEnd = (): void => {
+        this.dragDelta = 0;
+    };
 
     private syncSlots(force: boolean): void {
         const mark = this.slots.map((slot) => {
@@ -249,9 +332,8 @@ export class PfGMTabs extends GMComponent {
     }
 
     private makeEntry(page: GMTabPage, made: boolean): Entry {
-        const tabs = this.tabsNode;
+        const host = this.reelNode ?? this.tabsNode ?? this.node;
         const tab = new Node('tab');
-        const host = tabs ?? this.node;
         tab.layer = host.layer;
         host.addChild(tab);
         const tabUt = tab.addComponent(UITransform); // 先于 Sprite，避免后补的变换把尺寸留在默认 100
@@ -276,6 +358,7 @@ export class PfGMTabs extends GMComponent {
         entry.wired = true;
         const tab = entry.tab;
         gu.addClick(tab, () => {
+            if (this.dragged) return; // 这次是拖页签条，不换页
             const at = this.pages.findIndex((item) => item.tab === tab);
             if (at < 0) return;
             this.request(at, true);
@@ -374,7 +457,13 @@ export class PfGMTabs extends GMComponent {
         const uit = this.node.getComponent(UITransform);
         if (!tabs || !panel || !uit) return;
         uit.setAnchorPoint(0.5, 0.5);
-        const width = uit.width > 0 ? uit.width : PF_GM_TABS.width;
+        this.adoptChars();
+        const rawW = uit.width > 0 ? uit.width : PF_GM_TABS.width;
+        const width = rawW < PF_GM_TABS.minWidth ? PF_GM_TABS.minWidth : rawW;
+        if (rawW < PF_GM_TABS.minWidth) {
+            if (this.narrowAt !== rawW) console.warn('[PfGMTabs] 宽小于 360，已拉回', rawW);
+            this.narrowAt = rawW;
+        } else this.narrowAt = 0;
         const height = uit.height >= PF_GM_TABS.tabH ? uit.height : PF_GM_TABS.tabH;
         uit.setContentSize(width, height);
         const tabH = PF_GM_TABS.tabH;
@@ -391,10 +480,14 @@ export class PfGMTabs extends GMComponent {
         panelUt.setContentSize(width, panelH);
         tabs.setPosition(0, tabBottom + tabH / 2 + 1, 0); // 页签再抬 1 像素，底边黑线压住 panel 顶边
         panel.setPosition(0, (panelTop + panelBottom) / 2, 0);
-        if (this.fixedW <= 0 && this.pages.length > 0) this.fixedW = this.measureTab(this.pages[0].label);
-        const tabW = Math.round(this.fixedW > 0 ? this.fixedW : PF_GM_TABS.fontSize * 5 + PF_GM_TABS.padX * 2);
+        const chars = this.charsMark;
+        if (this.fixedW <= 0 && this.pages.length > 0) this.fixedW = this.measureTab(this.pages[0].label, chars);
+        const tabW = Math.round(this.fixedW > 0 ? this.fixedW : PF_GM_TABS.fontSize * chars + PF_GM_TABS.padX * 2);
         const count = this.pages.length;
-        const left = -width / 2 + PF_GM_TABS.corner; // 让过左上圆角，右边不排满
+        const inset = PF_GM_TABS.corner * 2; // 左右各一个直径
+        this.viewW = Math.max(0, width - inset * 2);
+        this.fitClip();
+        this.fitScroll(tabW, count);
         for (let i = 0; i < count; i++) {
             const entry = this.pages[i];
             const on = i === this.current;
@@ -405,7 +498,7 @@ export class PfGMTabs extends GMComponent {
             if (frame) entry.plate.spriteFrame = frame;
             tabUt.setAnchorPoint(0.5, 0); // 底边钉在 tabs 底上，也就是 panel 上沿
             tabUt.setContentSize(tabW, tabH); // 贴图之后再写，每帧都写，避免被原图尺寸盖住
-            entry.tab.setPosition(left + tabW / 2 + i * (tabW - PF_GM_TABS.join), -tabH / 2, 0); // 相邻边线叠 join 像素
+            entry.tab.setPosition(tabW / 2 + i * (tabW - PF_GM_TABS.join), -tabH / 2, 0); // 从卷轴左边排，相邻边线叠 join 像素
             this.dressLabel(entry.label);
             entry.label.string = entry.page.text;
             const lut = entry.label.node.getComponent(UITransform);
@@ -421,7 +514,65 @@ export class PfGMTabs extends GMComponent {
             this.pages[i].tab.setSiblingIndex(order++);
         }
         if (this.current >= 0) this.pages[this.current].tab.setSiblingIndex(order); // 激活的画在最上面，叠住两侧的边线
+        this.placeReel();
         tabs.setSiblingIndex(this.node.children.length - 1); // 画在板子上面，底边不被板子盖住
+    }
+
+    /** 遮罩缩在左右留白以内，卷轴锚在左中 */
+    private fitClip(): void {
+        const clip = this.clipNode;
+        const reel = this.reelNode;
+        const cut = clip?.getComponent(UITransform);
+        const rut = reel?.getComponent(UITransform);
+        if (!clip || !cut || !rut) return;
+        cut.setContentSize(this.viewW, PF_GM_TABS.tabH);
+        clip.setPosition(0, 0, 0);
+        rut.setContentSize(Math.max(this.viewW, 1), PF_GM_TABS.tabH);
+    }
+
+    /** 换页或宽度变了，才把当前颗滚进可视区。已经完全看得见就不动 */
+    private fitScroll(tabW: number, count: number): void {
+        const stride = tabW - PF_GM_TABS.join;
+        const contentW = count <= 0 ? 0 : count * tabW - (count - 1) * PF_GM_TABS.join;
+        this.maxScroll = Math.max(0, contentW - this.viewW);
+        const key = this.current + '|' + tabW + '|' + this.viewW + '|' + count;
+        if (key !== this.fitKey && this.current >= 0 && count > 0) {
+            const left = this.current * stride;
+            const right = left + tabW;
+            if (tabW >= this.viewW) this.scroll = left; // 一颗比窗口还宽，左边对齐
+            else if (left < this.scroll - 0.5) this.scroll = left;
+            else if (right > this.scroll + this.viewW + 0.5) this.scroll = right - this.viewW;
+        }
+        this.fitKey = key;
+        this.scroll = this.clampScroll(this.scroll);
+    }
+
+    private placeReel(): void {
+        this.reelNode?.setPosition(-this.viewW / 2 - this.scroll, 0, 0);
+    }
+
+    private clampScroll(n: number): number {
+        if (!(n > 0)) return 0;
+        if (n > this.maxScroll) return this.maxScroll;
+        return n;
+    }
+
+    private charsOk(n: number): boolean {
+        return Number.isInteger(n) && n > 1;
+    }
+
+    /** 检查器改了字数就重测。非法值打一次日志并退回 */
+    private adoptChars(): void {
+        const n = this.chars;
+        if (this.charsOk(n)) {
+            if (n !== this.charsMark) this.fixedW = 0;
+            this.charsMark = n;
+            this.badChars = Number.NaN;
+            return;
+        }
+        if (n !== this.badChars) console.error('[PfGMTabs] chars 必须是大于 1 的整数', n);
+        this.badChars = n;
+        this.chars = this.charsMark;
     }
 
     private fill(node: Node, panelUt: UITransform): void {
@@ -508,11 +659,11 @@ export class PfGMTabs extends GMComponent {
         });
     }
 
-    /** 五个中文字的实际宽度，加上两侧留白。字还没排出来时按字号估 */
-    private measureTab(label: Label): number {
+    /** chars 个中文字的实际宽度，加上两侧留白。字还没排出来时按字号估 */
+    private measureTab(label: Label, chars: number): number {
         const saved = label.string;
         this.dressLabel(label);
-        label.string = PF_GM_TABS.sample;
+        label.string = '中'.repeat(chars);
         label.overflow = Label.Overflow.NONE;
         label.enableWrapText = false;
         label.updateRenderData(true);
@@ -521,7 +672,7 @@ export class PfGMTabs extends GMComponent {
         label.overflow = Label.Overflow.SHRINK;
         label.enableWrapText = false;
         const pad = PF_GM_TABS.padX * 2;
-        if (textW <= 0) return PF_GM_TABS.fontSize * 5 + pad;
+        if (textW <= 0) return PF_GM_TABS.fontSize * chars + pad;
         return Math.ceil(textW) + pad;
     }
 
