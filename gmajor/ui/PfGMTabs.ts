@@ -10,7 +10,7 @@ const { ccclass, executeInEditMode, property } = _decorator;
 /**
  * 页签可调参数。改数字改这里。
  * 外框读根节点，预制体默认 640×480，窄于 360 拉回 360。页签高 64，和小档按钮一样。
- * chars 默认 5，整排一样宽。左右各让出一个圆角直径（半径 20，各留 40）。超出只横滑页签条。
+ * chars 默认 5，整排一样宽。左边留半个圆角直径（20），右边留一个直径（40）。超出只横滑页签条。
  * 字号 26。相邻页签边线叠 3 像素。底边黑线压住 panel 顶边黑线。激活的那颗画在最上面。
  * 页签九宫格上 10、下 2、左 10、右 10。panel 四边 20。
  */
@@ -18,7 +18,7 @@ const PF_GM_TABS = {
     width: 640,
     minWidth: 360, // 再窄拉回这里
     tabH: 64, // 和小档按钮同高
-    corner: 20, // panel 显示尺寸圆角半径。左右留白是它的 2 倍
+    corner: 20, // panel 显示尺寸圆角半径。直径 40。左边留半个，右边留一个
     join: 3, // 相邻页签各让 3 像素，边线叠成一条
     fontSize: 26,
     padX: 12, // 字两侧留白
@@ -484,9 +484,10 @@ export class PfGMTabs extends GMComponent {
         if (this.fixedW <= 0 && this.pages.length > 0) this.fixedW = this.measureTab(this.pages[0].label, chars);
         const tabW = Math.round(this.fixedW > 0 ? this.fixedW : PF_GM_TABS.fontSize * chars + PF_GM_TABS.padX * 2);
         const count = this.pages.length;
-        const inset = PF_GM_TABS.corner * 2; // 左右各一个直径
-        this.viewW = Math.max(0, width - inset * 2);
-        this.fitClip();
+        const insetL = PF_GM_TABS.corner; // 半个直径，靠左
+        const insetR = PF_GM_TABS.corner * 2; // 右边仍留一个直径
+        this.viewW = Math.max(0, width - insetL - insetR);
+        this.fitClip(insetL, insetR);
         this.fitScroll(tabW, count);
         for (let i = 0; i < count; i++) {
             const entry = this.pages[i];
@@ -518,15 +519,15 @@ export class PfGMTabs extends GMComponent {
         tabs.setSiblingIndex(this.node.children.length - 1); // 画在板子上面，底边不被板子盖住
     }
 
-    /** 遮罩缩在左右留白以内，卷轴锚在左中 */
-    private fitClip(): void {
+    /** 遮罩缩在左右留白以内。左边窄、右边宽，所以不居中 */
+    private fitClip(insetL: number, insetR: number): void {
         const clip = this.clipNode;
         const reel = this.reelNode;
         const cut = clip?.getComponent(UITransform);
         const rut = reel?.getComponent(UITransform);
         if (!clip || !cut || !rut) return;
         cut.setContentSize(this.viewW, PF_GM_TABS.tabH);
-        clip.setPosition(0, 0, 0);
+        clip.setPosition((insetL - insetR) / 2, 0, 0);
         rut.setContentSize(Math.max(this.viewW, 1), PF_GM_TABS.tabH);
     }
 
