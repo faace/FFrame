@@ -1,5 +1,5 @@
 ---
-description: Bundle/功能目录/绑定名、Sc/Ly/Pf、双基类、layer 结构（根+panel、mask 克隆）、界面控件进 gmajor、默认皮、换皮、控件不压背景边框、并排改纵向要连 x 和宽一起改、数据 watch、业务事件 on、事件大类前缀（Gp/Bind）、平台 gp.call/send、loading、addClick、createTs、动态 UI 挂 Canvas、双窗数据权。新建或改 Bundle、场景、预制体、gmajor/game 脚本时引用。用户说数据变了刷新 UI、金币/字段变化、监听事件、事件前缀、Gp、gp.call、平台通道、原生回包、新建功能包、异步等待、挡住操作、loading、注册点击、addClick、列表项、createTs、按钮看不见、动态创建节点、新建 Ly、layer 结构、mask、panel、生成 Ly 预制体、弹窗标题、关闭钮、GMFrame、不要标题、不要底框、左上角、铆钉、Ly 后不加 Popup、按钮组件、PfGMBtn、描边、白字、次要、加减、关闭、PfGMSlider、PfGMBar、PfGMStepper、PfGMTabs、滑条、进度条、步进、页签、轻提示、gu.toast、GMToastHost、PfGMToast、默认皮、换皮、Skin、plist、主题图集、界面图蛇形、btn_、按钮底板、九宫格、圆角、压边框、贴边、超出弹窗、控件太宽、并排改竖向、AI 风格稿、改 gmajor 还是游戏、兼容、升 gm.version、嵌套覆盖、只留差异项、双窗、第二窗、指令回矿、UI 不落盘、Bundle 内 res/spine/font/anim/prefab、目录小驼峰或大驼峰、实例节点、图片蛇形、文件名英文时也引用。
+description: Bundle/功能目录/绑定名、Sc/Ly/Pf、双基类、layer 结构（根+panel、mask 克隆）、界面控件进 gmajor、默认皮、换皮、控件不压背景边框、并排改纵向要连 x 和宽一起改、数据 watch、业务事件 on、事件大类前缀（Gp/Bind）、平台 gp.call/send、loading、addClick、createTs、动态 UI 挂 Canvas、双窗数据权。新建或改 Bundle、场景、预制体、gmajor/game 脚本时引用。用户说数据变了刷新 UI、金币/字段变化、监听事件、事件前缀、Gp、gp.call、平台通道、原生回包、新建功能包、异步等待、挡住操作、loading、注册点击、addClick、列表项、createTs、按钮看不见、动态创建节点、新建 Ly、layer 结构、mask、panel、生成 Ly 预制体、弹窗标题、关闭钮、GMFrame、不要标题、不要底框、左上角、铆钉、Ly 后不加 Popup、按钮组件、PfGMBtn、描边、白字、次要、加减、关闭、PfGMSlider、PfGMBar、PfGMStepper、PfGMTabs、滑条、进度条、步进、页签、列表、PfGMList、GMListItem、轻提示、gu.toast、GMToastHost、PfGMToast、默认皮、换皮、Skin、plist、主题图集、界面图蛇形、btn_、按钮底板、九宫格、圆角、压边框、贴边、超出弹窗、控件太宽、并排改竖向、AI 风格稿、改 gmajor 还是游戏、兼容、升 gm.version、嵌套覆盖、只留差异项、双窗、第二窗、指令回矿、UI 不落盘、Bundle 内 res/spine/font/anim/prefab、目录小驼峰或大驼峰、实例节点、图片蛇形、文件名英文时也引用。
 globs: assets/game/**,gmajor/**,**/*.{scene,prefab}
 alwaysApply: false
 ---
@@ -174,7 +174,7 @@ export class PfX extends GMScene {}
 - 可复用控件（按钮、标题等）的**脚本和结构**进 `gmajor`，不进本游戏功能包，不另开 Widget 库。
 - **控件不许压背景边框**。控件、说明字、展开层（下拉列表、页签 panel 等）一律落在所在弹窗 / 页面背景的九宫格内沿以里，不许压在背景那圈 `panel` 边框上（两块木框叠在一起会像被裁掉一块）。校验：`背景内沿 = 页面半宽 − panel 的 border`，`左边 = x − 宽/2`、`右边 = x + 宽/2` 都要落在内沿内并留余量；展开层比收起态宽时同样算。
 - **并排改纵向排时，`x` 和宽度一起改**。只改 `y` 会留下并排时的横向偏移和窄宽度，控件照样压边框。改成居中全宽再核对一遍左右边缘。
-- **框架自带预制体：`Pf` + `GM` + 名**。按钮 `PfGMBtn`，标题 `PfGMTitle`，滑条 `PfGMSlider`，进度条 `PfGMBar`，步进 `PfGMStepper`，页签 `PfGMTabs`，开关 `PfGMSwitch`，勾选框 `PfGMCheck`，道具格 `PfGMItemCell`，下拉 `PfGMSelect` / `PfGMOption`，轻提示 `PfGMToast`。弹层预制体同样：`Ly` + `GM` + 名（`LyGMXxx`）。先看出是 Pf 还是 Ly，再看出是框架的。
+- **框架自带预制体：`Pf` + `GM` + 名**。按钮 `PfGMBtn`，标题 `PfGMTitle`，滑条 `PfGMSlider`，进度条 `PfGMBar`，步进 `PfGMStepper`，页签 `PfGMTabs`，开关 `PfGMSwitch`，勾选框 `PfGMCheck`，道具格 `PfGMItemCell`，下拉 `PfGMSelect` / `PfGMOption`，列表 `PfGMList`，轻提示 `PfGMToast`。弹层预制体同样：`Ly` + `GM` + 名（`LyGMXxx`）。先看出是 Pf 还是 Ly，再看出是框架的。
 - 框架控件根锚点在中心。滑条只含轨道、填充、滑块和运行时建的裁剪层，旁边的图标和字由调用方摆。宽读根节点，高不跟。`value` 为 0–1，`setValue` 和检查器同一份。拖动自己听，loading 开着时这次丢掉。`setOnChange` 只在手指按下或移动时叫，`setValue` 不叫。
 - 进度条只有槽和填充。皮 `bar_bg`、`bar_fill`，自己切九宫格。`value` 为 0–1，不拖、不设 `onChange`。填充的 x 锚点为 0，从左侧往右长。四周留白写在脚本顶部。条上的白字描边宽 3。
 - 白字描边宽统一 3，跟 `PfGMBtn`。道具格数量、进度条上的字也是 3。奶油底上的深色字不描边：标题、步进数字、页签字、说明字。不要再写 2 或 4。
@@ -187,8 +187,9 @@ export class PfX extends GMScene {}
 - 历史遗留的 `update()`（`PfGMBtn`、`PfGMTitle`、`PfGMSlider`、`PfGMBar`、`PfGMSwitch`、`PfGMCheck`、`PfGMItemCell`、`PfGMSelect`、`PfGMOption`、`PfGMTabs`、`PfGMEditBox`、`PfGMStepper`）已全部保留为「检查器改字段当场刷新」，各有 `stamp` 早退。不要再新增同类写法；真要加先按上一条说明理由。`PfGMSlider` / `PfGMBar` 的宽度变化已改用 `SIZE_CHANGED`。
 - 轻提示调用写 `gu.toast(text)`、`gu.toastHide()`、`gu.setToastAnchor('top'|'center'|'bottom')`。队列、锚点、条数在 `GMToastHost`（挂在 Overlay 的 `toasts` 上）。`PfGMToast` 只画一条（`bg` / `label`、`setText`），不做 `show` / `hide` / `setAnchor`，也不要 `gu.toastRoot()`。开机默认 `center`。锚点可随时改，这次的值和当前不同就先收起。最多 3 条，这个数只写在 Host 的 `max`。最老的贴着停靠点，新的在最外一格。同一句再弹再出一条。
 - 页签是 `PfGMTabs`，不继承 `PfGMBtn`。子节点固定 `tabs`、`panel`。内容必须是 `GMTabPage`（`text` / `setText`，`onShow` / `onHide` 收 `done`）。皮 `tab_normal`、`tab_selected`、`panel`，控件自己切九宫格。高 64。整排一样宽，`chars` 默认 5，按中文字数来量，不按每一页标题各定宽。左边留半个圆角直径（20），右边留一个直径（40）。超出只横滑页签条，板子不跟着滑。窄于 360 拉回 360。标题更长时字缩小。点击用 `gu.addClick`。
+- 列表外层是 `PfGMList`（有预制体）。行基类是 `GMListItem`，没有预制体，游戏的行继承它。`view` 和 `content` 锚点都是 (0.5, 0.5)。不满可视区并且开了居中时，关掉 `ScrollView`，`content` 的 x、y 为 0。网格没排满时内容只包住已有格子，横竖一起居中。默认靠起点：竖向靠上，横向靠左。上下滚时行宽铺满整块可视区，左右滚时行高铺满，网格按个数把这一边均分。滚动条叠在内容上，不占这一边。横条把竖图转 -90° 再拉。底板用 `panel`，四角都是圆角。下拉展开列表仍用 `dropdown_list`。不带下拉的收起盒子、箭头和选中态。点击用 `gu.addClick`，列表不挂 `Button`。
 - 不要 `PfBtn`（太泛），不要 `PfFFBtn`（`FF*` 已废），不要只叫 `GMBtn`（看不出是预制体，也分不清 Ly/Pf）。
-- **本游戏**仍是 `PfShopItem` / `LyAlert`，中间不加 `GM`。纯基类仍是 `GMComponent` / `GMAlert` / `GMLayer` / `GMFrame`（没有对应预制体文件）。`GMFrame` 是普通弹窗骨架。
+- **本游戏**仍是 `PfShopItem` / `LyAlert`，中间不加 `GM`。纯基类仍是 `GMComponent` / `GMAlert` / `GMLayer` / `GMFrame` / `GMListItem`（没有对应预制体文件）。`GMFrame` 是普通弹窗骨架。
 - 界面图只在游戏 `assets/game/bundles/Skin/<主题>/`（Bundle `Skin`）。一套主题两份图集：`ctrl.png` + `ctrl.plist`（控件），`item.png` + `item.plist`（物品）。开机按 `config.skinTheme` 加载，不写进 `config.boot`，不绑入口。框架不带这些图。不要在 `GameUI/Skin` 再放一套。只认有 `ctrl.plist` 的主题。没有 plist 的目录不加载，不回退逐张 png。`LegacyV3` 已在 0.6.0 退役，旧图在 `FFrame-asset-line/legacy/Skin-LegacyV3-game/`。
 - 源图按设计分辨率 720×1280 的 2 倍出，留在 `FFrame-asset-line`。进游戏工程的是一半尺寸。九宫格写在 plist 子图的边上，运行时不再切矩形。
 - 素材和提示语放 `FFrame-asset-line/style/<主题>/`。长期脚本放 `FFrame-asset-line/tools/`。场景的原始生成素材放 `FFrame-asset-line/scenes/<场景>/资源生成/`，被该仓库 `.gitignore` 忽略，不入库，换电脑用 U 盘拷贝。
@@ -291,6 +292,7 @@ export class PfX extends GMScene {}
 ✅ gmajor/…/PfGMSwitch（face）、PfGMCheck（box/mark）、PfGMItemCell（bg/icon/frame/label）
 ✅ gmajor/…/PfGMSelect（bg/icon/label/arrow + 内嵌 list 骨架）、PfGMOption（bg/icon/label）、PfGMToast（bg/label；调用 gu.toast，队列在 GMToastHost）
 ❌ PfGMToast.show / hide / setAnchor；gu.toastRoot()
+✅ gmajor/…/PfGMList（view/content 锚点 0.5；不满且居中时关 ScrollView，content 归 0）+ GMListItem（无预制体，游戏行继承）
 ✅ 普通弹窗 extends GMFrame（默认 620×800；铆钉压棕色顶边；左上角有回调才出现）
 ✅ 界面图小写蛇形：btn_primary、title_bar、icon_close、panel
 ✅ 嵌套 PfGMBtn / PfGMTitle 只盖差异项（名、坐标、档位、主题、版式、text、图标；标题字在 Label 上）

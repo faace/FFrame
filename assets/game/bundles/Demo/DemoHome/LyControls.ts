@@ -1,7 +1,8 @@
 import { _decorator, assetManager, Color, Label, Node, Prefab, TTFFont, UITransform } from 'cc';
-import { GMFrame, GMOptionItem, gu, PfGMBadge, PfGMBar, PfGMBtn, PfGMBtnSize, PfGMBtnStyle, PfGMBtnTheme, PfGMCheck, PfGMEditBox, PfGMItemCell, PfGMSelect, PfGMSlider, PfGMStepper, PfGMSwitch, PfGMTabs } from 'db://gmajor/index';
+import { GMFrame, GMListDir, GMOptionItem, gu, PfGMBadge, PfGMBar, PfGMBtn, PfGMBtnSize, PfGMBtnStyle, PfGMBtnTheme, PfGMCheck, PfGMEditBox, PfGMItemCell, PfGMList, PfGMSelect, PfGMSlider, PfGMStepper, PfGMSwitch, PfGMTabs } from 'db://gmajor/index';
 import { loadSkin } from '../../GameUI/SkinKit';
 import { PfControlPage } from './PfControlPage';
+import { PfListDemoItem } from './PfListDemoItem';
 
 const { ccclass } = _decorator;
 
@@ -33,6 +34,13 @@ export class LyControls extends GMFrame {
     private started = false;
     private pickPage: Node | null = null; // 选择页。insert 后不在 panel 下了，留引用给回调写字
     private noteView: Label | null = null;
+    private listView: PfGMList | null = null;
+    private listItem: Prefab | null = null;
+    private listNote: Label | null = null;
+    private listDir = GMListDir.vertical;
+    private listLine = 1;
+    private listCount = 30;
+    private listCenter = false;
 
     protected onLayerInit(): void {
         this.setTitle('控件展示');
@@ -80,7 +88,12 @@ export class LyControls extends GMFrame {
         more.layer = panel.layer;
         more.addComponent(PfControlPage);
         ts.insert(more, '更多');
+        const panelUt = ts.node.getChildByName('panel')?.getComponent(UITransform) ?? null;
+        const pageUt = more.getComponent(UITransform) ?? more.addComponent(UITransform);
+        pageUt.setAnchorPoint(0.5, 0.5);
+        if (panelUt) pageUt.setContentSize(panelUt.contentSize);
         ts.setIndex(0);
+        this.bindList(more);
     }
 
     /** 按钮自己带着主题名，点一下把它写进页面底部的说明行，不弹窗 */
@@ -326,5 +339,91 @@ export class LyControls extends GMFrame {
     /** 选择页的回调结果写到页面底部，不弹窗 */
     private note(text: string): void {
         if (this.noteView?.isValid) this.noteView.string = text;
+    }
+
+    /** 第 4 页一个列表。按钮换排法、项数和居中。页节点是运行时建的，控件也运行时建 */
+    private bindList(page: Node): void {
+        const ui = assetManager.getBundle('GMUI');
+        const home = assetManager.getBundle('DemoHome');
+        if (!ui || !home) return console.error('[LyControls] 没有包，列表建不出来');
+        ui.load('PfGMList', Prefab, (err, listPrefab) => {
+            if (err || !listPrefab) return console.error('[LyControls] 列表预制体加载失败', err);
+            if (!page.isValid) return;
+            home.load('PfListDemoItem', Prefab, (err2, itemPrefab) => {
+                if (err2 || !itemPrefab) return console.error('[LyControls] 列表行预制体加载失败', err2);
+                if (!page.isValid) return;
+                ui.load('PfGMBtn', Prefab, (err3, btnPrefab) => {
+                    if (err3 || !btnPrefab) return console.error('[LyControls] 列表按钮加载失败', err3);
+                    if (!page.isValid) return;
+                    this.placeList(page, listPrefab, itemPrefab, btnPrefab);
+                });
+            });
+        });
+    }
+
+    /** 三行按钮在上，列表 480×400 在中，说明字贴在列表下面。左右都落在内沿 ±276 里 */
+    private placeList(page: Node, listPrefab: Prefab, itemPrefab: Prefab, btnPrefab: Prefab): void {
+        const pageUt = page.getComponent(UITransform);
+        const pageH = pageUt?.height ?? 900;
+        const top = pageH / 2 - 48;
+        const rowH = 72;
+        const rows = [top - 32, top - 32 - rowH, top - 32 - rowH * 2];
+        const xs = [-186, 0, 186]; // 小档宽 180，三颗贴着内沿 ±276，相邻留 6
+        const buttons: Array<[number, number, string, () => void]> = [
+            [0, 0, '上下', () => this.useList(GMListDir.vertical, 1, this.listCount, this.listCenter)],
+            [0, 1, '左右', () => this.useList(GMListDir.horizontal, 1, this.listCount, this.listCenter)],
+            [0, 2, '网格下', () => this.useList(GMListDir.vertical, 4, this.listCount, this.listCenter)],
+            [1, 0, '网格横', () => this.useList(GMListDir.horizontal, 4, this.listCount, this.listCenter)],
+            [1, 1, '项少', () => this.useList(this.listDir, this.listLine, 3, this.listCenter)],
+            [1, 2, '项多', () => this.useList(this.listDir, this.listLine, 30, this.listCenter)],
+            [2, 1, '居中', () => this.useList(this.listDir, this.listLine, this.listCount, !this.listCenter)],
+        ];
+        for (const [row, col, text, fn] of buttons) {
+            const ts = gu.createTs(btnPrefab, { parent: page, x: xs[col], y: rows[row] });
+            if (!(ts instanceof PfGMBtn)) return console.error('[LyControls] 列表按钮没挂上', text);
+            ts.setStyle(PfGMBtnStyle.text);
+            ts.setSize(PfGMBtnSize.small);
+            ts.setTheme(PfGMBtnTheme.secondary);
+            ts.setText(text);
+            ts.node.name = 'btnList' + text;
+            gu.addClick(ts.node, fn);
+        }
+        const listH = 400;
+        const listTop = rows[2] - 32 - 16;
+        const listY = listTop - listH / 2;
+        const list = gu.createTs(listPrefab, { parent: page, x: 0, y: listY });
+        if (!(list instanceof PfGMList)) return console.error('[LyControls] 列表没挂上');
+        list.node.name = 'pfList';
+        list.node.getComponent(UITransform)?.setContentSize(480, listH);
+        this.listView = list;
+        this.listItem = itemPrefab;
+        this.listNote = this.makeHead(page, listY - listH / 2 - 28, '');
+        PfListDemoItem.onPick = (index) => {
+            if (this.listNote?.isValid) this.listNote.string = '点了第 ' + index + ' 项';
+        };
+        this.useList(GMListDir.vertical, 1, 30, false);
+    }
+
+    /** 换排法或项数。居中再点一次就关掉 */
+    private useList(dir: GMListDir, line: number, count: number, center: boolean): void {
+        this.listDir = dir;
+        this.listLine = line;
+        this.listCount = count;
+        this.listCenter = center;
+        const list = this.listView;
+        const prefab = this.listItem;
+        if (!list || !prefab) return;
+        list.setDir(dir);
+        list.setLineCount(line);
+        list.setCenter(center);
+        list.setItems(prefab, count);
+        if (this.listNote?.isValid) this.listNote.string = this.listCaption();
+    }
+
+    private listCaption(): string {
+        const across = this.listDir === GMListDir.horizontal ? '左右' : '上下';
+        const kind = this.listLine > 1 ? '网格' : '单列';
+        const place = this.listCenter ? '居中' : '靠起点';
+        return kind + across + ' · ' + this.listCount + ' 项 · ' + place;
     }
 }
