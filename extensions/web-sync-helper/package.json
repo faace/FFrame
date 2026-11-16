@@ -1,0 +1,9 @@
+{
+  "package_version": 2,
+  "name": "web-sync-helper",
+  "version": "1.0.0",
+  "description": "接收 Preview WebSync 改动并写回 Prefab（端口 7457）",
+  "main": "./main.js",
+  "author": "Meodoku",
+  "editor": ">=3.8.0"
+}

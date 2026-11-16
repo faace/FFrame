@@ -1,0 +1,327 @@
+/* Meodoku：DevTools 可读性 + WebSync 底栏（面板仍在右侧，由原版 style.css 控制） */
+
+/* 提高节点树 / 属性文字对比度 */
+.tree-label {
+    color: #eef1ff !important;
+}
+
+.tree-row.inactive .tree-label {
+    color: #9aa3c7 !important;
+    opacity: 1 !important;
+}
+
+.panel-header {
+    color: #c5cae9 !important;
+}
+
+.tree-search-input {
+    color: #f5f6ff !important;
+}
+
+.tree-search-input::placeholder {
+    color: #8b93b8 !important;
+}
+
+.tree-empty,
+.prop-empty,
+.comp-empty {
+    color: #a8b0d4 !important;
+}
+
+.prop-name {
+    color: #b8c0e8 !important;
+}
+
+.prop-input {
+    color: #f0f2ff !important;
+}
+
+.tree-search-bar[data-web-sync-augmented="1"] {
+    flex-wrap: wrap;
+    height: auto;
+    min-height: 32px;
+    padding-bottom: 4px;
+}
+
+.tree-search-bar[data-web-sync-augmented="1"] .tree-search-input {
+    flex: 1 1 120px;
+    min-width: 80px;
+}
+
+.tree-search-bar[data-web-sync-augmented="1"] [data-web-sync-current-page],
+.tree-search-bar[data-web-sync-augmented="1"] [data-web-sync-pick-node] {
+    flex: 0 0 auto;
+    height: 22px;
+    padding: 0 8px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: #fff;
+    font-size: 11px;
+    cursor: pointer;
+}
+
+.tree-search-bar[data-web-sync-augmented="1"] [data-web-sync-current-page] {
+    background: #1565c0;
+}
+
+.tree-search-bar[data-web-sync-augmented="1"] [data-web-sync-pick-node] {
+    background: #2e7d32;
+}
+
+.tree-search-bar[data-web-sync-augmented="1"] [data-web-sync-pick-node][data-pick-active="1"] {
+    background: #ef6c00;
+}
+
+.ccdev-github {
+    display: none !important;
+}
+
+.web-sync-header-actions {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    z-index: 2;
+    display: flex;
+    gap: 6px;
+    align-items: center;
+}
+
+.web-sync-cache-toggle {
+    right: 48px !important;
+}
+
+.web-sync-cache-toggle.active {
+    background: #5d40372e;
+    border-color: #8d6e63;
+    color: #bcaaa4;
+}
+
+.web-sync-refresh-header {
+    position: static;
+    top: auto;
+    right: auto;
+    height: 22px;
+    padding: 0 8px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background: #455a64;
+    color: #fff;
+    font-size: 11px;
+    cursor: pointer;
+    white-space: nowrap;
+    user-select: none;
+}
+
+.web-sync-refresh-header:hover {
+    filter: brightness(1.08);
+    background: var(--bg-hover);
+}
+
+/* WebSync 底栏：挂在 #cc-devtools 内，仅 DevTools 打开时显示 */
+.web-sync-panel {
+    flex-shrink: 0;
+    border-top: 2px solid var(--border);
+    background: var(--bg-panel);
+    padding: 8px 10px 10px;
+    display: none;
+}
+
+.web-sync-panel[data-open="1"] {
+    display: block;
+}
+
+.web-sync-status {
+    font-size: 12px;
+    line-height: 1.45;
+    color: #ffe082;
+    margin-bottom: 8px;
+    word-break: break-word;
+}
+
+.web-sync-status[data-baselined="1"] {
+    color: #a5d6a7;
+}
+
+.web-sync-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-items: center;
+}
+
+.web-sync-btn {
+    flex: 1 1 auto;
+    min-width: 0;
+    height: 28px;
+    padding: 0 10px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    color: #fff;
+    font-size: 11px;
+    cursor: pointer;
+    white-space: nowrap;
+    user-select: none;
+}
+
+.web-sync-btn:hover {
+    filter: brightness(1.08);
+}
+
+.web-sync-btn[data-role="baseline"] {
+    background: #d84315;
+}
+
+.web-sync-btn[data-role="sync"] {
+    background: #1565c0;
+}
+
+.web-sync-btn[data-role="sync"][data-dim="1"] {
+    opacity: 0.45;
+}
+
+.web-sync-btn[data-active="1"] {
+    background: #ef6c00;
+}
+
+.web-sync-cache-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 100000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.55);
+}
+
+.web-sync-cache-overlay[data-open="1"] {
+    display: flex;
+}
+
+.web-sync-cache-card {
+    width: min(920px, 94vw);
+    max-height: 86vh;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: #1d1f24;
+    color: #eef1ff;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
+}
+
+.web-sync-cache-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.web-sync-cache-search {
+    margin-left: auto;
+    width: 180px;
+    height: 28px;
+    padding: 0 8px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background: #2a2d36;
+    color: #fff;
+    font-size: 12px;
+}
+
+.web-sync-cache-table-wrap {
+    overflow: auto;
+    flex: 1 1 auto;
+    min-height: 0;
+}
+
+.web-sync-cache-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+}
+
+.web-sync-cache-table th,
+.web-sync-cache-table td {
+    padding: 8px 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    text-align: left;
+    vertical-align: middle;
+}
+
+.web-sync-cache-table th {
+    position: sticky;
+    top: 0;
+    background: #252830;
+    color: #b8c0e8;
+}
+
+.web-sync-cache-preview {
+    height: 60px;
+    display: flex;
+    align-items: center;
+}
+
+.web-sync-cache-preview-link {
+    display: inline-flex;
+    align-items: center;
+    line-height: 0;
+    cursor: zoom-in;
+    text-decoration: none;
+}
+
+.web-sync-cache-preview-link:hover {
+    filter: brightness(1.08);
+}
+
+.web-sync-cache-preview img {
+    max-height: 60px;
+    max-width: 120px;
+    object-fit: contain;
+    pointer-events: none;
+}
+
+.web-sync-cache-id {
+    cursor: text;
+    user-select: text;
+    -webkit-user-select: text;
+    word-break: break-all;
+    color: #cfd8ff;
+}
+
+.web-sync-cache-id::selection {
+    background: rgba(108, 99, 255, 0.45);
+    color: #fff;
+}
+
+.web-sync-cache-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    border-top: 1px solid var(--border);
+}
+
+.web-sync-cache-close {
+    height: 28px;
+    padding: 0 12px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    background: #37474f;
+    color: #90caf9;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.web-sync-cache-textures-only {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: #ccc;
+    cursor: pointer;
+    user-select: none;
+}
