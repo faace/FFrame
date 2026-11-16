@@ -1,5 +1,5 @@
 import { _decorator, assetManager, Color, Label, Node, Prefab, TTFFont, UITransform } from 'cc';
-import { GMFrame, GMOptionItem, gu, PfGMBadge, PfGMBar, PfGMBtn, PfGMBtnSize, PfGMBtnStyle, PfGMBtnTheme, PfGMCheck, PfGMEditBox, PfGMItemCell, PfGMSelect, PfGMSlider, PfGMStepper, PfGMSwitch, PfGMTabs, PfGMToast } from 'db://gmajor/index';
+import { GMFrame, GMOptionItem, gu, PfGMBadge, PfGMBar, PfGMBtn, PfGMBtnSize, PfGMBtnStyle, PfGMBtnTheme, PfGMCheck, PfGMEditBox, PfGMItemCell, PfGMSelect, PfGMSlider, PfGMStepper, PfGMSwitch, PfGMTabs } from 'db://gmajor/index';
 import { loadSkin } from '../../GameUI/SkinKit';
 
 const { ccclass } = _decorator;
@@ -265,20 +265,20 @@ export class LyControls extends GMFrame {
             this.makeHead(page, TOAST_HEAD_Y, '轻提示　PfGMToast');
             const items: Array<[number, string, PfGMBtnTheme, () => void]> = [
                 [-TOAST_BTN_X, '提示一次', PfGMBtnTheme.primary, () => {
-                    PfGMToast.show('棋盘已满，请先整理');
-                    say('弹了一条。再点几次会一条条往下加');
+                    gu.toast('棋盘已满，请先整理');
+                    say('从屏幕中线向上飘');
                 }],
                 [0, '连点同句', PfGMBtnTheme.info, () => {
-                    PfGMToast.show('连点同一句');
-                    PfGMToast.show('连点同一句');
-                    PfGMToast.show('连点同一句');
+                    gu.toast('连点同一句');
+                    gu.toast('连点同一句');
+                    gu.toast('连点同一句');
                     say('同一句连发三次就是三条，各走各的计时');
                 }],
                 [TOAST_BTN_X, '三条一起', PfGMBtnTheme.warning, () => {
-                    PfGMToast.show('第一条　完成合成任务获得园景素材');
-                    PfGMToast.show('第二条　提示不适用');
-                    PfGMToast.show('第三条　棋盘已满，请先整理');
-                    say('三条叠成一列，新的从下面升上来');
+                    gu.toast('第一条　完成合成任务获得园景素材');
+                    gu.toast('第二条　提示不适用');
+                    gu.toast('第三条　棋盘已满，请先整理');
+                    say('新的从中线飘上去，旧的往上补');
                 }],
             ]; // 左 / 中 / 右三颗，小档 180×64
             items.forEach(([x, text, theme, cb], i) => {
@@ -305,7 +305,7 @@ export class LyControls extends GMFrame {
         node.getComponent(UITransform) ?? node.addComponent(UITransform);
         node.getComponent(UITransform)!.setContentSize(560, 40);
         const label = node.addComponent(Label);
-        label.string = '点上面三颗，看屏幕上方';
+        label.string = '点上面三颗，看屏幕中间偏上';
         label.fontSize = 20;
         label.lineHeight = 24;
         label.color = new Color(132, 112, 88, 255);

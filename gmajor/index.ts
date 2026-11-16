@@ -38,7 +38,8 @@ export { PfGMItemCell } from './ui/PfGMItemCell'; // 框架道具格；底+图�
 export { PfGMBadge } from './ui/PfGMBadge'; // 框架角标；setDot 点模式可开动效 / setCount 数字模式 99+ / 不接收点击
 export { PfGMSelect, GMOptionItem } from './ui/PfGMSelect'; // 框架下拉；收起态 bg/icon/label/arrow；items；index；setOnChange 只在用户点选时叫
 export { PfGMOption } from './ui/PfGMOption'; // 框架下拉行；底+图标+字；选中换绿底白字；点击由调用方注册
-export { PfGMToast, GMToastAnchor } from './ui/PfGMToast'; // 轻提示；show 一句、自动消失、不挡操作；最多叠 3 条
+export { PfGMToast } from './ui/PfGMToast'; // 轻提示一条；bg + label；队列在 GMToastHost
+export type { GMToastAnchor } from './ui/GMToastHost'; // gu.setToastAnchor：top / center / bottom
 export { GMTabPage } from './ui/GMTabPage'; // 页签内容基类；onShow/onHide(done)；text/setText
 export { PfGMTabs, GMTabSource } from './ui/PfGMTabs'; // 框架页签；tabs+panel；index；insert/remove
 export { loadSkin, setSkinTheme, applySkin, skinFrame, SKIN_BUNDLE } from './ui/GMSkin'; // 游戏 Skin 包；setSkinTheme 告诉编辑器当前主题；缺槽用内置白图
@@ -47,7 +48,7 @@ export { GMFrame, FRAME_EDGE } from './ui/GMFrame'; // 普通弹窗骨架；铆�
 export { GMAlert } from './ui/GMAlert'; // 确认框基类；皮在本游戏常驻包
 export type { GMAlertInit } from './ui/GMAlert'; // gu.alert 填进确认框的文案和关闭
 export { GMScene } from './ui/GMScene'; // 场景基类；Sc* 继承（→Layer→Component）；默认 opacity
-export { GMUIManager } from './ui/GMUIManager'; // 视图门面：openScene / showLayer / addClick / createTs / alert；设计分辨率 720×1280，宽适配
+export { GMUIManager } from './ui/GMUIManager'; // 视图门面：openScene / showLayer / addClick / createTs / alert / toast；设计分辨率 720×1280，宽适配
 export type { GMOpenSceneOptions, GMShowLayerOptions, GMLoadingShowOptions, GMAddClickOpts, GMClickPress, GMCreateTsNodeParm, GMAlertParams, GMAlertBtn } from './ui/GMUIManager';
 
 // —— data/ ——

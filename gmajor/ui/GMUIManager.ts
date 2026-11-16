@@ -9,6 +9,8 @@ import { GMLayer, bindLayerMaskTpl } from './GMLayer';
 import { PfGMBtn } from './PfGMBtn';
 import { GMOverlayHost } from './GMOverlayHost';
 import { GMScene } from './GMScene';
+import { GMToastHost } from './GMToastHost';
+import type { GMToastAnchor } from './GMToastHost';
 
 const OVERLAY_LAYER = 1 << 19; // 独立层，避免被场景 UI 相机画两次
 const LOADING_DELAY = 1.5; // 秒；之后才出转圈
@@ -91,7 +93,7 @@ export class GMUIManager {
     private layersRoot: Node | null = null;
     private loadingRoot: Node | null = null;
     private alertsRoot: Node | null = null;
-    private toastsRoot: Node | null = null; // 轻提示；满屏但不挡输入
+    private toastHost: GMToastHost | null = null;
     private loadingVisual: Node | null = null;
     private readonly layers: LayerItem[] = [];
     private readonly alerts: AlertItem[] = [];
@@ -174,7 +176,7 @@ export class GMUIManager {
         this.layersRoot = this.makeFullNode('layers', root);
         this.loadingRoot = this.makeFullNode('loading', root);
         this.alertsRoot = this.makeFullNode('alerts', root); // 最上：等待中也能点确认
-        this.toastsRoot = this.makeFullNode('toasts', root); // 轻提示：画在确认框之上，不吃事件
+        const toastsRoot = this.makeFullNode('toasts', root); // 轻提示：画在确认框之上，不吃事件
         this.makeLayerMaskTpl(root);
         this.loadingRoot.addComponent(BlockInputEvents);
         this.loadingRoot.active = false;
@@ -190,7 +192,10 @@ export class GMUIManager {
         label.horizontalAlign = Label.HorizontalAlign.CENTER;
         label.verticalAlign = Label.VerticalAlign.CENTER;
 
-        this.host = root.addComponent(GMOverlayHost);
+        const scheduler = root.addComponent(GMOverlayHost);
+        this.host = scheduler;
+        this.toastHost = toastsRoot.addComponent(GMToastHost);
+        this.toastHost.attach((prefab) => this.createTs(prefab, { parent: toastsRoot }), scheduler);
         scene.addChild(root);
         director.addPersistRootNode(root);
         this.overlay = root;
@@ -198,10 +203,23 @@ export class GMUIManager {
         console.info('[gm.ui] Overlay 已创建');
     }
 
-    /** 轻提示容器。PfGMToast 挂这下面；满屏、透明、不挡输入 */
-    toastRoot(): Node | null {
+    /** 轻提示。再调一次同一句会再出一条 */
+    toast(text: string): void {
         this.ensureOverlay();
-        return this.toastsRoot;
+        if (!this.toastHost) return console.error('[gm.ui] Overlay 未就绪');
+        this.toastHost.toast(text);
+    }
+
+    /** 收起正在显示的轻提示 */
+    toastHide(): void {
+        this.toastHost?.toastHide();
+    }
+
+    /** 改停靠。值和当前不同时先收起。开机默认 center */
+    setToastAnchor(anchor: GMToastAnchor): void {
+        this.ensureOverlay();
+        if (!this.toastHost) return console.error('[gm.ui] Overlay 未就绪');
+        this.toastHost.setAnchor(anchor);
     }
 
     openScene(sceneName: string, options: GMOpenSceneOptions, onComplete?: GMAsyncComplete, onProgress?: GMAsyncProgress): void {
