@@ -27,13 +27,14 @@ App 是自己的 Creator 工程，框架（`FFrame/gmajor`）是被引用的资�
 {
   "package_version": 2,
   "name": "gmajor",
-  "version": "0.5.0",
+  "version": "0.10.2",
   "contributions": {
     "asset-db": { "mount": { "path": "../../../FFrame/gmajor", "readonly": true } }
   }
 }
 ```
 
+- `version` 写成正在挂的框架版本（与 `gmajor/launch/GMLauncher.ts` 一致），只是标签。
 - `path` 必须是相对这个扩展目录的路径，不能是绝对路径。上面写法要求 app 和 FFrame 是兄弟目录。
 - `name` 必须是 `gmajor`，决定了资源库名 `db://gmajor`。
 - app 里 `readonly: true`。要改框架到 FFrame 仓库改。
@@ -58,13 +59,11 @@ import { GMScene, gm, gp } from 'db://gmajor/index';
 
 ## 皮肤
 
-播放只加载 Bundle `Skin`（`assets/game/bundles/Skin/`）。不写进 `boot`，不绑入口。没有这个包，或缺某一张，该槽用内置白图，打一条日志，开机继续。
+播放只加载 Bundle `Skin`（`assets/game/bundles/Skin/`）。不写进 `boot`，不绑入口。`config.skinTheme` 写成主题目录名（例如 `ZooV7`）。主题下是 `ctrl` / `item` 两份 png + plist。没有这个包、没有主题、或缺某一张，该槽用内置白图，打一条日志，开机继续。0.6.0 起不再认包根散 png。
 
-框架会取哪些文件名，写在仓库根 README 的「皮肤槽」。App 自己把同名 png 放进 `bundles/Skin`。框架仓库不带这些图。
+槽名写在仓库根 README 的「皮肤槽」。可从 FFrame demo 的 `assets/game/bundles/Skin/ZooV7/` 拷一份起步。框架仓库不带这些图。不要在 `GameUI/Skin` 再放一套。
 
-不要在 `GameUI/Skin` 再放一套图。
-
-控件脚本在框架。确认框基类 `GMAlert` 在框架，皮是 app 常驻包里的预制体（demo 是 `GameUI` / `LyAlert`）。不用确认框就可以不预载。分层见 [界面组件/说明.md](./界面组件/说明.md)。
+控件与基本能力在框架（`PfGM*`、`GMFrame`、`GMAlert`、`gu.*` …）。确认框预制体在 app（demo 是 `GameUI` / `LyAlert`）。**没特殊情况就用通用的**：嵌框架控件、吃拷进来的通用 UI 皮（`ZooV7`）；只有明确的特殊美术或特殊交互才换图或另写。不用确认框就可以不预载。分层见 [界面组件/说明.md](./界面组件/说明.md)。
 
 ## 升级框架后
 
