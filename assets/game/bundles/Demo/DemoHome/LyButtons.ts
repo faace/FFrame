@@ -34,7 +34,7 @@ export class LyButtons extends GMLayer {
         });
     }
 
-    /** 标题铆钉和关闭钮压在面板棕色顶边上 */
+    /** 标题中心和关闭钮压在面板棕色顶边上 */
     private alignTitle(): void {
         const panel = this.panel;
         const uit = panel?.getComponent(UITransform);

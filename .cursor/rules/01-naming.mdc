@@ -124,7 +124,7 @@ ScMain          # 场景根
 - **子节点**：新建 Ly 预制体时，默认结构就必须是根 + 空 `panel`（生成时带上，不是事后补）。mask **不进 prefab**。用 `node tools/create-ly-prefab.mjs <目录> Ly名字`。不要从空节点另存成 prefab。运行时没有 `panel` 仍报错——那是预制体没按规范生成。
 - **mask**：Overlay 上有隐藏模板；入树时基类克隆到根下、sibling 最低。半透黑、挡穿透。
 - **内容**：只往 `this.panel` 上长，禁止挂根上。
-- **普通弹窗**继承 `GMFrame`（它继承 `GMLayer`），不要各自搭顶栏。标题铆钉压在面板棕色顶边上；关闭钮和左上角与标题垂直居中，都是小档纯图标方钮，关闭钮中心距右边缘约 15，左上角对称。默认 620×800、有标题、有关闭、有底框。左上角有回调才出现，图标默认 `icon_help`。不要标题时按钮位置不变，内容从木框内沿开始。不要底框只是不画木框，遮罩还在，位置不变。开关和尺寸写在子类字段上，只写和默认不同的。
+- **普通弹窗**继承 `GMFrame`（它继承 `GMLayer`），不要各自搭顶栏。标题条垂直中心压在面板棕色顶边上，四角铆钉在九宫格角块里；关闭钮和左上角与标题垂直居中，都是小档纯图标方钮，关闭钮中心距右边缘约 15，左上角对称。默认 620×800、有标题、有关闭、有底框。左上角有回调才出现，图标默认 `icon_help`。不要标题时按钮位置不变，内容从木框内沿开始。不要底框只是不画木框，遮罩还在，位置不变。开关和尺寸写在子类字段上，只写和默认不同的。
 - **确认框**不继承 `GMFrame`。只把标题和关闭钮放在同一条棕色边上，其余仍是原来的正文和按钮。
 - **正文**：普通弹窗的 `body` 由 `GMFrame` 创建。有标题时在标题下沿和面板底边之间。确认框的 `body` 仍是文案。
 - **动效**：不动根。进场 mask 透明→半透，同时 panel `0→1.1→1`，时长对齐；退场反过来。
@@ -293,7 +293,7 @@ export class PfX extends GMScene {}
 ✅ gmajor/…/PfGMSelect（bg/icon/label/arrow；展开用 PfGMList，底板 dropdown_list）、PfGMOption（bg/icon/label，继承 GMListItem）、PfGMToast（bg/label；调用 gu.toast，队列在 GMToastHost）
 ❌ PfGMToast.show / hide / setAnchor；gu.toastRoot()
 ✅ gmajor/…/PfGMList（view/content 锚点 0.5；不满且居中时关 ScrollView，content 归 0）+ GMListItem（无预制体，游戏行继承）
-✅ 普通弹窗 extends GMFrame（默认 620×800；铆钉压棕色顶边；左上角有回调才出现）
+✅ 普通弹窗 extends GMFrame（默认 620×800；标题中心压棕色顶边；左上角有回调才出现）
 ✅ 界面图小写蛇形：btn_primary、title_bar、icon_close、panel
 ✅ 嵌套 PfGMBtn / PfGMTitle 只盖差异项（名、坐标、档位、主题、版式、text、图标；标题字在 Label 上）
 ✅ 白字描边宽 3（按钮、道具格数量、进度条上的字）。奶油底上的深色字不描边

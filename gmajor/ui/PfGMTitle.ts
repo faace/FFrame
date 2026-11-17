@@ -8,7 +8,7 @@ const { ccclass, executeInEditMode, property } = _decorator;
  * 标题可调参数。改数字改这里。
  * 字体资源：db://gmajor/fonts/main.ttf，挂在子节点 label 上。
  * 三档的高、字号跟同名按钮档。宽仍随字数，高不跟字数变。
- * 九宫格在 title_bar 上：左 48、右 48、上 20、下 20。
+ * 九宫格在 title_bar 上：左 48、右 48、上 32、下 32。四角铆钉在角块里，拉高不变形。
  */
 const PF_GM_TITLE = {
     outlineWidth: 0, // 0 不描边

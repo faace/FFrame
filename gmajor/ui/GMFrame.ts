@@ -10,7 +10,7 @@ const { ccclass } = _decorator;
 
 const editing = EDITOR && !PREVIEW;
 
-/** 铆钉在标题条垂直正中。面板棕色框中线约在外沿往里 7（源图木色带 6–23，显示尺寸减半） */
+/** 标题条垂直中心压在面板棕色框中线上。框中线约在外沿往里 7（源图木色带 6–23，显示尺寸减半）。铆钉在四角，不拿来对齐 */
 export const FRAME_EDGE = 7;
 const PAD = 24; // 内容距左右、底边，以及标题下沿
 const FRAME_INNER = 20; // panel 九宫格上边（显示尺寸）。没标题时内容从这里起

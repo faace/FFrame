@@ -33,7 +33,7 @@ export class LySetting extends GMLayer {
         });
     }
 
-    /** 标题铆钉、关闭钮和帮助钮压在面板棕色顶边上 */
+    /** 标题中心、关闭钮和帮助钮压在面板棕色顶边上 */
     private alignTitle(): void {
         const panel = this.panel;
         const uit = panel?.getComponent(UITransform);
