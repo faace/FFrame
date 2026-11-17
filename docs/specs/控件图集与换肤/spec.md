@@ -68,7 +68,7 @@ assets/game/bundles/Skin/
 
 ## 已确认
 
-状态：spec 已由用户确认（2026-10-30）。ticket 02 已做完。ticket 03 先用现成图顶上缺的 8 槽，`item.png` 已打好，出图以后再改。ticket 04、05 的代码已写，预览未跑。物品图不要用控件那套纯代码填色。
+状态（2026-11-17）：控件图集、主题加载、demo / zoo 接入、通用控件清单已收完。框架约 `0.10.2`；图集实画 36、预留 0。临时总结夹已删。ticket 03 物品槽仍可按业务再补图，不挡通用控件收尾。
 
 1. 主题目录名用 `ZooV7` 和 `LegacyV3`（英文大驼峰），不用 `动物园-v7` 这种写法。
 2. v7 母版里的部分件尺寸（例如按钮 288×80）和 2 倍规则不一致。ticket 02 按 2 倍规则重新出图，不直接拿 v7 的 1024 图放大。
@@ -76,10 +76,10 @@ assets/game/bundles/Skin/
 ## Ticket 清单
 
 - [x] 01 素材仓库整理：建 `FFrame-asset-line/style/ZooV7/` 和 `LegacyV3/` 结构，从 `legacy/FFrame-del/` 迁入历史版本和脚本。
-- [x] 02 控件图集：`draw-zoo-v7-ctrl.mjs` 按 2 倍尺寸出 `ctrl.png` 和 `ctrl.json`。名单是 21 个槽，另加 10 个空槽。依赖 01。
-- [ ] 03 物品图集：出 `item.png` 和 `item.json`。28 格已打进图集，其中 8 格是现成图复制。依赖 01。
-- [ ] 04 GMSkin 图集加载：`gmajor` 支持按主题加载两张图集，升 `0.5.1`（已随周末提交发布，之后框架到 `0.5.3`）。代码已写，预览未跑。无依赖。
-- [x] 05 游戏侧接入：`bundles/Skin` 只剩 `ZooV7/`，`LegacyV3` 已移到素材仓库归档。开机读 `config.skinTheme`。用户在 Creator 里确认已验证。依赖 02、03、04。
+- [x] 02 控件图集：`draw-zoo-v7-ctrl.mjs` 按 2 倍尺寸出 `ctrl.png` 和 `ctrl.json`。后续扩到实画 36、预留 0。依赖 01。
+- [ ] 03 物品图集：出 `item.png` 和 `item.json`。游戏里已有半尺寸 `item` 图集可用；缺槽与新图标仍可按业务另开。依赖 01。
+- [x] 04 GMSkin 图集加载：`gmajor` 按 `config.skinTheme` 加载主题下 `ctrl` / `item` 两份 plist。已在 demo / zoo 验证。无依赖。
+- [x] 05 游戏侧接入：`bundles/Skin` 只剩 `ZooV7/`，`LegacyV3` 已移到素材仓库归档。开机读 `config.skinTheme`。demo 与 zoo 均已验证。依赖 02、03、04。
 - [x] 06 动物园素材入库（已改为不入库）：`资源生成/` 挪到 `FFrame-asset-line/scenes/动物园/`，被忽略，U 盘同步。无依赖。
 - [x] 07 文档与规则：更新 `docs/界面组件/` 和 README 的皮肤说明，把 `01-naming` 的“界面控件与默认皮”改成主题 plist，运行 `tools/sync-cursor-rules-index.mjs`。依赖 05。
 
